@@ -7,7 +7,7 @@
   "scripts": {
     "build": "unbuild",
     "lint": "biome lint .",
-    "release": "npx bumpp --push --tag --commit"
+    "release": "npx bumpp --push --tag --commit && npx changelogithub"
   },
   "keywords": [
     "github",
@@ -24,7 +24,6 @@
     "@biomejs/biome": "^1.9.4",
     "@types/jest": "^29.5.14",
     "@types/node": "^20.17.10",
-    "bumpp": "^9.9.2",
     "grammy": "^1.33.0",
     "telegramify-markdown": "^1.2.2",
     "typescript": "^5.7.2",
