@@ -1,0 +1,25 @@
+name: "Telegram Message Action"
+description: "Send messages to Telegram"
+inputs:
+  bot_token:
+    description: "Telegram Bot Token"
+    required: true
+  chat_id:
+    description: "Telegram Chat ID"
+    required: true
+  message:
+    description: "Message to send"
+    required: true
+    default: ""
+  reply_to_message_id:
+    description: "Topic ID"
+    required: false
+    default: ""
+
+runs:
+  using: "node20"
+  main: "dist/index.js"
+
+branding:
+  icon: "message-square"
+  color: "blue"

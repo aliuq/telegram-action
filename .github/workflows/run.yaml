@@ -1,0 +1,28 @@
+name: Telegram Notification Demo
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+  workflow_dispatch:
+
+jobs:
+  notification:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      # 发送基本消息
+      - name: Send Basic Message
+        uses: ./
+        with:
+          bot_token: ${{ secrets.TELEGRAM_BOT_TOKEN }}
+          chat_id: ${{ secrets.TELEGRAM_CHAT_ID }}
+          reply_to_message_id: ${{ secrets.TELEGRAM_REPLY_TO_MESSAGE_ID }}
+          message: |
+            🚀 新的提交已推送!
+
+            👤提交人: ${{ github.actor }}
+            📦仓库  : ${{ github.repository }}
+            🌿分支  : ${{ github.ref }}

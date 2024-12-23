@@ -1,0 +1,31 @@
+{
+  "name": "telegram-action",
+  "version": "0.0.0",
+  "description": "GitHub Action for sending Telegram messages",
+  "main": "dist/index.js",
+  "type": "commonjs",
+  "scripts": {
+    "build": "unbuild"
+  },
+  "keywords": [
+    "github",
+    "action",
+    "telegram",
+    "notification"
+  ],
+  "author": "AliuQ",
+  "license": "MIT",
+  "packageManager": "pnpm@9.12.3",
+  "devDependencies": {
+    "@types/jest": "^29.5.14",
+    "@types/node": "^20.17.10",
+    "typescript": "^5.7.2",
+    "unbuild": "^3.0.1",
+    "@actions/core": "^1.11.1",
+    "@actions/github": "^6.0.0",
+    "grammy": "^1.33.0"
+  },
+  "engines": {
+    "node": ">=20"
+  }
+}
