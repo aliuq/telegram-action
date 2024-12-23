@@ -1,4 +1,5 @@
 name: "Telegram Message Notification"
+author: "AliuQ"
 description: "Send message to Telegram"
 inputs:
   bot_token:
@@ -19,6 +20,10 @@ inputs:
     description: "JSON string of button configuration"
     required: false
     default: ""
+
+outputs:
+  message_id:
+    description: "ID of the sent message"
 
 runs:
   using: "node20"
