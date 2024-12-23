@@ -13,12 +13,45 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      # 发送基本消息
-      - name: Send Basic Message
+      - name: Basic Notification
         uses: ./
         with:
           bot_token: ${{ secrets.TELEGRAM_BOT_TOKEN }}
           chat_id: ${{ secrets.TELEGRAM_CHAT_ID }}
+          message: |
+            🚀 新的提交已推送!
+
+            👤提交人: ${{ github.actor }}
+            📦仓库  : ${{ github.repository }}
+            🌿分支  : ${{ github.ref }}
+
+      - name: Basic Notification with Buttons
+        uses: ./
+        with:
+          bot_token: ${{ secrets.TELEGRAM_BOT_TOKEN }}
+          chat_id: ${{ secrets.TELEGRAM_CHAT_ID }}
+          message: |
+            🚀 新的提交已推送!
+
+            👤提交人: ${{ github.actor }}
+            📦仓库  : ${{ github.repository }}
+            🌿分支  : ${{ github.ref }}
+          buttons: |
+            [
+              [
+                { "text": "查看", "url": "https://google.com" },
+                { "text": "测试", "url": "https://x.com" }
+              ],
+              [
+                { "text": "访问仓库", "url": "https://github.com/${{ github.repository }}" }
+              ]
+            ]
+
+      - name: Group Notification
+        uses: ./
+        with:
+          bot_token: ${{ secrets.TELEGRAM_BOT_TOKEN }}
+          chat_id: ${{ secrets.TELEGRAM_CHAT_ID_GROUP }}
           reply_to_message_id: ${{ secrets.TELEGRAM_REPLY_TO_MESSAGE_ID }}
           message: |
             🚀 新的提交已推送!
@@ -27,14 +60,18 @@ jobs:
             📦仓库  : ${{ github.repository }}
             🌿分支  : ${{ github.ref }}
 
-      - name: Send Message with Buttons
+      - name: Group Notification with Buttons
         uses: ./
         with:
           bot_token: ${{ secrets.TELEGRAM_BOT_TOKEN }}
-          chat_id: ${{ secrets.TELEGRAM_CHAT_ID }}
+          chat_id: ${{ secrets.TELEGRAM_CHAT_ID_GROUP }}
           reply_to_message_id: ${{ secrets.TELEGRAM_REPLY_TO_MESSAGE_ID }}
           message: |
-            🚀 测试按钮!
+            🚀 新的提交已推送!
+
+            👤提交人: ${{ github.actor }}
+            📦仓库  : ${{ github.repository }}
+            🌿分支  : ${{ github.ref }}
           buttons: |
             [
               [
