@@ -1,60 +1,78 @@
-# Telegram Message Action
+# Telegram Message Notification Action
 
-用于在 GitHub Actions 工作流中发送 Telegram 消息通知的 Action。
+一个用于发送 Telegram 消息通知的 GitHub Action。支持基本消息发送和自定义按钮功能。
 
 ## 功能特点
 
-- 支持发送基本文本消息、按钮消息
-- 支持回复特定消息（通过 reply_to_message_id）
-- 使用 Node.js 20 运行环境
-- 使用 TypeScript 编写，提供更好的类型安全性
+- 发送基本文本消息
+- 支持 Markdown 格式
+- 支持自定义按钮
+- 支持话题回复
 
 ## 使用方法
 
-### 基本使用
+### 基本配置
+
+1. 获取 Telegram Bot Token （从 [@BotFather](https://t.me/BotFather) 获取）
+2. 获取 Chat ID （可以使用 [@userinfobot](https://t.me/userinfobot) 获取）
+3. 在仓库的 Settings -> Secrets -> Actions 中添加以下 secrets：
+   - `TELEGRAM_BOT_TOKEN`
+   - `TELEGRAM_CHAT_ID`
+   - `TELEGRAM_REPLY_TO_MESSAGE_ID`（可选，用于话题回复）
+
+### 基本用法
 
 ```yaml
-- uses: aliuq/telegram-action@v1
+- name: Send Telegram Message
+  uses: aliuq/telegram-action@main
   with:
     bot_token: ${{ secrets.TELEGRAM_BOT_TOKEN }}
     chat_id: ${{ secrets.TELEGRAM_CHAT_ID }}
-    message: "Hello from GitHub Actions!"
+    message: |
+      🚀 新的提交已推送!
+      
+      👤提交人: ${{ github.actor }}
+      📦仓库: ${{ github.repository }}
+      🌿分支: ${{ github.ref }}
 ```
 
-### 回复特定消息/发送到主题
+### 带按钮的消息
 
 ```yaml
-- uses: aliuq/telegram-action@v1
+- name: Send Message with Buttons
+  uses: aliuq/telegram-action@main
   with:
     bot_token: ${{ secrets.TELEGRAM_BOT_TOKEN }}
     chat_id: ${{ secrets.TELEGRAM_CHAT_ID }}
-    reply_to_message_id: ${{ secrets.TELEGRAM_REPLY_TO_MESSAGE_ID }}
-    message: "这是一条回复消息"
+    message: "查看更多信息"
+    buttons: |
+      [
+        [
+          { "text": "查看提交", "url": "https://github.com/${{ github.repository }}/commit/${{ github.sha }}" }
+        ]
+      ]
 ```
 
 ## 输入参数
 
-| 参数 | 说明 | 必填 | 默认值 |
+| 参数 | 描述 | 必填 | 默认值 |
 |------|------|------|--------|
-| bot_token | Telegram Bot Token | 是 | - |
-| chat_id | 目标聊天 ID | 是 | - |
-| message | 要发送的消息内容 | 是 | "" |
-| reply_to_message_id | 要回复的消息 ID/主题ID | 否 | "" |
+| `bot_token` | Telegram Bot Token | 是 | - |
+| `chat_id` | Telegram Chat ID | 是 | - |
+| `message` | 要发送的消息内容 | 是 | "" |
+| `reply_to_message_id` | 要回复的消息 ID（用于话题功能） | 否 | "" |
+| `buttons` | 按钮配置的 JSON 字符串 | 否 | "" |
 
-## 配置说明
+## 输出参数
 
-## 开发
+| 参数 | 描述 |
+|------|------|
+| `message_id` | 发送成功后的消息 ID |
+| `message_link` | 发送的消息链接 |
 
-```bash
-# 安装依赖
-pnpm install
+## 完整示例
 
-# 构建项目
-pnpm build
-
-# 本地测试
-act -j notification
-```
+请参考 [.github/workflows/run.yaml](.github/workflows/run.yaml) 中的示例。
 
 ## 许可证
 
