@@ -7,10 +7,10 @@ async function run() {
     const botToken = core.getInput("bot_token", { required: true });
     const chatId = core.getInput("chat_id", { required: true });
     const message = core.getInput("message", { required: true });
+    const buttons = core.getInput("buttons", { required: false });
     const replyToMessageId = core.getInput("reply_to_message_id", {
       required: false,
     });
-    const buttons = core.getInput("buttons", { required: false });
 
     const bot = new Bot(botToken);
     const params: Parameters<typeof bot.api.sendMessage>[2] = {
