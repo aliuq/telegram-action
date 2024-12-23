@@ -1,5 +1,5 @@
-name: "Telegram Message Action"
-description: "Send messages to Telegram"
+name: "Telegram Message Notification"
+description: "Send message to Telegram"
 inputs:
   bot_token:
     description: "Telegram Bot Token"
@@ -13,6 +13,10 @@ inputs:
     default: ""
   reply_to_message_id:
     description: "Topic ID"
+    required: false
+    default: ""
+  buttons:
+    description: "JSON string of button configuration"
     required: false
     default: ""
 

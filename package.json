@@ -5,7 +5,8 @@
   "main": "dist/index.js",
   "type": "commonjs",
   "scripts": {
-    "build": "unbuild"
+    "build": "unbuild",
+    "lint": "biome lint ."
   },
   "keywords": [
     "github",
@@ -17,13 +18,15 @@
   "license": "MIT",
   "packageManager": "pnpm@9.12.3",
   "devDependencies": {
-    "@types/jest": "^29.5.14",
-    "@types/node": "^20.17.10",
-    "typescript": "^5.7.2",
-    "unbuild": "^3.0.1",
     "@actions/core": "^1.11.1",
     "@actions/github": "^6.0.0",
-    "grammy": "^1.33.0"
+    "@biomejs/biome": "^1.9.4",
+    "@types/jest": "^29.5.14",
+    "@types/node": "^20.17.10",
+    "grammy": "^1.33.0",
+    "telegramify-markdown": "^1.2.2",
+    "typescript": "^5.7.2",
+    "unbuild": "^3.0.1"
   },
   "engines": {
     "node": ">=20"

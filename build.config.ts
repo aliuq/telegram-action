@@ -2,27 +2,36 @@ import { defineBuildConfig } from "unbuild";
 
 export default defineBuildConfig({
   entries: ["./src/index"],
-  // sourcemap: true,
+  sourcemap: true,
   rollup: {
     emitCJS: true,
     esbuild: {
       minify: true,
     },
+    inlineDependencies: true,
     output: {
       entryFileNames: '[name].js',
-      chunkFileNames: 'libs/[name].js',
-      manualChunks(id: string, _meta: any) {
-        if (id.includes('node_modules')) {
-          const pkgName = extractPackageName(id);
-          if (pkgName) {
-            // Fix for undici and @actions error on act
-            if (pkgName.includes('@actions') || pkgName.includes('undici')) {
-              return "@actions_undici";
-            }
-            return `${pkgName}`;
-          }
-        }
-      },
+      chunkFileNames: 'chunks/[name].js',
+      // manualChunks(id: string, _meta: any) {
+      //   if (id.includes('node_modules')) {
+      //     const pkgName = extractPackageName(id);
+      //     if (pkgName) {
+      //       // Fix for undici and @actions error on act
+      //       if (pkgName.includes('@actions') || pkgName.includes('undici')) {
+      //         return "vendors/@actions_undici";
+      //       }
+
+      //       // 其他依赖按类型分组
+      //       if (pkgName.includes('micromark')) return 'vendors/micromark';
+      //       if (pkgName.includes('mdast-util')) return 'vendors/mdast-util';
+      //       if (pkgName.includes('remark')) return 'vendors/remark';
+      //       if (pkgName.includes('unist')) return 'vendors/unist';
+
+      //       return `vendors/${pkgName}`;
+      //     }
+      //     return "vendors/misc";
+      //   }
+      // },
     }
   },
   failOnWarn: false,
@@ -51,7 +60,6 @@ function extractPackageName(input: string): string {
 
   if (match) {
     return match[1].replace('/', '_')
-  } else {
-    return ""; // Return empty string if no match is found
   }
+  return ""
 }
