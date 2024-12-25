@@ -7,7 +7,7 @@
   "scripts": {
     "build": "unbuild",
     "lint": "biome lint .",
-    "release": "npx bumpp --push --tag --commit && npx changelogithub"
+    "release": "pnpm build && npx bumpp --push --tag --commit --all && npx changelogithub"
   },
   "keywords": [
     "github",
