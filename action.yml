@@ -20,6 +20,10 @@ inputs:
     description: "JSON string of button configuration"
     required: false
     default: ""
+  disable_link_preview:
+    description: "Disable link preview"
+    required: false
+    default: "true"
 
 outputs:
   message_id:

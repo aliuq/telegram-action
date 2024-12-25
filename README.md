@@ -62,6 +62,7 @@
 | `message` | 要发送的消息内容 | 是 | "" |
 | `reply_to_message_id` | 要回复的消息 ID（用于话题功能） | 否 | "" |
 | `buttons` | 按钮配置的 JSON 字符串 | 否 | "" |
+| `disable_link_preview` | 禁用链接预览 | 否 | "true" |
 
 ## 输出参数
 

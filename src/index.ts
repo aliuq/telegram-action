@@ -11,10 +11,16 @@ async function run() {
     const replyToMessageId = core.getInput("reply_to_message_id", {
       required: false,
     });
+    const disableLinkPreview = core.getInput("disable_link_preview", {
+      required: false,
+    });
 
     const bot = new Bot(botToken);
     const params: Parameters<typeof bot.api.sendMessage>[2] = {
       parse_mode: "MarkdownV2",
+      link_preview_options: {
+        is_disabled: disableLinkPreview === "true",
+      }
     };
 
     if (replyToMessageId) {
