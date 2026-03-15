@@ -1,0 +1,40 @@
+{
+  "name": "Telegram Action",
+  "image": "ghcr.io/aliuq/devcontainer:base",
+  "postCreateCommand": "mise use act bun node@lts",
+  "features": {
+    "ghcr.io/devcontainers/features/docker-in-docker:2": {}
+  },
+  "customizations": {
+    "vscode": {
+      "extensions": [
+        "github.copilot-chat",
+        "streetsidesoftware.code-spell-checker",
+        "davidanson.vscode-markdownlint",
+        "mads-hartmann.bash-ide-vscode",
+        "editorconfig.editorconfig",
+        "pkief.material-icon-theme",
+        "zhuangtongfa.material-theme",
+        "docsmsft.docs-yaml",
+        "redhat.vscode-yaml",
+        "davidanson.vscode-markdownlint",
+        "biomejs.biome"
+      ],
+      "settings": {
+        "workbench.iconTheme": "material-icon-theme",
+        "workbench.colorTheme": "One Dark Pro Darker",
+        "workbench.preferredDarkColorTheme": "One Dark Pro Darker",
+        "cSpell.ignorePaths": [
+          "package-lock.json",
+          "node_modules",
+          "vscode-extension",
+          ".git/{info,lfs,logs,refs,objects}/**",
+          ".git/{index,*refs,*HEAD}",
+          ".vscode",
+          ".vscode-insiders",
+          "devcontainer.json"
+        ]
+      }
+    }
+  }
+}

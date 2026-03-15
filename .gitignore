@@ -1,3 +1,5 @@
 .env
 .history
 node_modules
+
+.*/skills

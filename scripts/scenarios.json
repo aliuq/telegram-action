@@ -1,0 +1,156 @@
+[
+  {
+    "id": "basic",
+    "description": "Basic text message",
+    "requires_group": false,
+    "expect_failure": false,
+    "inputs": {
+      "message": "🚀 Hello from telegram-action!\n\nThis is a basic test message.",
+      "disable_link_preview": "true",
+      "buttons": "",
+      "attachment": "",
+      "attachment_type": "",
+      "attachment_filename": ""
+    }
+  },
+  {
+    "id": "link-preview-enabled",
+    "description": "Message with link preview enabled",
+    "requires_group": false,
+    "expect_failure": false,
+    "inputs": {
+      "message": "🔗 Link preview test\n\nhttps://github.com",
+      "disable_link_preview": "false",
+      "buttons": "",
+      "attachment": "",
+      "attachment_type": "",
+      "attachment_filename": ""
+    }
+  },
+  {
+    "id": "buttons-flat",
+    "description": "Inline buttons using flat single-row JSON",
+    "requires_group": false,
+    "expect_failure": false,
+    "inputs": {
+      "message": "🔘 Button test (flat format)",
+      "disable_link_preview": "true",
+      "buttons": "[{\"text\":\"View commit\",\"url\":\"https://github.com/aliuq/telegram-action\"},{\"text\":\"Open repository\",\"url\":\"https://github.com/aliuq/telegram-action\"}]",
+      "attachment": "",
+      "attachment_type": "",
+      "attachment_filename": ""
+    }
+  },
+  {
+    "id": "buttons-nested",
+    "description": "Inline buttons using nested multi-row JSON",
+    "requires_group": false,
+    "expect_failure": false,
+    "inputs": {
+      "message": "🔘 Button test (nested format)",
+      "disable_link_preview": "true",
+      "buttons": "[[{\"text\":\"Google\",\"url\":\"https://google.com\"},{\"text\":\"GitHub\",\"url\":\"https://github.com\"}],[{\"text\":\"X (Twitter)\",\"url\":\"https://x.com\"}]]",
+      "attachment": "",
+      "attachment_type": "",
+      "attachment_filename": ""
+    }
+  },
+  {
+    "id": "buttons-callback",
+    "description": "Inline buttons using callback_data",
+    "requires_group": false,
+    "expect_failure": false,
+    "inputs": {
+      "message": "🔘 Callback button test",
+      "disable_link_preview": "true",
+      "buttons": "[{\"text\":\"Callback A\",\"callback_data\":\"action_a\"},{\"text\":\"Callback B\",\"callback_data\":\"action_b\"}]",
+      "attachment": "",
+      "attachment_type": "",
+      "attachment_filename": ""
+    }
+  },
+  {
+    "id": "photo-local",
+    "description": "Send a local photo attachment",
+    "requires_group": false,
+    "expect_failure": false,
+    "inputs": {
+      "message": "🖼️ Local photo attachment test",
+      "disable_link_preview": "true",
+      "buttons": "",
+      "attachment": "scripts/fixtures/sample-photo.png",
+      "attachment_type": "photo",
+      "attachment_filename": "sample-photo.png"
+    }
+  },
+  {
+    "id": "document-local",
+    "description": "Send a local document attachment",
+    "requires_group": false,
+    "expect_failure": false,
+    "inputs": {
+      "message": "📎 Local document attachment test",
+      "disable_link_preview": "true",
+      "buttons": "",
+      "attachment": "scripts/fixtures/sample-document.txt",
+      "attachment_type": "document",
+      "attachment_filename": "sample-document.txt"
+    }
+  },
+  {
+    "id": "video-url",
+    "description": "Send a video attachment from a public URL",
+    "requires_group": false,
+    "expect_failure": false,
+    "inputs": {
+      "message": "🎬 Video attachment test",
+      "disable_link_preview": "true",
+      "buttons": "",
+      "attachment": "https://samplelib.com/lib/preview/mp4/sample-5s.mp4",
+      "attachment_type": "video",
+      "attachment_filename": ""
+    }
+  },
+  {
+    "id": "group-reply",
+    "description": "Reply inside a group topic or threaded chat",
+    "requires_group": true,
+    "expect_failure": false,
+    "inputs": {
+      "message": "↩️ This is a group topic reply message.",
+      "disable_link_preview": "true",
+      "buttons": "",
+      "attachment": "",
+      "attachment_type": "",
+      "attachment_filename": ""
+    }
+  },
+  {
+    "id": "group-reply-with-buttons",
+    "description": "Reply inside a group topic with buttons",
+    "requires_group": true,
+    "expect_failure": false,
+    "inputs": {
+      "message": "↩️ Topic reply with buttons",
+      "disable_link_preview": "true",
+      "buttons": "[{\"text\":\"Open repository\",\"url\":\"https://github.com\"}]",
+      "attachment": "",
+      "attachment_type": "",
+      "attachment_filename": ""
+    }
+  },
+  {
+    "id": "invalid-buttons",
+    "description": "Invalid button payload should fail",
+    "requires_group": false,
+    "expect_failure": true,
+    "inputs": {
+      "message": "⚠️ This run should fail because the buttons payload is invalid.",
+      "disable_link_preview": "true",
+      "buttons": "[{\"url\":\"https://google.com\"}]",
+      "attachment": "",
+      "attachment_type": "",
+      "attachment_filename": ""
+    }
+  }
+]

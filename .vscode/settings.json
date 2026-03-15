@@ -1,6 +1,19 @@
 {
+  "editor.codeActionsOnSave": {
+    "source.fixAll.biome": "explicit",
+    "source.organizeImports": "never",
+    "source.organizeImports.biome": "never"
+  },
+  "[javascript]": {
+    "editor.defaultFormatter": "biomejs.biome",
+    "editor.formatOnSave": true
+  },
+  "[typescript]": {
+    "editor.defaultFormatter": "biomejs.biome",
+    "editor.formatOnSave": true
+  },
   "cSpell.words": [
-    "changelogithub",
-    "mdast"
-  ]
+    "changelogithub"
+  ],
+  "terminal.integrated.copyOnSelection": true
 }

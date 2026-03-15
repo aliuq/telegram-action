@@ -1,6 +1,6 @@
 name: "Telegram Message Notification"
 author: "AliuQ"
-description: "Send message to Telegram"
+description: "Send Telegram messages, attachments, and interactive buttons"
 inputs:
   bot_token:
     description: "Telegram Bot Token"
@@ -9,28 +9,45 @@ inputs:
     description: "Telegram Chat ID"
     required: true
   message:
-    description: "Message to send"
-    required: true
+    description: "Message text to send, or the caption when an attachment is provided"
+    required: false
     default: ""
   reply_to_message_id:
-    description: "Topic ID"
+    description: "Message ID to reply to, including topic starter messages"
     required: false
     default: ""
   buttons:
-    description: "JSON string of button configuration"
+    description: >
+      Inline keyboard buttons in JSON. Supports two formats:
+      flat array (single row): [{"text":"…","url":"…"}]
+      nested array (multi-row): [[{"text":"…","url":"…"}],[{"text":"…","url":"…"}]]
     required: false
     default: ""
   disable_link_preview:
-    description: "Disable link preview"
+    description: 'Disable link previews. Only "true" and "false" are accepted.'
     required: false
     default: "true"
+  attachment:
+    description: "Attachment source. Supports local file paths, public URLs, or Telegram file_ids."
+    required: false
+    default: ""
+  attachment_type:
+    description: 'Attachment type. Supported values: "photo", "video", "audio", "animation", and "document".'
+    required: false
+    default: ""
+  attachment_filename:
+    description: "Optional filename override when uploading a local file."
+    required: false
+    default: ""
 
 outputs:
   message_id:
     description: "ID of the sent message"
+  status:
+    description: "Status of the action ('success')"
 
 runs:
-  using: "node20"
+  using: "node24"
   main: "dist/index.js"
 
 branding:

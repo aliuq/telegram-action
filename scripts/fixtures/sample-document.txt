@@ -1,0 +1,3 @@
+This is a sample document fixture used by the telegram-action integration scenarios.
+
+It verifies that the action can upload a local workspace file as a Telegram document.
