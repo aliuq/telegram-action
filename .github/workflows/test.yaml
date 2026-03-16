@@ -1,0 +1,75 @@
+name: Integration Tests
+
+on:
+  push:
+    branches: [master]
+  pull_request:
+    branches: [master]
+  workflow_dispatch:
+    inputs:
+      scenario_ids:
+        description: "Comma-separated scenario ids to run, or 'all'"
+        required: false
+        default: "all"
+
+jobs:
+  scenario_matrix:
+    runs-on: ubuntu-latest
+    outputs:
+      matrix: ${{ steps.matrix.outputs.matrix }}
+    steps:
+      - uses: actions/checkout@v6
+
+      - id: matrix
+        name: Build scenario matrix
+        env:
+          SCENARIO_IDS: ${{ inputs.scenario_ids || 'all' }}
+        run: node --experimental-strip-types scripts/workflow.ts matrix
+
+  notification:
+    needs: scenario_matrix
+    runs-on: ubuntu-latest
+    env:
+      NODE_OPTIONS: --no-deprecation
+    strategy:
+      fail-fast: false
+      max-parallel: 1
+      matrix: ${{ fromJSON(needs.scenario_matrix.outputs.matrix) }}
+    steps:
+      - uses: actions/checkout@v6
+
+      - id: scenario
+        name: Load scenario
+        env:
+          SCENARIO_ID: ${{ matrix.scenario_id }}
+        run: node --experimental-strip-types scripts/workflow.ts scenario
+
+      - id: run_scenario
+        name: Run scenario — ${{ matrix.scenario_id }}
+        continue-on-error: true
+        uses: ./
+        env:
+          ACT_SCENARIO_ID: ${{ matrix.scenario_id }}
+          TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
+          TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
+          TELEGRAM_REPLY_TO_MESSAGE_ID: ${{ steps.scenario.outputs.reply_to_message_id == 'env' && secrets.TELEGRAM_REPLY_TO_MESSAGE_ID || '' }}
+        with:
+          message: ${{ steps.scenario.outputs.message }}
+          buttons: ${{ steps.scenario.outputs.buttons }}
+          disable_link_preview: ${{ steps.scenario.outputs.disable_link_preview }}
+          attachment: ${{ steps.scenario.outputs.attachment }}
+          attachment_type: ${{ steps.scenario.outputs.attachment_type }}
+          attachment_filename: ${{ steps.scenario.outputs.attachment_filename }}
+
+      - name: Assert scenario outcome
+        env:
+          SCENARIO_ID: ${{ matrix.scenario_id }}
+          EXPECT_FAILURE: ${{ steps.scenario.outputs.expect_failure }}
+          SCENARIO_OUTCOME: ${{ steps.run_scenario.outcome }}
+        run: node --experimental-strip-types scripts/workflow.ts assert-outcome
+
+      - name: Print outputs
+        if: ${{ steps.scenario.outputs.expect_failure != 'true' && steps.run_scenario.outcome == 'success' }}
+        run: |
+          echo "message_id=${{ steps.run_scenario.outputs.message_id }}"
+          echo "status=${{ steps.run_scenario.outputs.status }}"

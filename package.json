@@ -5,13 +5,12 @@
   "type": "module",
   "main": "dist/index.js",
   "scripts": {
-    "lint": "biome check . && node scripts/check-scenario-sync.mjs",
-    "dev": "bun build ./src/index.ts --outdir dist --target node --watch",
-    "local": "bun scripts/run-local.ts",
-    "local:watch": "bun --watch scripts/run-local.ts",
-    "build": "bun build ./src/index.ts --outdir=dist --target=node --minify --sourcemap=external",
+    "build": "tsdown",
+    "dev": "tsdown --watch",
+    "lint": "tsc --noEmit && biome check .",
     "test": "bun scripts/test.ts",
-    "test:interactive": "bun scripts/test.ts",
+    "test:validate": "bun scripts/test.ts --mode validate",
+    "test:act": "bun scripts/test.ts --mode act",
     "release": "bun run build && bunx bumpp --push --tag --commit --all && bunx changelogithub"
   },
   "keywords": [
@@ -23,15 +22,15 @@
   "author": "AliuQ",
   "homepage": "https://github.com/aliuq/telegram-action",
   "license": "MIT",
-  "dependencies": {
-    "@actions/core": "^3.0.0",
-    "grammy": "^1.41.1",
-    "telegramify-markdown": "^1.3.2"
-  },
   "devDependencies": {
+    "@actions/core": "^3.0.0",
     "@biomejs/biome": "^2.4.7",
     "@clack/prompts": "^1.1.0",
     "@types/node": "^25.5.0",
+    "cac": "^7.0.0",
+    "grammy": "^1.41.1",
+    "telegramify-markdown": "^1.3.2",
+    "tsdown": "^0.21.3",
     "typescript": "^5.9.3"
   },
   "engines": {

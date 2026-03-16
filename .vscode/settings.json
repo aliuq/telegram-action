@@ -13,7 +13,9 @@
     "editor.formatOnSave": true
   },
   "cSpell.words": [
-    "changelogithub"
+    "changelogithub",
+    "grammyjs",
+    "tsgo"
   ],
   "terminal.integrated.copyOnSelection": true
 }

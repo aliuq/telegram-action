@@ -2,18 +2,8 @@ name: "Telegram Message Notification"
 author: "AliuQ"
 description: "Send Telegram messages, attachments, and interactive buttons"
 inputs:
-  bot_token:
-    description: "Telegram Bot Token"
-    required: true
-  chat_id:
-    description: "Telegram Chat ID"
-    required: true
   message:
     description: "Message text to send, or the caption when an attachment is provided"
-    required: false
-    default: ""
-  reply_to_message_id:
-    description: "Message ID to reply to, including topic starter messages"
     required: false
     default: ""
   buttons:

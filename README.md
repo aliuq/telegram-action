@@ -1,15 +1,17 @@
 # Telegram Message Notification Action
 
-A GitHub Action for sending Telegram notifications. It supports standard messages, inline buttons, media and document attachments, replies to existing messages, and local validation with `act`.
+A GitHub Action for sending Telegram notifications. It supports plain messages, inline buttons, file attachments, replies to existing messages, and local validation flows for maintainers.
+
+For Chinese documentation, see [README.zh-CN.md](./README.zh-CN.md). The English README is the primary source of truth for behavior, inputs, and development notes.
 
 ## Features
 
 - Send plain text messages with MarkdownV2 formatting
 - Send inline keyboard buttons using flat or nested JSON
 - Send media and documents from local files, public URLs, or Telegram file IDs
-- Send video messages through the shared attachment interface
 - Reply to an existing message, including topic starter messages
 - Enable or disable link previews explicitly
+- Validate the shared scenario catalog locally before running live integrations
 - Run example workflows locally with `act`
 
 ## Usage
@@ -21,7 +23,6 @@ A GitHub Action for sending Telegram notifications. It supports standard message
 3. Add the following repository secrets in `Settings -> Secrets and variables -> Actions`:
    - `TELEGRAM_BOT_TOKEN`
    - `TELEGRAM_CHAT_ID`
-   - `TELEGRAM_CHAT_ID_GROUP` for group or topic tests
    - `TELEGRAM_REPLY_TO_MESSAGE_ID` for topic or threaded replies
 
 ### Basic example
@@ -29,9 +30,10 @@ A GitHub Action for sending Telegram notifications. It supports standard message
 ```yaml
 - name: Send Telegram Message
   uses: aliuq/telegram-action@master
+  env:
+    TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
+    TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
   with:
-    bot_token: ${{ secrets.TELEGRAM_BOT_TOKEN }}
-    chat_id: ${{ secrets.TELEGRAM_CHAT_ID }}
     message: |
       🚀 A new commit was pushed!
 
@@ -49,9 +51,10 @@ The `buttons` input accepts two JSON shapes.
 ```yaml
 - name: Send Message with Buttons
   uses: aliuq/telegram-action@master
+  env:
+    TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
+    TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
   with:
-    bot_token: ${{ secrets.TELEGRAM_BOT_TOKEN }}
-    chat_id: ${{ secrets.TELEGRAM_CHAT_ID }}
     message: "See more details"
     buttons: |
       [
@@ -83,20 +86,22 @@ Use `attachment` together with `attachment_type` to send a media or document pay
 ```yaml
 - name: Send a local photo
   uses: aliuq/telegram-action@master
+  env:
+    TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
+    TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
   with:
-    bot_token: ${{ secrets.TELEGRAM_BOT_TOKEN }}
-    chat_id: ${{ secrets.TELEGRAM_CHAT_ID }}
     message: "🖼️ Photo attachment"
-    attachment: "scripts/fixtures/sample-photo.png"
+    attachment: "scripts/fixtures/sample-photo.webp"
     attachment_type: "photo"
 ```
 
 ```yaml
 - name: Send a document from a URL
   uses: aliuq/telegram-action@master
+  env:
+    TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
+    TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
   with:
-    bot_token: ${{ secrets.TELEGRAM_BOT_TOKEN }}
-    chat_id: ${{ secrets.TELEGRAM_CHAT_ID }}
     message: "📎 Document attachment"
     attachment: "https://example.com/report.pdf"
     attachment_type: "document"
@@ -105,36 +110,57 @@ Use `attachment` together with `attachment_type` to send a media or document pay
 ```yaml
 - name: Send a video from a URL
   uses: aliuq/telegram-action@master
+  env:
+    TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
+    TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
   with:
-    bot_token: ${{ secrets.TELEGRAM_BOT_TOKEN }}
-    chat_id: ${{ secrets.TELEGRAM_CHAT_ID }}
     message: "🎬 Video attachment"
     attachment: "https://samplelib.com/lib/preview/mp4/sample-5s.mp4"
     attachment_type: "video"
 ```
 
-When an attachment is present, the `message` input is sent as the attachment caption. Video attachments can use the same local path, URL, and Telegram `file_id` flow as the other attachment types.
+```yaml
+- name: Send a video as a file
+  uses: aliuq/telegram-action@master
+  env:
+    TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
+    TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
+  with:
+    message: "📎 Video file"
+    attachment: "scripts/fixtures/sample-video.mp4"
+    attachment_type: "document"
+    attachment_filename: "sample-video.mp4"
+```
+
+When an attachment is present, the `message` input is sent as the attachment caption.
+Use `attachment_type: "document"` whenever you want Telegram to send an image or video as a regular file instead of optimizing it as inline media. The action sets `disable_content_type_detection: true` for uploaded documents so Telegram keeps media files in document mode.
 
 ### Reply to a message or topic
 
 ```yaml
 - name: Reply in a topic
   uses: aliuq/telegram-action@master
+  env:
+    TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
+    TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
+    TELEGRAM_REPLY_TO_MESSAGE_ID: ${{ secrets.TELEGRAM_REPLY_TO_MESSAGE_ID }}
   with:
-    bot_token: ${{ secrets.TELEGRAM_BOT_TOKEN }}
-    chat_id: ${{ secrets.TELEGRAM_CHAT_ID_GROUP }}
-    reply_to_message_id: ${{ secrets.TELEGRAM_REPLY_TO_MESSAGE_ID }}
     message: "Replying inside a topic"
 ```
+
+## Required environment variables
+
+| Variable | Description | Required |
+|------|------|------|
+| `TELEGRAM_BOT_TOKEN` | Telegram bot token | Yes |
+| `TELEGRAM_CHAT_ID` | Target Telegram chat, channel, or group ID | Yes |
+| `TELEGRAM_REPLY_TO_MESSAGE_ID` | Reply target message ID for topic or threaded replies | No |
 
 ## Inputs
 
 | Input | Description | Required | Default |
 |------|------|------|--------|
-| `bot_token` | Telegram bot token | Yes | - |
-| `chat_id` | Telegram chat ID | Yes | - |
 | `message` | Message text sent with MarkdownV2 formatting. Used as the caption when an attachment is sent | No | `""` |
-| `reply_to_message_id` | Message ID to reply to | No | `""` |
 | `buttons` | Inline keyboard JSON in flat or nested format | No | `""` |
 | `disable_link_preview` | Whether to disable link previews. Accepts only `"true"` or `"false"` | No | `"true"` |
 | `attachment` | Local file path, public URL, or Telegram file ID to send as an attachment | No | `""` |
@@ -148,86 +174,88 @@ When an attachment is present, the `message` input is sent as the attachment cap
 | `message_id` | ID of the sent Telegram message |
 | `status` | Execution status, currently `"success"` |
 
+## Code layout
+
+The runtime is intentionally split into a few focused modules:
+
+- `src/index.ts`: tiny entry point and top-level error handling
+- `src/env.ts`: shared environment variable helpers for the action and local tooling
+- `src/inputs.ts`: input reading, validation, and normalization
+- `src/attachments.ts`: local file and attachment source resolution
+- `src/telegram.ts`: Telegram API request construction and dispatch
+- `src/act-logging.ts`: local-only debug logging for `act`
+
+This layout keeps behavior unchanged for action consumers while making the internals easier to extend and review.
+
 ## Local testing
 
-### Fast local development without `act`
+Use this order locally:
 
-For quick iteration, you can run the action logic directly with Bun instead of booting a full GitHub Actions job.
+1. Run `bun run test` to send selected scenarios directly to Telegram.
+   You can also run `bun run test -- <scenarioId>` or `bun run test -- --all`.
+2. Run `bun run test:validate` when you only want parser-level validation without sending messages.
+3. Run `bun run test:act` when you want to execute selected scenarios through `act` against `.github/workflows/test.yaml`.
+4. Run raw `act` commands only when you need a fully manual workflow invocation.
 
-Create a local env file first:
+### 1. Direct send test
 
-```bash
-cat <<'EOF' > .env.local
-TELEGRAM_BOT_TOKEN=xxx
-TELEGRAM_CHAT_ID=yyy
-TELEGRAM_CHAT_ID_GROUP=zzz
-TELEGRAM_REPLY_TO_MESSAGE_ID=123
-EOF
-```
-
-Then load it into your shell and run one of the shared scenarios directly:
-
-```bash
-set -a && source ./.env.local && set +a
-bun run local basic
-```
-
-You can pick any id from `scripts/scenarios.json`:
-
-```bash
-bun run local buttons-flat
-bun run local document-local
-```
-
-For rapid iteration, override only the fields you are changing:
-
-```bash
-LOCAL_MESSAGE=$'🚀 Fast local dev\n\nTweaking message rendering' bun run local basic
-LOCAL_BUTTONS='[{"text":"GitHub","url":"https://github.com"}]' bun run local basic
-LOCAL_ATTACHMENT='scripts/fixtures/sample-document.txt' LOCAL_ATTACHMENT_TYPE='document' bun run local basic
-```
-
-If you want automatic reruns while editing, use Bun watch mode:
-
-```bash
-set -a && source ./.env.local && set +a
-bun run local:watch basic
-```
-
-The local runner maps the friendly `TELEGRAM_*` variables to the action's `INPUT_*` environment variables, reuses `scripts/scenarios.json`, and imports `src/index.ts` directly, so you can test logic changes without rebuilding the full `act` environment.
-
-For local mock servers or network debugging, the action also honors an optional `TELEGRAM_API_ROOT` environment variable when run directly.
-
-### Interactive manual runner
-
-The repository includes a small interactive runner built with [@clack/prompts](https://github.com/bombshell-dev/clack). It reuses `.github/workflows/run.yaml`, reads shared scenario definitions from `scripts/scenarios.json`, and runs the existing `notification` job through `act`.
-
-Before running it, create a repository-root `.env` file for `act`:
+Before running it, create a repository-root `.env` file:
 
 ```bash
 cat <<'EOF' > .env
 TELEGRAM_BOT_TOKEN=xxx
 TELEGRAM_CHAT_ID=yyy
-TELEGRAM_CHAT_ID_GROUP=zzz
+TELEGRAM_REPLY_TO_MESSAGE_ID=123
+EOF
+```
+
+Then use the direct sender:
+
+```bash
+bun run test
+bun run test -- buttons-flat
+bun run test -- --all
+```
+
+Bun automatically loads the repository-root `.env` file for `bun run`, so the sender does not need its own custom `.env` parser or an explicit `--env-file` flag. By default, `bun run test` opens an interactive multi-select prompt and sends the chosen scenarios directly to Telegram. Expected-failure scenarios are treated as pass cases only when they fail as intended.
+
+### 2. Unified interactive runner
+
+The repository includes a single local runner built with [@clack/prompts](https://github.com/bombshell-dev/clack). It supports three modes:
+
+- `source`: run the source-mode Telegram sender directly from the current workspace
+- `act`: execute the GitHub Actions workflow locally through `act`
+- `validate`: check the scenario catalog without sending messages
+
+Every run stores the exact rerun command plus a log file in `.history/`, and the prompt can quickly rerun the previous command.
+
+Before running it, create a repository-root `.env` file:
+
+```bash
+cat <<'EOF' > .env
+TELEGRAM_BOT_TOKEN=xxx
+TELEGRAM_CHAT_ID=yyy
 TELEGRAM_REPLY_TO_MESSAGE_ID=123
 EOF
 ```
 
 ```bash
-bun run test:interactive
+bun run test
+bun run test:act
+bun run test:validate
+bun run test -- --all
+bun run test:validate -- buttons-flat
 ```
 
-The runner first lets you choose between manual selection and a one-click "select all" path. Manual mode starts with no scenarios selected, and the multi-select prompt then uses `space` to toggle items and `enter` to confirm. Before execution, it prints the full `act` command, asks for one more confirmation, and then streams the live `act` logs directly to the terminal. When you select only part of the catalog, the runner also adds `act --matrix scenario_id:...` filters so it does not expand the entire workflow matrix.
+The runner lets you choose the environment first, then pick either a manual scenario subset or the full catalog. The `act` mode preserves ANSI colors and saves the full colored output to `.history/logs/`.
 
-During local `act` runs, the action also prints an extra debug group with the scenario id, Telegram method, masked chat id, button counts, attachment source kind, and nested network error details when a request fails.
+During local `act` runs, the action prints an extra debug group with the scenario id, Telegram method, masked chat id, button counts, attachment source kind, and nested network error details when a request fails.
 
-The `invalid-buttons` test case is expected to fail because the action now rejects malformed button payloads instead of silently skipping them. The `video-url` scenario depends on Telegram being able to fetch the public video URL.
+The `invalid-buttons` test case is expected to fail because the action rejects malformed button payloads instead of silently skipping them. The `video-url` scenario depends on Telegram being able to fetch the public video URL.
 
-The repository lint step also verifies that the workflow matrix scenario ids stay in sync with `scripts/scenarios.json`, which helps keep the scenario catalog as the primary source of truth.
+### 4. Direct `act` usage
 
-### Running the example workflow with `act`
-
-You can dry-run the bundled workflow locally. The workflow accepts a single `scenario_ids` input, so you can run all scenarios or a comma-separated subset while keeping the scenario catalog in one place.
+You can also invoke the bundled workflow directly. The workflow accepts a single `scenario_ids` input, and a dedicated setup job builds the matrix dynamically from the TypeScript scenario catalog.
 
 ```bash
 act workflow_dispatch -n -W .github/workflows/run.yaml -j notification \
@@ -239,11 +267,18 @@ To execute it for real, provide the required secrets:
 
 ```bash
 act workflow_dispatch -W .github/workflows/run.yaml -j notification \
-  --input scenario_ids=basic,photo-local,document-local,video-url \
+  --input scenario_ids=basic,photo-local,photo-as-document,video-as-document,document-local,video-url \
   --secret-file .env
 ```
 
 This action uses `node24`, so use a recent version of `act`.
+
+## Troubleshooting
+
+- **`attachment path does not exist`**: use a workspace-relative path such as `scripts/fixtures/sample-photo.webp`, and make sure the file exists in the checked-out repository.
+- **`buttons must be valid JSON`**: validate the JSON locally first; every button needs a `text` field plus exactly one Telegram action field.
+- **Telegram rejects the message formatting**: start with plain text, then add Markdown gradually so you can see which characters need escaping.
+- **Replies fail**: confirm that `TELEGRAM_CHAT_ID` and `TELEGRAM_REPLY_TO_MESSAGE_ID` point to the same topic or thread context.
 
 ## Full example workflow
 
