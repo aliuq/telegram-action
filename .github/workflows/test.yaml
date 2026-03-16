@@ -42,7 +42,7 @@ jobs:
         name: Load scenario
         env:
           SCENARIO_ID: ${{ matrix.scenario_id }}
-        run: node --experimental-strip-types scripts/workflow.ts scenario
+        run: node --version && node --experimental-strip-types scripts/workflow.ts scenario
 
       - id: run_scenario
         name: Run scenario — ${{ matrix.scenario_id }}
