@@ -24,7 +24,7 @@ jobs:
         name: Build scenario matrix
         env:
           SCENARIO_IDS: ${{ inputs.scenario_ids || 'all' }}
-        run: node --version && node scripts/workflow.ts matrix
+        run: npx tsx scripts/workflow.ts matrix
 
   notification:
     needs: scenario_matrix
@@ -42,7 +42,7 @@ jobs:
         name: Load scenario
         env:
           SCENARIO_ID: ${{ matrix.scenario_id }}
-        run: node --version && node scripts/workflow.ts scenario
+        run: npx tsx scripts/workflow.ts scenario
 
       - id: run_scenario
         name: Run scenario — ${{ matrix.scenario_id }}
@@ -72,7 +72,7 @@ jobs:
           SCENARIO_ID: ${{ matrix.scenario_id }}
           EXPECT_FAILURE: ${{ steps.scenario.outputs.expect_failure }}
           SCENARIO_OUTCOME: ${{ steps.run_scenario.outcome }}
-        run: node --experimental-strip-types scripts/workflow.ts assert-outcome
+        run: npx tsx scripts/workflow.ts assert-outcome
 
       - name: Print outputs
         if: ${{ steps.scenario.outputs.expect_failure != 'true' && steps.run_scenario.outcome == 'success' }}
