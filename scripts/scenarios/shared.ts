@@ -21,7 +21,6 @@ export function createScenarioInputs(overrides: Partial<ScenarioInputs>): Scenar
     message_file: "",
     message_url: "",
     stream_response: "false",
-    reply_to_message_id: "",
     disable_link_preview: "true",
     buttons: "",
     attachment: "",

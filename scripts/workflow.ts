@@ -44,7 +44,6 @@ async function writeScenarioOutputs(): Promise<void> {
   writeOutput("message_file", scenario.inputs.message_file ?? "");
   writeOutput("message_url", scenario.inputs.message_url ?? "");
   writeOutput("stream_response", scenario.inputs.stream_response ?? "false");
-  writeOutput("reply_to_message_id", scenario.inputs.reply_to_message_id ?? "");
   writeOutput("disable_link_preview", scenario.inputs.disable_link_preview ?? "true");
   writeOutput("buttons", scenario.inputs.buttons ?? "");
   writeOutput("attachment", scenario.inputs.attachment ?? "");

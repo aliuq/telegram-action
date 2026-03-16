@@ -13,7 +13,7 @@ import { buildRawActionInputs, describeRequestMethod, ROOT, SECRET_FILE_PATH } f
 function ensureSecretFileExists(): void {
   if (!existsSync(SECRET_FILE_PATH)) {
     throw new Error(
-      "Missing .env file in the repository root. Create it with TELEGRAM_BOT_TOKEN, TELEGRAM_CHAT_ID, and TELEGRAM_REPLY_TO_MESSAGE_ID before running act mode.",
+      "Missing .env file in the repository root. Create it with TELEGRAM_BOT_TOKEN and TELEGRAM_CHAT_ID before running act mode.",
     );
   }
 }
@@ -135,6 +135,7 @@ export async function runSourceSelection(scenarios: ScenarioDefinition[], logFil
             chatId: request.chatId,
             message: request.message,
             disableLinkPreview: request.disableLinkPreview,
+            topicId: request.topicId,
             replyMessageId: request.replyMessageId,
             replyMarkup: request.replyMarkup,
             attachmentType: request.attachmentType,
@@ -163,6 +164,7 @@ export async function runSourceSelection(scenarios: ScenarioDefinition[], logFil
         chatId: request.chatId,
         message: request.message,
         disableLinkPreview: request.disableLinkPreview,
+        topicId: request.topicId,
         replyMessageId: request.replyMessageId,
         replyMarkup: request.replyMarkup,
         attachmentType: request.attachmentType,

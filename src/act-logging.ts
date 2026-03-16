@@ -69,6 +69,7 @@ export function formatActRequestSummary(options: ActRequestSummaryOptions): stri
     `Chat ID: ${maskIdentifier(options.chatId)}`,
     `Message: ${options.message?.length ?? 0} chars`,
     `Link preview: ${formatToggle(!options.disableLinkPreview)}`,
+    `Topic target: ${options.topicId ?? "none"}`,
     `Reply target: ${options.replyMessageId ?? "none"}`,
     `Buttons: ${buttonRows} row(s), ${buttonCount} button(s)`,
     `Attachment: ${attachmentSummary}`,

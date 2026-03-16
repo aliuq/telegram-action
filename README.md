@@ -13,7 +13,8 @@ For Chinese documentation, see [README.zh-CN.md](./README.zh-CN.md). The English
 - Load message text from inline input, local files, or remote URLs
 - Send media and documents from local files, public URLs, or Telegram file IDs
 - Send multiple media items with the `attachments` JSON input
-- Reply to an existing message, including topic starter messages
+- Reply to an existing message
+- Post into a Telegram topic/thread via `TELEGRAM_TOPIC_ID`
 - Enable or disable link previews explicitly
 - Post to Telegram channels that already have discussion comments enabled
 - Validate the shared scenario catalog locally before running live integrations
@@ -28,7 +29,8 @@ For Chinese documentation, see [README.zh-CN.md](./README.zh-CN.md). The English
 3. Add the following repository secrets in `Settings -> Secrets and variables -> Actions`:
    - `TELEGRAM_BOT_TOKEN`
    - `TELEGRAM_CHAT_ID`
-   - `TELEGRAM_REPLY_TO_MESSAGE_ID` for topic or threaded replies
+   - `TELEGRAM_TOPIC_ID` for topic/thread delivery when needed
+   - `TELEGRAM_REPLY_TO_MESSAGE_ID` for replying to a specific existing message when needed
 
 ### Basic example
 
@@ -236,14 +238,15 @@ Boundary behavior:
 - 2-10 compatible items are sent in one Telegram media group
 - More than 10 items are split into multiple batches automatically, preserving order
 
-### Reply to a message or topic
+### Post in a topic or reply to a message
 
 ```yaml
-- name: Reply in a topic
+- name: Post in a topic and optionally reply to a message
   uses: aliuq/telegram-action@master
   env:
     TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
     TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
+    TELEGRAM_TOPIC_ID: ${{ secrets.TELEGRAM_TOPIC_ID }}
     TELEGRAM_REPLY_TO_MESSAGE_ID: ${{ secrets.TELEGRAM_REPLY_TO_MESSAGE_ID }}
   with:
     message: "Replying inside a topic"
@@ -259,7 +262,8 @@ Telegram channel comments are not controlled by a per-message Bot API flag. If y
 |------|------|------|
 | `TELEGRAM_BOT_TOKEN` | Telegram bot token | Yes |
 | `TELEGRAM_CHAT_ID` | Target Telegram chat, channel, or group ID | Yes |
-| `TELEGRAM_REPLY_TO_MESSAGE_ID` | Reply target message ID for topic or threaded replies | No |
+| `TELEGRAM_TOPIC_ID` | Target topic/thread ID (`message_thread_id`) when posting into a forum topic | No |
+| `TELEGRAM_REPLY_TO_MESSAGE_ID` | Reply target message ID when replying to a specific message | No |
 
 ## Inputs
 
@@ -324,6 +328,7 @@ Before running it, create a repository-root `.env` file:
 cat <<'EOF' > .env
 TELEGRAM_BOT_TOKEN=xxx
 TELEGRAM_CHAT_ID=yyy
+TELEGRAM_TOPIC_ID=456
 TELEGRAM_REPLY_TO_MESSAGE_ID=123
 EOF
 ```
@@ -346,7 +351,7 @@ The repository includes a single local runner built with [@clack/prompts](https:
 - `act`: execute the GitHub Actions workflow locally through `act`
 - `validate`: check the scenario catalog without sending messages
 
-Every run stores the exact rerun command plus a log file in `.history/`, and the prompt can quickly rerun the previous command.
+Every run stores the exact rerun command plus a log file in `.test-history/`, and the prompt can quickly rerun the previous command.
 
 Before running it, create a repository-root `.env` file:
 
@@ -354,6 +359,7 @@ Before running it, create a repository-root `.env` file:
 cat <<'EOF' > .env
 TELEGRAM_BOT_TOKEN=xxx
 TELEGRAM_CHAT_ID=yyy
+TELEGRAM_TOPIC_ID=456
 TELEGRAM_REPLY_TO_MESSAGE_ID=123
 EOF
 ```
@@ -367,7 +373,7 @@ bun run test -- --all
 bun run test:validate -- buttons-flat
 ```
 
-The runner lets you choose the environment first, then pick either a manual scenario subset or the full catalog. The `act` mode preserves ANSI colors and saves the full colored output to `.history/logs/`.
+The runner lets you choose the environment first, then pick either a manual scenario subset or the full catalog. The `act` mode preserves ANSI colors and saves the full colored output to `.test-history/logs/`.
 
 During local `act` runs, the action prints an extra debug group with the scenario id, Telegram method, masked chat id, button counts, attachment source kind, and nested network error details when a request fails.
 
@@ -398,7 +404,7 @@ This action uses `node24`, so use a recent version of `act`.
 - **`attachment path does not exist`**: use a workspace-relative path such as `scripts/fixtures/sample-photo.webp`, and make sure the file exists in the checked-out repository.
 - **`buttons must be valid JSON`**: validate the JSON locally first; every button needs a `text` field plus exactly one Telegram action field.
 - **Telegram rejects the message formatting**: start with plain text, then add Markdown gradually so you can see which characters need escaping.
-- **Replies fail**: confirm that `TELEGRAM_CHAT_ID` and `TELEGRAM_REPLY_TO_MESSAGE_ID` point to the same topic or thread context.
+- **Replies or topic posts fail**: confirm that `TELEGRAM_CHAT_ID`, `TELEGRAM_TOPIC_ID`, and `TELEGRAM_REPLY_TO_MESSAGE_ID` all belong to the same chat/thread context, and only set the variables you actually need.
 
 ## Full example workflow
 

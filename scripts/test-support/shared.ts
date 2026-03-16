@@ -1,5 +1,5 @@
 import { ATTACHMENT_METHOD_NAMES } from "../../src/constants.ts";
-import { getRequiredEnv } from "../../src/env.ts";
+import { getOptionalEnv, getRequiredEnv } from "../../src/env.ts";
 import { parseActionInputs } from "../../src/inputs.ts";
 import { describeTextSendMethod } from "../../src/telegram.ts";
 import type { ParsedActionInputs, RawActionInputs, ScenarioDefinition } from "../../src/types.ts";
@@ -7,12 +7,11 @@ import { TEST_MESSAGE_URL_OVERRIDES } from "../scenarios/shared.ts";
 
 export const ROOT = new URL("../..", import.meta.url).pathname;
 export const SECRET_FILE_PATH = new URL("../../.env", import.meta.url).pathname;
-export const HISTORY_DIR = new URL("../../.history", import.meta.url).pathname;
-export const LOG_DIR = new URL("../../.history/logs", import.meta.url).pathname;
-export const HISTORY_FILE_PATH = new URL("../../.history/test-history.json", import.meta.url).pathname;
+export const HISTORY_DIR = new URL("../../.test-history", import.meta.url).pathname;
+export const LOG_DIR = new URL("../../.test-history/logs", import.meta.url).pathname;
+export const HISTORY_FILE_PATH = new URL("../../.test-history/test-history.json", import.meta.url).pathname;
 export const TEST_BOT_TOKEN = "test-bot-token";
 export const TEST_CHAT_ID = "123456";
-export const TEST_REPLY_TO_MESSAGE_ID = "42";
 export const TEST_MESSAGE_URL_OVERRIDES_JSON = JSON.stringify(TEST_MESSAGE_URL_OVERRIDES);
 export const RUNNER_BANNER = [
   "████████╗███████╗██╗     ███████╗ ██████╗ ██████╗  █████╗ ███╗   ███╗",
@@ -46,11 +45,8 @@ export function buildRawActionInputs(scenario: ScenarioDefinition, useRealEnv: b
     messageUrl: scenario.inputs.message_url,
     streamResponse: scenario.inputs.stream_response,
     buttons: scenario.inputs.buttons,
-    replyToMessageId: scenario.inputs.reply_to_message_id
-      ? useRealEnv
-        ? getRequiredEnv("TELEGRAM_REPLY_TO_MESSAGE_ID")
-        : TEST_REPLY_TO_MESSAGE_ID
-      : "",
+    topicId: useRealEnv ? getOptionalEnv("TELEGRAM_TOPIC_ID") : "",
+    replyToMessageId: useRealEnv ? getOptionalEnv("TELEGRAM_REPLY_TO_MESSAGE_ID") : "",
     disableLinkPreview: scenario.inputs.disable_link_preview,
     attachment: scenario.inputs.attachment,
     attachments: scenario.inputs.attachments,

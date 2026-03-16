@@ -67,6 +67,21 @@ interface RetryRateLimitOptions {
   label: string;
 }
 
+async function sleepWithWarningCountdown(message: string, seconds: number): Promise<void> {
+  if (!process.stderr.isTTY) {
+    core.warning(message);
+    await sleep(seconds * 1000);
+    return;
+  }
+
+  for (let remainingSeconds = seconds; remainingSeconds > 0; remainingSeconds--) {
+    process.stderr.write(`\r\x1b[33m${message} Retrying in ${remainingSeconds}s...\x1b[0m`);
+    await sleep(1000);
+  }
+
+  process.stderr.write("\n");
+}
+
 async function retryOnRateLimit<T>(operation: () => Promise<T>, options: RetryRateLimitOptions): Promise<T> {
   let retries = 0;
 
@@ -86,7 +101,10 @@ async function retryOnRateLimit<T>(operation: () => Promise<T>, options: RetryRa
         );
       }
 
-      await sleep(retryAfterSeconds * 1000);
+      await sleepWithWarningCountdown(
+        `${options.label} rate-limited by Telegram (${retries}/${options.maxRetries}).`,
+        retryAfterSeconds,
+      );
     }
   }
 }
@@ -121,6 +139,7 @@ function createPlainMessageOptions(request: ParsedActionInputs, replyMessageId?:
     link_preview_options: {
       is_disabled: request.disableLinkPreview,
     },
+    ...(request.topicId !== undefined ? { message_thread_id: request.topicId } : {}),
     ...(includeReplyMarkup && request.replyMarkup ? { reply_markup: request.replyMarkup } : {}),
     ...(replyParameters ? { reply_parameters: replyParameters } : {}),
   };
@@ -135,10 +154,17 @@ async function sendFormattedMessage(
   includeReplyMarkup = false,
 ) {
   try {
-    return await bot.api.sendMessage(
-      request.chatId,
-      formattedChunk,
-      createMessageOptions(request, replyMessageId, includeReplyMarkup),
+    return await retryOnRateLimit(
+      () =>
+        bot.api.sendMessage(
+          request.chatId,
+          formattedChunk,
+          createMessageOptions(request, replyMessageId, includeReplyMarkup),
+        ),
+      {
+        maxRetries: MAX_DRAFT_RETRIES,
+        label: "Text chunk",
+      },
     );
   } catch (error) {
     if (!isDraftParseError(error) || rawChunk.length > TELEGRAM_MESSAGE_LIMIT) {
@@ -150,10 +176,17 @@ async function sendFormattedMessage(
         `scenarioId=${request.scenarioId} rawLength=${rawChunk.length} formattedLength=${formattedChunk.length} ` +
         `error="${getTelegramErrorDescription(error)}" preview="${summarizeChunkForLogs(rawChunk)}"`,
     );
-    return await bot.api.sendMessage(
-      request.chatId,
-      rawChunk,
-      createPlainMessageOptions(request, replyMessageId, includeReplyMarkup),
+    return await retryOnRateLimit(
+      () =>
+        bot.api.sendMessage(
+          request.chatId,
+          rawChunk,
+          createPlainMessageOptions(request, replyMessageId, includeReplyMarkup),
+        ),
+      {
+        maxRetries: MAX_DRAFT_RETRIES,
+        label: "Plain-text fallback chunk",
+      },
     );
   }
 }
@@ -217,6 +250,7 @@ function createAttachmentOptions(
 
   return {
     ...(caption ? { caption, parse_mode: "MarkdownV2" as const } : {}),
+    ...(request.topicId !== undefined ? { message_thread_id: request.topicId } : {}),
     ...(includeReplyMarkup && request.replyMarkup ? { reply_markup: request.replyMarkup } : {}),
     ...(replyParameters ? { reply_parameters: replyParameters } : {}),
     ...(attachmentType === "document" ? { disable_content_type_detection: true } : {}),
@@ -236,6 +270,7 @@ function createMessageOptions(request: ParsedActionInputs, replyMessageId?: numb
     link_preview_options: {
       is_disabled: request.disableLinkPreview,
     },
+    ...(request.topicId !== undefined ? { message_thread_id: request.topicId } : {}),
     ...(includeReplyMarkup && request.replyMarkup ? { reply_markup: request.replyMarkup } : {}),
     ...(replyParameters ? { reply_parameters: replyParameters } : {}),
   };
@@ -245,6 +280,14 @@ function createDraftMessageOptions() {
   return {
     parse_mode: "MarkdownV2" as const,
   };
+}
+
+async function sendTypingIndicator(bot: TextTransportBot, chatId: string): Promise<void> {
+  try {
+    await bot.api.sendChatAction(chatId, "typing");
+  } catch (error) {
+    core.warning(`Failed to send typing indicator: ${getTelegramErrorDescription(error)}`);
+  }
 }
 
 function getDraftStreamingChatId(chatId: string): number | undefined {
@@ -297,7 +340,7 @@ async function streamTextWithDraftApi(
 ): Promise<number | undefined> {
   const draftSeed = Date.now();
   const framesPerChunk = getFramesPerChunk(chunks.length);
-  let replyMessageId = request.replyMessageId;
+  let replyMessageId: number | undefined;
   let lastMessageId: number | undefined;
 
   // Show typing indicator so users see "typing…" at the top of the chat
@@ -419,20 +462,35 @@ async function sendAttachmentBatch(
 ): Promise<number> {
   if (items.length === 1) {
     const [item] = items;
-    const result = await ATTACHMENT_SENDERS[item.type](
-      bot,
-      request.chatId,
-      item.source.value,
-      createAttachmentOptions(request, item.type, replyMessageId, item.caption, false, item.supportsStreaming),
+    const result = await retryOnRateLimit(
+      () =>
+        ATTACHMENT_SENDERS[item.type](
+          bot,
+          request.chatId,
+          item.source.value,
+          createAttachmentOptions(request, item.type, replyMessageId, item.caption, false, item.supportsStreaming),
+        ),
+      {
+        maxRetries: MAX_DRAFT_RETRIES,
+        label: `Attachment batch (${item.type})`,
+      },
     );
     return result.message_id;
   }
 
-  const messages = await bot.api.sendMediaGroup(
-    request.chatId,
-    items.map((item) => createMediaGroupItem(item)),
+  const messages = await retryOnRateLimit(
+    () =>
+      bot.api.sendMediaGroup(
+        request.chatId,
+        items.map((item) => createMediaGroupItem(item)),
+        {
+          ...(request.topicId !== undefined ? { message_thread_id: request.topicId } : {}),
+          ...(replyMessageId ? { reply_parameters: { message_id: replyMessageId } } : {}),
+        },
+      ),
     {
-      ...(replyMessageId ? { reply_parameters: { message_id: replyMessageId } } : {}),
+      maxRetries: MAX_DRAFT_RETRIES,
+      label: `Media group batch (${items.length} items)`,
     },
   );
 
@@ -450,11 +508,11 @@ async function sendAttachmentItems(bot: Bot, request: ParsedActionInputs): Promi
     bot,
     request,
     introChunks,
-    request.replyMessageId,
+    undefined,
     Boolean(request.replyMarkup),
   );
 
-  let previousMessageId = introTailMessageId ?? request.replyMessageId;
+  let previousMessageId = introTailMessageId;
   const batches = createMediaGroupBatches(request.attachmentItems ?? []);
 
   for (const batch of batches) {
@@ -526,10 +584,14 @@ export async function sendTextMessage(
   const messageChunks = splitTelegramMessageChunks(request.message ?? "", TELEGRAM_MESSAGE_LIMIT);
   const draftChatId = request.streamResponse ? getDraftStreamingChatId(request.chatId) : undefined;
 
+  if (draftChatId === undefined && messageChunks.length > 0) {
+    await sendTypingIndicator(bot, request.chatId);
+  }
+
   const lastMessageId =
     draftChatId !== undefined
       ? await streamTextWithDraftApi(bot, request, messageChunks, draftChatId)
-      : await sendMessageChunks(bot, request, messageChunks, request.replyMessageId, true);
+      : await sendMessageChunks(bot, request, messageChunks, undefined, true);
 
   if (!lastMessageId) {
     throw new Error("failed to send any Telegram messages");
@@ -554,6 +616,7 @@ export async function sendTelegramMessage(request: ParsedActionInputs): Promise<
         chatId: request.chatId,
         message: request.message,
         disableLinkPreview: request.disableLinkPreview,
+        topicId: request.topicId,
         replyMessageId: request.replyMessageId,
         replyMarkup: request.replyMarkup,
       });
@@ -562,16 +625,20 @@ export async function sendTelegramMessage(request: ParsedActionInputs): Promise<
     }
 
     if (request.attachmentSource && request.attachmentType) {
+      const attachmentType = request.attachmentType;
+      const attachmentSource = request.attachmentSource;
+
       logActRequestSummary({
         scenarioId: request.scenarioId,
-        method: ATTACHMENT_METHOD_NAMES[request.attachmentType],
+        method: ATTACHMENT_METHOD_NAMES[attachmentType],
         chatId: request.chatId,
         message: request.message,
         disableLinkPreview: request.disableLinkPreview,
+        topicId: request.topicId,
         replyMessageId: request.replyMessageId,
         replyMarkup: request.replyMarkup,
-        attachmentType: request.attachmentType,
-        attachmentSource: request.attachmentSource,
+        attachmentType,
+        attachmentSource,
       });
 
       const captionPlan = buildAttachmentCaptionPlan(request.message);
@@ -580,22 +647,29 @@ export async function sendTelegramMessage(request: ParsedActionInputs): Promise<
         bot,
         request,
         captionPlan.leadingChunks,
-        request.replyMessageId,
+        undefined,
         attachReplyMarkupToText,
       );
 
-      return ATTACHMENT_SENDERS[request.attachmentType](
-        bot,
-        request.chatId,
-        request.attachmentSource.value,
-        createAttachmentOptions(
-          request,
-          request.attachmentType,
-          chainTailMessageId ?? request.replyMessageId,
-          captionPlan.caption,
-          !attachReplyMarkupToText,
-          request.supportsStreaming,
-        ),
+      return retryOnRateLimit(
+        () =>
+          ATTACHMENT_SENDERS[attachmentType](
+            bot,
+            request.chatId,
+            attachmentSource.value,
+            createAttachmentOptions(
+              request,
+              attachmentType,
+              chainTailMessageId,
+              captionPlan.caption,
+              !attachReplyMarkupToText,
+              request.supportsStreaming,
+            ),
+          ),
+        {
+          maxRetries: MAX_DRAFT_RETRIES,
+          label: `Single attachment (${request.attachmentType})`,
+        },
       );
     }
 
@@ -605,6 +679,7 @@ export async function sendTelegramMessage(request: ParsedActionInputs): Promise<
       chatId: request.chatId,
       message: request.message,
       disableLinkPreview: request.disableLinkPreview,
+      topicId: request.topicId,
       replyMessageId: request.replyMessageId,
       replyMarkup: request.replyMarkup,
     });

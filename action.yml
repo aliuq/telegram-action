@@ -1,6 +1,6 @@
 name: "Telegram Message Notification"
 author: "AliuQ"
-description: "Send Telegram messages, attachments, and interactive buttons"
+description: "Send Telegram messages, attachments, buttons, optional topic-targeted posts via TELEGRAM_TOPIC_ID, and optional replies via TELEGRAM_REPLY_TO_MESSAGE_ID"
 inputs:
   message:
     description: "Message text to send, or the caption when an attachment is provided"

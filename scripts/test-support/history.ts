@@ -26,7 +26,7 @@ export function loadHistoryState(): TestHistoryState {
  */
 export function saveHistoryEntry(entry: TestHistoryEntry): void {
   const state = loadHistoryState();
-  const runs = [entry, ...state.runs].slice(0, 20);
+  const runs = [entry, ...state.runs.filter((run) => run.createdAt !== entry.createdAt)].slice(0, 20);
   writeFileSync(HISTORY_FILE_PATH, JSON.stringify({ lastRun: entry, runs }, null, 2));
 }
 

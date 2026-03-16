@@ -11,7 +11,6 @@ export function createReplyScenarios(): ScenarioDefinition[] {
       description: "Reply inside a topic or threaded chat",
       inputs: {
         message: "↩️ This is a group topic reply message.",
-        reply_to_message_id: "env",
       },
     }),
     createScenario({
@@ -19,7 +18,6 @@ export function createReplyScenarios(): ScenarioDefinition[] {
       description: "Reply inside a topic with buttons",
       inputs: {
         message: "↩️ Topic reply with buttons",
-        reply_to_message_id: "env",
         buttons: '[{"text":"Open repository","url":"https://github.com"}]',
       },
     }),

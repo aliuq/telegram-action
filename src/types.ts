@@ -16,6 +16,7 @@ export interface AttachmentSendOptions {
   caption?: string;
   parse_mode?: "MarkdownV2";
   reply_markup?: InlineKeyboardMarkup;
+  message_thread_id?: number;
   reply_parameters?: { message_id: number };
   disable_content_type_detection?: boolean;
   supports_streaming?: boolean;
@@ -46,6 +47,7 @@ export interface RawActionInputs {
   messageUrl: string;
   streamResponse: string;
   buttons: string;
+  topicId: string;
   replyToMessageId: string;
   disableLinkPreview: string;
   attachment: string;
@@ -73,6 +75,7 @@ export interface ParsedActionInputs {
   message?: string;
   streamResponse: boolean;
   disableLinkPreview: boolean;
+  topicId?: number;
   replyMessageId?: number;
   replyMarkup?: InlineKeyboardMarkup;
   attachmentType?: AttachmentType;
@@ -113,7 +116,6 @@ export interface ScenarioInputs {
   message_file: string;
   message_url: string;
   stream_response: string;
-  reply_to_message_id: string;
   disable_link_preview: string;
   buttons: string;
   attachment: string;
@@ -180,6 +182,8 @@ export interface TestHistoryEntry extends TestSelection {
   command: string;
   createdAt: string;
   logFile?: string;
+  durationMs?: number;
+  durationText?: string;
 }
 
 /**
@@ -204,6 +208,7 @@ export interface ActRequestSummaryOptions {
   chatId: string;
   message?: string;
   disableLinkPreview: boolean;
+  topicId?: number;
   replyMessageId?: number;
   replyMarkup?: InlineKeyboardMarkup;
   attachmentType?: AttachmentType;

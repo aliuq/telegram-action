@@ -7,14 +7,24 @@
   },
   "files": {
     "ignoreUnknown": false,
-    "includes": ["**", "!**/.history", "!**/dist"]
+    "includes": [
+      "**",
+      "!**/.test-history",
+      "!**/dist"
+    ]
   },
   "formatter": {
     "enabled": true,
     "indentStyle": "space",
     "lineWidth": 100
   },
-  "assist": { "actions": { "source": { "organizeImports": "on" } } },
+  "assist": {
+    "actions": {
+      "source": {
+        "organizeImports": "on"
+      }
+    }
+  },
   "linter": {
     "enabled": true,
     "rules": {

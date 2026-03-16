@@ -40,7 +40,6 @@ export function createMessageScenarios(): ScenarioDefinition[] {
       description: "Message body loaded from a remote URL without test override (real HTTP request)",
       inputs: {
         message_url: "https://www.shadcn-vue.com/raw/docs/introduction.md",
-        stream_response: "true",
       },
     }),
     createScenario({

@@ -52,7 +52,8 @@ jobs:
           ACT_SCENARIO_ID: ${{ matrix.scenario_id }}
           TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
           TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
-          TELEGRAM_REPLY_TO_MESSAGE_ID: ${{ steps.scenario.outputs.reply_to_message_id == 'env' && secrets.TELEGRAM_REPLY_TO_MESSAGE_ID || '' }}
+          TELEGRAM_TOPIC_ID: ${{ secrets.TELEGRAM_TOPIC_ID }}
+          TELEGRAM_REPLY_TO_MESSAGE_ID: ${{ secrets.TELEGRAM_REPLY_TO_MESSAGE_ID }}
           TELEGRAM_ACTION_TEST_MESSAGE_URL_OVERRIDES: ${{ steps.scenario.outputs.message_url_overrides }}
         with:
           message: ${{ steps.scenario.outputs.message }}

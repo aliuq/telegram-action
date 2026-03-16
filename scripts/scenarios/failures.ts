@@ -45,5 +45,13 @@ export function createFailureScenarios(): ScenarioDefinition[] {
         attachment_type: "photo",
       },
     }),
+    createScenario({
+      id: "stream-response-missing-message",
+      description: "Streaming mode should fail when no text message source is provided",
+      expect_failure: true,
+      inputs: {
+        stream_response: "true",
+      },
+    }),
   ];
 }

@@ -13,7 +13,8 @@
 - 支持从内联文本、本地文件、远程 URL 读取消息正文
 - 发送本地文件、公共 URL 或 Telegram `file_id` 附件
 - 支持通过 `attachments` 一次发送多个媒体文件
-- 回复群组话题或已有消息
+- 回复已有消息
+- 通过 `TELEGRAM_TOPIC_ID` 发送到指定话题
 - 显式开启或关闭链接预览
 - 支持向已开启 discussion 的频道发送可评论的频道消息
 - 本地校验场景配置
@@ -28,7 +29,8 @@
 3. 在仓库 `Settings -> Secrets and variables -> Actions` 中配置：
    - `TELEGRAM_BOT_TOKEN`
    - `TELEGRAM_CHAT_ID`
-   - `TELEGRAM_REPLY_TO_MESSAGE_ID`（回复话题消息用）
+   - `TELEGRAM_TOPIC_ID`（发送到指定话题时使用）
+   - `TELEGRAM_REPLY_TO_MESSAGE_ID`（回复某条已有消息时使用）
 
 ### 基本用法
 
@@ -176,11 +178,12 @@ Telegram 频道评论区不是单条消息级别的 Bot API 开关。如果 `TEL
 
 - `TELEGRAM_BOT_TOKEN`：Telegram Bot Token，通过 `env` 传入，必填
 - `TELEGRAM_CHAT_ID`：聊天 / 群组 / 频道 ID，通过 `env` 传入，必填
+- `TELEGRAM_TOPIC_ID`：目标话题 ID（`message_thread_id`），通过 `env` 传入，可选
 - `TELEGRAM_REPLY_TO_MESSAGE_ID`：回复目标消息 ID，通过 `env` 传入，可选
 - `message`：消息内容，可选
 - `message_file`：仓库内 UTF-8 文本文件路径，可选
 - `message_url`：远程 HTTP(S) URL，可选
-- `stream_response`：是否启用文本流式响应。私聊通过 Action 内置的 `sendMessageDraft` 流程发送，超长输出会自动落成多条回复链消息；其他聊天自动回退到普通 `sendMessage`，取值 `"true"` 或 `"false"`
+- `stream_response`：是否启用文本流式响应。私聊通过 Action 内置的 `sendMessageDraft` 流程发送，超长输出会自动落成多条回复链消息；其他聊天自动回退到普通 `sendMessage`，取值 `"true"` 或 `"false"`。该选项当前只支持纯文本消息，不能与 `attachment` 或 `attachments` 同时使用
 - `buttons`：按钮 JSON，可选
 - `disable_link_preview`：`"true"` 或 `"false"`
 - `attachment`：附件路径 / URL / Telegram `file_id`
@@ -219,6 +222,7 @@ Telegram 真正的 draft streaming 目前只适用于私聊，因此非私聊场
 cat <<'EOF' > .env
 TELEGRAM_BOT_TOKEN=xxx
 TELEGRAM_CHAT_ID=yyy
+TELEGRAM_TOPIC_ID=456
 TELEGRAM_REPLY_TO_MESSAGE_ID=123
 EOF
 ```
@@ -250,13 +254,13 @@ bun run test:act
 bun run test:validate
 ```
 
-测试脚本会把最近一次执行命令和日志保存在 `.history/` 里，并支持快速重跑上一次命令。`act` 模式会保留彩色输出。
+测试脚本会把最近一次执行命令和日志保存在 `.test-history/` 里，并支持快速重跑上一次命令。`act` 模式会保留彩色输出。
 
 ## 常见问题
 
 - **提示 `attachment path does not exist`**：请确认路径是仓库根目录下的相对路径，例如 `scripts/fixtures/sample-photo.webp`。
 - **提示按钮 JSON 非法**：先把 `buttons` 单独拿出来做 JSON 校验，确保每个按钮都带 `text`。
-- **回复失败**：确认 `TELEGRAM_CHAT_ID` 和 `TELEGRAM_REPLY_TO_MESSAGE_ID` 属于同一话题上下文。
+- **回复或话题发送失败**：确认 `TELEGRAM_CHAT_ID`、`TELEGRAM_TOPIC_ID`、`TELEGRAM_REPLY_TO_MESSAGE_ID` 属于同一聊天/话题上下文，并且只设置你真正需要的变量。
 - **格式显示异常**：先发送纯文本，再逐步加入 Markdown 内容排查转义问题。
 
 ## 文档建议
