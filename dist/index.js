@@ -16076,10656 +16076,6 @@ function logActErrorDetails(error$2) {
 	endGroup();
 }
 //#endregion
-//#region node_modules/micromark/dist/constant/has-own-property.js
-var require_has_own_property = /* @__PURE__ */ __commonJSMin(((exports, module) => {
-	module.exports = {}.hasOwnProperty;
-}));
-//#endregion
-//#region node_modules/micromark/dist/constant/splice.js
-var require_splice = /* @__PURE__ */ __commonJSMin(((exports, module) => {
-	module.exports = [].splice;
-}));
-//#endregion
-//#region node_modules/micromark/dist/util/chunked-splice.js
-var require_chunked_splice = /* @__PURE__ */ __commonJSMin(((exports, module) => {
-	var splice = require_splice();
-	function chunkedSplice(list, start, remove, items) {
-		var end = list.length;
-		var chunkStart = 0;
-		var parameters;
-		if (start < 0) start = -start > end ? 0 : end + start;
-		else start = start > end ? end : start;
-		remove = remove > 0 ? remove : 0;
-		if (items.length < 1e4) {
-			parameters = Array.from(items);
-			parameters.unshift(start, remove);
-			splice.apply(list, parameters);
-		} else {
-			if (remove) splice.apply(list, [start, remove]);
-			while (chunkStart < items.length) {
-				parameters = items.slice(chunkStart, chunkStart + 1e4);
-				parameters.unshift(start, 0);
-				splice.apply(list, parameters);
-				chunkStart += 1e4;
-				start += 1e4;
-			}
-		}
-	}
-	module.exports = chunkedSplice;
-}));
-//#endregion
-//#region node_modules/micromark/dist/util/miniflat.js
-var require_miniflat = /* @__PURE__ */ __commonJSMin(((exports, module) => {
-	function miniflat(value) {
-		return value === null || value === void 0 ? [] : "length" in value ? value : [value];
-	}
-	module.exports = miniflat;
-}));
-//#endregion
-//#region node_modules/micromark/dist/util/combine-extensions.js
-var require_combine_extensions = /* @__PURE__ */ __commonJSMin(((exports, module) => {
-	var hasOwnProperty = require_has_own_property();
-	var chunkedSplice = require_chunked_splice();
-	var miniflat = require_miniflat();
-	function combineExtensions(extensions) {
-		var all = {};
-		var index = -1;
-		while (++index < extensions.length) extension(all, extensions[index]);
-		return all;
-	}
-	function extension(all, extension) {
-		var hook;
-		var left;
-		var right;
-		var code;
-		for (hook in extension) {
-			left = hasOwnProperty.call(all, hook) ? all[hook] : all[hook] = {};
-			right = extension[hook];
-			for (code in right) left[code] = constructs(miniflat(right[code]), hasOwnProperty.call(left, code) ? left[code] : []);
-		}
-	}
-	function constructs(list, existing) {
-		var index = -1;
-		var before = [];
-		while (++index < list.length) (list[index].add === "after" ? existing : before).push(list[index]);
-		chunkedSplice(existing, 0, 0, before);
-		return existing;
-	}
-	module.exports = combineExtensions;
-}));
-//#endregion
-//#region node_modules/micromark/dist/constant/from-char-code.js
-var require_from_char_code = /* @__PURE__ */ __commonJSMin(((exports, module) => {
-	module.exports = String.fromCharCode;
-}));
-//#endregion
-//#region node_modules/micromark/dist/util/regex-check.js
-var require_regex_check = /* @__PURE__ */ __commonJSMin(((exports, module) => {
-	var fromCharCode = require_from_char_code();
-	function regexCheck(regex) {
-		return check;
-		function check(code) {
-			return regex.test(fromCharCode(code));
-		}
-	}
-	module.exports = regexCheck;
-}));
-//#endregion
-//#region node_modules/micromark/dist/character/ascii-alpha.js
-var require_ascii_alpha = /* @__PURE__ */ __commonJSMin(((exports, module) => {
-	module.exports = require_regex_check()(/[A-Za-z]/);
-}));
-//#endregion
-//#region node_modules/micromark/dist/character/ascii-alphanumeric.js
-var require_ascii_alphanumeric = /* @__PURE__ */ __commonJSMin(((exports, module) => {
-	module.exports = require_regex_check()(/[\dA-Za-z]/);
-}));
-//#endregion
-//#region node_modules/micromark/dist/character/ascii-control.js
-var require_ascii_control = /* @__PURE__ */ __commonJSMin(((exports, module) => {
-	function asciiControl(code) {
-		return code < 32 || code === 127;
-	}
-	module.exports = asciiControl;
-}));
-//#endregion
-//#region node_modules/micromark/dist/character/markdown-line-ending.js
-var require_markdown_line_ending = /* @__PURE__ */ __commonJSMin(((exports, module) => {
-	function markdownLineEnding(code) {
-		return code < -2;
-	}
-	module.exports = markdownLineEnding;
-}));
-//#endregion
-//#region node_modules/micromark/dist/constant/unicode-punctuation-regex.js
-var require_unicode_punctuation_regex = /* @__PURE__ */ __commonJSMin(((exports, module) => {
-	module.exports = /[!-\/:-@\[-`\{-~\xA1\xA7\xAB\xB6\xB7\xBB\xBF\u037E\u0387\u055A-\u055F\u0589\u058A\u05BE\u05C0\u05C3\u05C6\u05F3\u05F4\u0609\u060A\u060C\u060D\u061B\u061E\u061F\u066A-\u066D\u06D4\u0700-\u070D\u07F7-\u07F9\u0830-\u083E\u085E\u0964\u0965\u0970\u09FD\u0A76\u0AF0\u0C77\u0C84\u0DF4\u0E4F\u0E5A\u0E5B\u0F04-\u0F12\u0F14\u0F3A-\u0F3D\u0F85\u0FD0-\u0FD4\u0FD9\u0FDA\u104A-\u104F\u10FB\u1360-\u1368\u1400\u166E\u169B\u169C\u16EB-\u16ED\u1735\u1736\u17D4-\u17D6\u17D8-\u17DA\u1800-\u180A\u1944\u1945\u1A1E\u1A1F\u1AA0-\u1AA6\u1AA8-\u1AAD\u1B5A-\u1B60\u1BFC-\u1BFF\u1C3B-\u1C3F\u1C7E\u1C7F\u1CC0-\u1CC7\u1CD3\u2010-\u2027\u2030-\u2043\u2045-\u2051\u2053-\u205E\u207D\u207E\u208D\u208E\u2308-\u230B\u2329\u232A\u2768-\u2775\u27C5\u27C6\u27E6-\u27EF\u2983-\u2998\u29D8-\u29DB\u29FC\u29FD\u2CF9-\u2CFC\u2CFE\u2CFF\u2D70\u2E00-\u2E2E\u2E30-\u2E4F\u2E52\u3001-\u3003\u3008-\u3011\u3014-\u301F\u3030\u303D\u30A0\u30FB\uA4FE\uA4FF\uA60D-\uA60F\uA673\uA67E\uA6F2-\uA6F7\uA874-\uA877\uA8CE\uA8CF\uA8F8-\uA8FA\uA8FC\uA92E\uA92F\uA95F\uA9C1-\uA9CD\uA9DE\uA9DF\uAA5C-\uAA5F\uAADE\uAADF\uAAF0\uAAF1\uABEB\uFD3E\uFD3F\uFE10-\uFE19\uFE30-\uFE52\uFE54-\uFE61\uFE63\uFE68\uFE6A\uFE6B\uFF01-\uFF03\uFF05-\uFF0A\uFF0C-\uFF0F\uFF1A\uFF1B\uFF1F\uFF20\uFF3B-\uFF3D\uFF3F\uFF5B\uFF5D\uFF5F-\uFF65]/;
-}));
-//#endregion
-//#region node_modules/micromark/dist/character/unicode-punctuation.js
-var require_unicode_punctuation = /* @__PURE__ */ __commonJSMin(((exports, module) => {
-	var unicodePunctuationRegex = require_unicode_punctuation_regex();
-	module.exports = require_regex_check()(unicodePunctuationRegex);
-}));
-//#endregion
-//#region node_modules/micromark/dist/character/unicode-whitespace.js
-var require_unicode_whitespace = /* @__PURE__ */ __commonJSMin(((exports, module) => {
-	module.exports = require_regex_check()(/\s/);
-}));
-//#endregion
-//#region node_modules/micromark-extension-gfm-autolink-literal/syntax.js
-var require_syntax$3 = /* @__PURE__ */ __commonJSMin(((exports) => {
-	var asciiAlpha = require_ascii_alpha();
-	var asciiAlphanumeric = require_ascii_alphanumeric();
-	var asciiControl = require_ascii_control();
-	var markdownLineEnding = require_markdown_line_ending();
-	var unicodePunctuation = require_unicode_punctuation();
-	var unicodeWhitespace = require_unicode_whitespace();
-	var www = {
-		tokenize: tokenizeWww,
-		partial: true
-	};
-	var domain = {
-		tokenize: tokenizeDomain,
-		partial: true
-	};
-	var path = {
-		tokenize: tokenizePath,
-		partial: true
-	};
-	var punctuation = {
-		tokenize: tokenizePunctuation,
-		partial: true
-	};
-	var namedCharacterReference = {
-		tokenize: tokenizeNamedCharacterReference,
-		partial: true
-	};
-	var wwwAutolink = {
-		tokenize: tokenizeWwwAutolink,
-		previous: previousWww
-	};
-	var httpAutolink = {
-		tokenize: tokenizeHttpAutolink,
-		previous: previousHttp
-	};
-	var emailAutolink = {
-		tokenize: tokenizeEmailAutolink,
-		previous: previousEmail
-	};
-	var text = {};
-	exports.text = text;
-	var code = 48;
-	while (code < 123) {
-		text[code] = emailAutolink;
-		code++;
-		if (code === 58) code = 65;
-		else if (code === 91) code = 97;
-	}
-	text[43] = emailAutolink;
-	text[45] = emailAutolink;
-	text[46] = emailAutolink;
-	text[95] = emailAutolink;
-	text[72] = [emailAutolink, httpAutolink];
-	text[104] = [emailAutolink, httpAutolink];
-	text[87] = [emailAutolink, wwwAutolink];
-	text[119] = [emailAutolink, wwwAutolink];
-	function tokenizeEmailAutolink(effects, ok, nok) {
-		var self = this;
-		var hasDot;
-		return start;
-		function start(code) {
-			/* istanbul ignore next - hooks. */
-			if (!gfmAtext(code) || !previousEmail(self.previous) || previous(self.events)) return nok(code);
-			effects.enter("literalAutolink");
-			effects.enter("literalAutolinkEmail");
-			return atext(code);
-		}
-		function atext(code) {
-			if (gfmAtext(code)) {
-				effects.consume(code);
-				return atext;
-			}
-			if (code === 64) {
-				effects.consume(code);
-				return label;
-			}
-			return nok(code);
-		}
-		function label(code) {
-			if (code === 46) return effects.check(punctuation, done, dotContinuation)(code);
-			if (code === 45 || code === 95) return effects.check(punctuation, nok, dashOrUnderscoreContinuation)(code);
-			if (asciiAlphanumeric(code)) {
-				effects.consume(code);
-				return label;
-			}
-			return done(code);
-		}
-		function dotContinuation(code) {
-			effects.consume(code);
-			hasDot = true;
-			return label;
-		}
-		function dashOrUnderscoreContinuation(code) {
-			effects.consume(code);
-			return afterDashOrUnderscore;
-		}
-		function afterDashOrUnderscore(code) {
-			if (code === 46) return effects.check(punctuation, nok, dotContinuation)(code);
-			return label(code);
-		}
-		function done(code) {
-			if (hasDot) {
-				effects.exit("literalAutolinkEmail");
-				effects.exit("literalAutolink");
-				return ok(code);
-			}
-			return nok(code);
-		}
-	}
-	function tokenizeWwwAutolink(effects, ok, nok) {
-		var self = this;
-		return start;
-		function start(code) {
-			/* istanbul ignore next - hooks. */
-			if (code !== 87 && code - 32 !== 87 || !previousWww(self.previous) || previous(self.events)) return nok(code);
-			effects.enter("literalAutolink");
-			effects.enter("literalAutolinkWww");
-			return effects.check(www, effects.attempt(domain, effects.attempt(path, done), nok), nok)(code);
-		}
-		function done(code) {
-			effects.exit("literalAutolinkWww");
-			effects.exit("literalAutolink");
-			return ok(code);
-		}
-	}
-	function tokenizeHttpAutolink(effects, ok, nok) {
-		var self = this;
-		return start;
-		function start(code) {
-			/* istanbul ignore next - hooks. */
-			if (code !== 72 && code - 32 !== 72 || !previousHttp(self.previous) || previous(self.events)) return nok(code);
-			effects.enter("literalAutolink");
-			effects.enter("literalAutolinkHttp");
-			effects.consume(code);
-			return t1;
-		}
-		function t1(code) {
-			if (code === 84 || code - 32 === 84) {
-				effects.consume(code);
-				return t2;
-			}
-			return nok(code);
-		}
-		function t2(code) {
-			if (code === 84 || code - 32 === 84) {
-				effects.consume(code);
-				return p;
-			}
-			return nok(code);
-		}
-		function p(code) {
-			if (code === 80 || code - 32 === 80) {
-				effects.consume(code);
-				return s;
-			}
-			return nok(code);
-		}
-		function s(code) {
-			if (code === 83 || code - 32 === 83) {
-				effects.consume(code);
-				return colon;
-			}
-			return colon(code);
-		}
-		function colon(code) {
-			if (code === 58) {
-				effects.consume(code);
-				return slash1;
-			}
-			return nok(code);
-		}
-		function slash1(code) {
-			if (code === 47) {
-				effects.consume(code);
-				return slash2;
-			}
-			return nok(code);
-		}
-		function slash2(code) {
-			if (code === 47) {
-				effects.consume(code);
-				return after;
-			}
-			return nok(code);
-		}
-		function after(code) {
-			return asciiControl(code) || unicodeWhitespace(code) || unicodePunctuation(code) ? nok(code) : effects.attempt(domain, effects.attempt(path, done), nok)(code);
-		}
-		function done(code) {
-			effects.exit("literalAutolinkHttp");
-			effects.exit("literalAutolink");
-			return ok(code);
-		}
-	}
-	function tokenizeWww(effects, ok, nok) {
-		return start;
-		function start(code) {
-			effects.consume(code);
-			return w2;
-		}
-		function w2(code) {
-			if (code === 87 || code - 32 === 87) {
-				effects.consume(code);
-				return w3;
-			}
-			return nok(code);
-		}
-		function w3(code) {
-			if (code === 87 || code - 32 === 87) {
-				effects.consume(code);
-				return dot;
-			}
-			return nok(code);
-		}
-		function dot(code) {
-			if (code === 46) {
-				effects.consume(code);
-				return after;
-			}
-			return nok(code);
-		}
-		function after(code) {
-			return code === null || markdownLineEnding(code) ? nok(code) : ok(code);
-		}
-	}
-	function tokenizeDomain(effects, ok, nok) {
-		var hasUnderscoreInLastSegment;
-		var hasUnderscoreInLastLastSegment;
-		return domain;
-		function domain(code) {
-			if (code === 38) return effects.check(namedCharacterReference, done, punctuationContinuation)(code);
-			if (code === 46 || code === 95) return effects.check(punctuation, done, punctuationContinuation)(code);
-			if (asciiControl(code) || unicodeWhitespace(code) || code !== 45 && unicodePunctuation(code)) return done(code);
-			effects.consume(code);
-			return domain;
-		}
-		function punctuationContinuation(code) {
-			if (code === 46) {
-				hasUnderscoreInLastLastSegment = hasUnderscoreInLastSegment;
-				hasUnderscoreInLastSegment = void 0;
-				effects.consume(code);
-				return domain;
-			}
-			if (code === 95) hasUnderscoreInLastSegment = true;
-			effects.consume(code);
-			return domain;
-		}
-		function done(code) {
-			if (!hasUnderscoreInLastLastSegment && !hasUnderscoreInLastSegment) return ok(code);
-			return nok(code);
-		}
-	}
-	function tokenizePath(effects, ok) {
-		var balance = 0;
-		return inPath;
-		function inPath(code) {
-			if (code === 38) return effects.check(namedCharacterReference, ok, continuedPunctuation)(code);
-			if (code === 40) balance++;
-			if (code === 41) return effects.check(punctuation, parenAtPathEnd, continuedPunctuation)(code);
-			if (pathEnd(code)) return ok(code);
-			if (trailingPunctuation(code)) return effects.check(punctuation, ok, continuedPunctuation)(code);
-			effects.consume(code);
-			return inPath;
-		}
-		function continuedPunctuation(code) {
-			effects.consume(code);
-			return inPath;
-		}
-		function parenAtPathEnd(code) {
-			balance--;
-			return balance < 0 ? ok(code) : continuedPunctuation(code);
-		}
-	}
-	function tokenizeNamedCharacterReference(effects, ok, nok) {
-		return start;
-		function start(code) {
-			effects.consume(code);
-			return inside;
-		}
-		function inside(code) {
-			if (asciiAlpha(code)) {
-				effects.consume(code);
-				return inside;
-			}
-			if (code === 59) {
-				effects.consume(code);
-				return after;
-			}
-			return nok(code);
-		}
-		function after(code) {
-			return pathEnd(code) ? ok(code) : nok(code);
-		}
-	}
-	function tokenizePunctuation(effects, ok, nok) {
-		return start;
-		function start(code) {
-			effects.consume(code);
-			return after;
-		}
-		function after(code) {
-			if (trailingPunctuation(code)) {
-				effects.consume(code);
-				return after;
-			}
-			return pathEnd(code) ? ok(code) : nok(code);
-		}
-	}
-	function trailingPunctuation(code) {
-		return code === 33 || code === 34 || code === 39 || code === 41 || code === 42 || code === 44 || code === 46 || code === 58 || code === 59 || code === 60 || code === 63 || code === 95 || code === 126;
-	}
-	function pathEnd(code) {
-		return code === null || code < 0 || code === 32 || code === 60;
-	}
-	function gfmAtext(code) {
-		return code === 43 || code === 45 || code === 46 || code === 95 || asciiAlphanumeric(code);
-	}
-	function previousWww(code) {
-		return code === null || code < 0 || code === 32 || code === 40 || code === 42 || code === 95 || code === 126;
-	}
-	function previousHttp(code) {
-		return code === null || !asciiAlpha(code);
-	}
-	function previousEmail(code) {
-		return code !== 47 && previousHttp(code);
-	}
-	function previous(events) {
-		var index = events.length;
-		while (index--) if ((events[index][1].type === "labelLink" || events[index][1].type === "labelImage") && !events[index][1]._balanced) return true;
-	}
-}));
-//#endregion
-//#region node_modules/micromark-extension-gfm-autolink-literal/index.js
-var require_micromark_extension_gfm_autolink_literal = /* @__PURE__ */ __commonJSMin(((exports, module) => {
-	module.exports = require_syntax$3();
-}));
-//#endregion
-//#region node_modules/micromark/dist/character/markdown-line-ending-or-space.js
-var require_markdown_line_ending_or_space = /* @__PURE__ */ __commonJSMin(((exports, module) => {
-	function markdownLineEndingOrSpace(code) {
-		return code < 0 || code === 32;
-	}
-	module.exports = markdownLineEndingOrSpace;
-}));
-//#endregion
-//#region node_modules/micromark/dist/util/classify-character.js
-var require_classify_character = /* @__PURE__ */ __commonJSMin(((exports, module) => {
-	var markdownLineEndingOrSpace = require_markdown_line_ending_or_space();
-	var unicodePunctuation = require_unicode_punctuation();
-	var unicodeWhitespace = require_unicode_whitespace();
-	function classifyCharacter(code) {
-		if (code === null || markdownLineEndingOrSpace(code) || unicodeWhitespace(code)) return 1;
-		if (unicodePunctuation(code)) return 2;
-	}
-	module.exports = classifyCharacter;
-}));
-//#endregion
-//#region node_modules/micromark/dist/util/resolve-all.js
-var require_resolve_all = /* @__PURE__ */ __commonJSMin(((exports, module) => {
-	function resolveAll(constructs, events, context) {
-		var called = [];
-		var index = -1;
-		var resolve;
-		while (++index < constructs.length) {
-			resolve = constructs[index].resolveAll;
-			if (resolve && called.indexOf(resolve) < 0) {
-				events = resolve(events, context);
-				called.push(resolve);
-			}
-		}
-		return events;
-	}
-	module.exports = resolveAll;
-}));
-//#endregion
-//#region node_modules/micromark/dist/constant/assign.js
-var require_assign = /* @__PURE__ */ __commonJSMin(((exports, module) => {
-	module.exports = Object.assign;
-}));
-//#endregion
-//#region node_modules/micromark/dist/util/shallow.js
-var require_shallow = /* @__PURE__ */ __commonJSMin(((exports, module) => {
-	var assign = require_assign();
-	function shallow(object) {
-		return assign({}, object);
-	}
-	module.exports = shallow;
-}));
-//#endregion
-//#region node_modules/micromark-extension-gfm-strikethrough/index.js
-var require_micromark_extension_gfm_strikethrough = /* @__PURE__ */ __commonJSMin(((exports, module) => {
-	module.exports = create;
-	var classifyCharacter = require_classify_character();
-	var chunkedSplice = require_chunked_splice();
-	var resolveAll = require_resolve_all();
-	var shallow = require_shallow();
-	function create(options) {
-		var single = (options || {}).singleTilde;
-		var tokenizer = {
-			tokenize: tokenizeStrikethrough,
-			resolveAll: resolveAllStrikethrough
-		};
-		if (single === null || single === void 0) single = true;
-		return {
-			text: { 126: tokenizer },
-			insideSpan: { null: tokenizer }
-		};
-		function resolveAllStrikethrough(events, context) {
-			var index = -1;
-			var strikethrough;
-			var text;
-			var open;
-			var nextEvents;
-			while (++index < events.length) if (events[index][0] === "enter" && events[index][1].type === "strikethroughSequenceTemporary" && events[index][1]._close) {
-				open = index;
-				while (open--) if (events[open][0] === "exit" && events[open][1].type === "strikethroughSequenceTemporary" && events[open][1]._open && events[index][1].end.offset - events[index][1].start.offset === events[open][1].end.offset - events[open][1].start.offset) {
-					events[index][1].type = "strikethroughSequence";
-					events[open][1].type = "strikethroughSequence";
-					strikethrough = {
-						type: "strikethrough",
-						start: shallow(events[open][1].start),
-						end: shallow(events[index][1].end)
-					};
-					text = {
-						type: "strikethroughText",
-						start: shallow(events[open][1].end),
-						end: shallow(events[index][1].start)
-					};
-					nextEvents = [
-						[
-							"enter",
-							strikethrough,
-							context
-						],
-						[
-							"enter",
-							events[open][1],
-							context
-						],
-						[
-							"exit",
-							events[open][1],
-							context
-						],
-						[
-							"enter",
-							text,
-							context
-						]
-					];
-					chunkedSplice(nextEvents, nextEvents.length, 0, resolveAll(context.parser.constructs.insideSpan.null, events.slice(open + 1, index), context));
-					chunkedSplice(nextEvents, nextEvents.length, 0, [
-						[
-							"exit",
-							text,
-							context
-						],
-						[
-							"enter",
-							events[index][1],
-							context
-						],
-						[
-							"exit",
-							events[index][1],
-							context
-						],
-						[
-							"exit",
-							strikethrough,
-							context
-						]
-					]);
-					chunkedSplice(events, open - 1, index - open + 3, nextEvents);
-					index = open + nextEvents.length - 2;
-					break;
-				}
-			}
-			return removeRemainingSequences(events);
-		}
-		function removeRemainingSequences(events) {
-			var index = -1;
-			var length = events.length;
-			while (++index < length) if (events[index][1].type === "strikethroughSequenceTemporary") events[index][1].type = "data";
-			return events;
-		}
-		function tokenizeStrikethrough(effects, ok, nok) {
-			var previous = this.previous;
-			var events = this.events;
-			var size = 0;
-			return start;
-			function start(code) {
-				if (code !== 126 || previous === 126 && events[events.length - 1][1].type !== "characterEscape") return nok(code);
-				effects.enter("strikethroughSequenceTemporary");
-				return more(code);
-			}
-			function more(code) {
-				var before = classifyCharacter(previous);
-				var token;
-				var after;
-				if (code === 126) {
-					if (size > 1) return nok(code);
-					effects.consume(code);
-					size++;
-					return more;
-				}
-				if (size < 2 && !single) return nok(code);
-				token = effects.exit("strikethroughSequenceTemporary");
-				after = classifyCharacter(code);
-				token._open = !after || after === 2 && before;
-				token._close = !before || before === 2 && after;
-				return ok(code);
-			}
-		}
-	}
-}));
-//#endregion
-//#region node_modules/micromark/dist/character/markdown-space.js
-var require_markdown_space = /* @__PURE__ */ __commonJSMin(((exports, module) => {
-	function markdownSpace(code) {
-		return code === -2 || code === -1 || code === 32;
-	}
-	module.exports = markdownSpace;
-}));
-//#endregion
-//#region node_modules/micromark/dist/tokenize/factory-space.js
-var require_factory_space = /* @__PURE__ */ __commonJSMin(((exports, module) => {
-	var markdownSpace = require_markdown_space();
-	function spaceFactory(effects, ok, type, max) {
-		var limit = max ? max - 1 : Infinity;
-		var size = 0;
-		return start;
-		function start(code) {
-			if (markdownSpace(code)) {
-				effects.enter(type);
-				return prefix(code);
-			}
-			return ok(code);
-		}
-		function prefix(code) {
-			if (markdownSpace(code) && size++ < limit) {
-				effects.consume(code);
-				return prefix;
-			}
-			effects.exit(type);
-			return ok(code);
-		}
-	}
-	module.exports = spaceFactory;
-}));
-//#endregion
-//#region node_modules/micromark-extension-gfm-table/syntax.js
-var require_syntax$2 = /* @__PURE__ */ __commonJSMin(((exports) => {
-	exports.flow = { null: {
-		tokenize: tokenizeTable,
-		resolve: resolveTable,
-		interruptible: true
-	} };
-	var createSpace = require_factory_space();
-	var setextUnderlineMini = {
-		tokenize: tokenizeSetextUnderlineMini,
-		partial: true
-	};
-	var nextPrefixedOrBlank = {
-		tokenize: tokenizeNextPrefixedOrBlank,
-		partial: true
-	};
-	function resolveTable(events, context) {
-		var length = events.length;
-		var index = -1;
-		var token;
-		var inHead;
-		var inDelimiterRow;
-		var inRow;
-		var cell;
-		var content;
-		var text;
-		var contentStart;
-		var contentEnd;
-		var cellStart;
-		while (++index < length) {
-			token = events[index][1];
-			if (inRow) {
-				if (token.type === "temporaryTableCellContent") {
-					contentStart = contentStart || index;
-					contentEnd = index;
-				}
-				if ((token.type === "tableCellDivider" || token.type === "tableRow") && contentEnd) {
-					content = {
-						type: "tableContent",
-						start: events[contentStart][1].start,
-						end: events[contentEnd][1].end
-					};
-					text = {
-						type: "chunkText",
-						start: content.start,
-						end: content.end,
-						contentType: "text"
-					};
-					events.splice(contentStart, contentEnd - contentStart + 1, [
-						"enter",
-						content,
-						context
-					], [
-						"enter",
-						text,
-						context
-					], [
-						"exit",
-						text,
-						context
-					], [
-						"exit",
-						content,
-						context
-					]);
-					index -= contentEnd - contentStart - 3;
-					length = events.length;
-					contentStart = void 0;
-					contentEnd = void 0;
-				}
-			}
-			if (events[index][0] === "exit" && cellStart && cellStart + 1 < index && (token.type === "tableCellDivider" || token.type === "tableRow" && (cellStart + 3 < index || events[cellStart][1].type !== "whitespace"))) {
-				cell = {
-					type: inDelimiterRow ? "tableDelimiter" : inHead ? "tableHeader" : "tableData",
-					start: events[cellStart][1].start,
-					end: events[index][1].end
-				};
-				events.splice(index + (token.type === "tableCellDivider" ? 1 : 0), 0, [
-					"exit",
-					cell,
-					context
-				]);
-				events.splice(cellStart, 0, [
-					"enter",
-					cell,
-					context
-				]);
-				index += 2;
-				length = events.length;
-				cellStart = index + 1;
-			}
-			if (token.type === "tableRow") {
-				inRow = events[index][0] === "enter";
-				if (inRow) cellStart = index + 1;
-			}
-			if (token.type === "tableDelimiterRow") {
-				inDelimiterRow = events[index][0] === "enter";
-				if (inDelimiterRow) cellStart = index + 1;
-			}
-			if (token.type === "tableHead") inHead = events[index][0] === "enter";
-		}
-		return events;
-	}
-	function tokenizeTable(effects, ok, nok) {
-		var align = [];
-		var tableHeaderCount = 0;
-		var seenDelimiter;
-		var hasDash;
-		return start;
-		function start(code) {
-			/* istanbul ignore if - used to be passed in beta micromark versions. */
-			if (code === null || code === -5 || code === -4 || code === -3) return nok(code);
-			effects.enter("table")._align = align;
-			effects.enter("tableHead");
-			effects.enter("tableRow");
-			if (code === 124) return cellDividerHead(code);
-			tableHeaderCount++;
-			effects.enter("temporaryTableCellContent");
-			return inCellContentHead(code);
-		}
-		function cellDividerHead(code) {
-			effects.enter("tableCellDivider");
-			effects.consume(code);
-			effects.exit("tableCellDivider");
-			seenDelimiter = true;
-			return cellBreakHead;
-		}
-		function cellBreakHead(code) {
-			if (code === null || code === -5 || code === -4 || code === -3) return atRowEndHead(code);
-			if (code === -2 || code === -1 || code === 32) {
-				effects.enter("whitespace");
-				effects.consume(code);
-				return inWhitespaceHead;
-			}
-			if (seenDelimiter) {
-				seenDelimiter = void 0;
-				tableHeaderCount++;
-			}
-			if (code === 124) return cellDividerHead(code);
-			effects.enter("temporaryTableCellContent");
-			return inCellContentHead(code);
-		}
-		function inWhitespaceHead(code) {
-			if (code === -2 || code === -1 || code === 32) {
-				effects.consume(code);
-				return inWhitespaceHead;
-			}
-			effects.exit("whitespace");
-			return cellBreakHead(code);
-		}
-		function inCellContentHead(code) {
-			if (code === null || code < 0 || code === 32 || code === 124) {
-				effects.exit("temporaryTableCellContent");
-				return cellBreakHead(code);
-			}
-			effects.consume(code);
-			return code === 92 ? inCellContentEscapeHead : inCellContentHead;
-		}
-		function inCellContentEscapeHead(code) {
-			if (code === 92 || code === 124) {
-				effects.consume(code);
-				return inCellContentHead;
-			}
-			return inCellContentHead(code);
-		}
-		function atRowEndHead(code) {
-			if (code === null) return nok(code);
-			effects.exit("tableRow");
-			effects.exit("tableHead");
-			effects.enter("lineEnding");
-			effects.consume(code);
-			effects.exit("lineEnding");
-			return effects.check(setextUnderlineMini, nok, createSpace(effects, rowStartDelimiter, "linePrefix", 4));
-		}
-		function rowStartDelimiter(code) {
-			if (code === null || code < 0 || code === 32) return nok(code);
-			effects.enter("tableDelimiterRow");
-			return atDelimiterRowBreak(code);
-		}
-		function atDelimiterRowBreak(code) {
-			if (code === null || code === -5 || code === -4 || code === -3) return rowEndDelimiter(code);
-			if (code === -2 || code === -1 || code === 32) {
-				effects.enter("whitespace");
-				effects.consume(code);
-				return inWhitespaceDelimiter;
-			}
-			if (code === 45) {
-				effects.enter("tableDelimiterFiller");
-				effects.consume(code);
-				hasDash = true;
-				align.push(null);
-				return inFillerDelimiter;
-			}
-			if (code === 58) {
-				effects.enter("tableDelimiterAlignment");
-				effects.consume(code);
-				effects.exit("tableDelimiterAlignment");
-				align.push("left");
-				return afterLeftAlignment;
-			}
-			if (code === 124) {
-				effects.enter("tableCellDivider");
-				effects.consume(code);
-				effects.exit("tableCellDivider");
-				return atDelimiterRowBreak;
-			}
-			return nok(code);
-		}
-		function inWhitespaceDelimiter(code) {
-			if (code === -2 || code === -1 || code === 32) {
-				effects.consume(code);
-				return inWhitespaceDelimiter;
-			}
-			effects.exit("whitespace");
-			return atDelimiterRowBreak(code);
-		}
-		function inFillerDelimiter(code) {
-			if (code === 45) {
-				effects.consume(code);
-				return inFillerDelimiter;
-			}
-			effects.exit("tableDelimiterFiller");
-			if (code === 58) {
-				effects.enter("tableDelimiterAlignment");
-				effects.consume(code);
-				effects.exit("tableDelimiterAlignment");
-				align[align.length - 1] = align[align.length - 1] === "left" ? "center" : "right";
-				return afterRightAlignment;
-			}
-			return atDelimiterRowBreak(code);
-		}
-		function afterLeftAlignment(code) {
-			if (code === 45) {
-				effects.enter("tableDelimiterFiller");
-				effects.consume(code);
-				hasDash = true;
-				return inFillerDelimiter;
-			}
-			return nok(code);
-		}
-		function afterRightAlignment(code) {
-			if (code === null || code === -5 || code === -4 || code === -3) return rowEndDelimiter(code);
-			if (code === -2 || code === -1 || code === 32) {
-				effects.enter("whitespace");
-				effects.consume(code);
-				return inWhitespaceDelimiter;
-			}
-			if (code === 124) {
-				effects.enter("tableCellDivider");
-				effects.consume(code);
-				effects.exit("tableCellDivider");
-				return atDelimiterRowBreak;
-			}
-			return nok(code);
-		}
-		function rowEndDelimiter(code) {
-			effects.exit("tableDelimiterRow");
-			if (!hasDash || tableHeaderCount !== align.length) return nok(code);
-			if (code === null) return tableClose(code);
-			return effects.check(nextPrefixedOrBlank, tableClose, tableContinue)(code);
-		}
-		function tableClose(code) {
-			effects.exit("table");
-			return ok(code);
-		}
-		function tableContinue(code) {
-			effects.enter("lineEnding");
-			effects.consume(code);
-			effects.exit("lineEnding");
-			return createSpace(effects, bodyStart, "linePrefix", 4);
-		}
-		function bodyStart(code) {
-			effects.enter("tableBody");
-			return rowStartBody(code);
-		}
-		function rowStartBody(code) {
-			effects.enter("tableRow");
-			if (code === 124) return cellDividerBody(code);
-			effects.enter("temporaryTableCellContent");
-			return inCellContentBody(code);
-		}
-		function cellDividerBody(code) {
-			effects.enter("tableCellDivider");
-			effects.consume(code);
-			effects.exit("tableCellDivider");
-			return cellBreakBody;
-		}
-		function cellBreakBody(code) {
-			if (code === null || code === -5 || code === -4 || code === -3) return atRowEndBody(code);
-			if (code === -2 || code === -1 || code === 32) {
-				effects.enter("whitespace");
-				effects.consume(code);
-				return inWhitespaceBody;
-			}
-			if (code === 124) return cellDividerBody(code);
-			effects.enter("temporaryTableCellContent");
-			return inCellContentBody(code);
-		}
-		function inWhitespaceBody(code) {
-			if (code === -2 || code === -1 || code === 32) {
-				effects.consume(code);
-				return inWhitespaceBody;
-			}
-			effects.exit("whitespace");
-			return cellBreakBody(code);
-		}
-		function inCellContentBody(code) {
-			if (code === null || code < 0 || code === 32 || code === 124) {
-				effects.exit("temporaryTableCellContent");
-				return cellBreakBody(code);
-			}
-			effects.consume(code);
-			return code === 92 ? inCellContentEscapeBody : inCellContentBody;
-		}
-		function inCellContentEscapeBody(code) {
-			if (code === 92 || code === 124) {
-				effects.consume(code);
-				return inCellContentBody;
-			}
-			return inCellContentBody(code);
-		}
-		function atRowEndBody(code) {
-			effects.exit("tableRow");
-			if (code === null) return tableBodyClose(code);
-			return effects.check(nextPrefixedOrBlank, tableBodyClose, tableBodyContinue)(code);
-		}
-		function tableBodyClose(code) {
-			effects.exit("tableBody");
-			return tableClose(code);
-		}
-		function tableBodyContinue(code) {
-			effects.enter("lineEnding");
-			effects.consume(code);
-			effects.exit("lineEnding");
-			return createSpace(effects, rowStartBody, "linePrefix", 4);
-		}
-	}
-	function tokenizeSetextUnderlineMini(effects, ok, nok) {
-		return start;
-		function start(code) {
-			if (code !== 45) return nok(code);
-			effects.enter("setextUnderline");
-			return sequence(code);
-		}
-		function sequence(code) {
-			if (code === 45) {
-				effects.consume(code);
-				return sequence;
-			}
-			return whitespace(code);
-		}
-		function whitespace(code) {
-			if (code === -2 || code === -1 || code === 32) {
-				effects.consume(code);
-				return whitespace;
-			}
-			if (code === null || code === -5 || code === -4 || code === -3) return ok(code);
-			return nok(code);
-		}
-	}
-	function tokenizeNextPrefixedOrBlank(effects, ok, nok) {
-		var size = 0;
-		return start;
-		function start(code) {
-			effects.enter("check");
-			effects.consume(code);
-			return whitespace;
-		}
-		function whitespace(code) {
-			if (code === -1 || code === 32) {
-				effects.consume(code);
-				size++;
-				return size === 4 ? ok : whitespace;
-			}
-			if (code === null || code < 0) return ok(code);
-			return nok(code);
-		}
-	}
-}));
-//#endregion
-//#region node_modules/micromark-extension-gfm-table/index.js
-var require_micromark_extension_gfm_table = /* @__PURE__ */ __commonJSMin(((exports, module) => {
-	module.exports = require_syntax$2();
-}));
-//#endregion
-//#region node_modules/micromark/dist/util/size-chunks.js
-var require_size_chunks = /* @__PURE__ */ __commonJSMin(((exports, module) => {
-	function sizeChunks(chunks) {
-		var index = -1;
-		var size = 0;
-		while (++index < chunks.length) size += typeof chunks[index] === "string" ? chunks[index].length : 1;
-		return size;
-	}
-	module.exports = sizeChunks;
-}));
-//#endregion
-//#region node_modules/micromark/dist/util/prefix-size.js
-var require_prefix_size = /* @__PURE__ */ __commonJSMin(((exports, module) => {
-	var sizeChunks = require_size_chunks();
-	function prefixSize(events, type) {
-		var tail = events[events.length - 1];
-		if (!tail || tail[1].type !== type) return 0;
-		return sizeChunks(tail[2].sliceStream(tail[1]));
-	}
-	module.exports = prefixSize;
-}));
-//#endregion
-//#region node_modules/micromark-extension-gfm-task-list-item/syntax.js
-var require_syntax$1 = /* @__PURE__ */ __commonJSMin(((exports) => {
-	var markdownLineEndingOrSpace = require_markdown_line_ending_or_space();
-	var spaceFactory = require_factory_space();
-	var prefixSize = require_prefix_size();
-	var tasklistCheck = { tokenize: tokenizeTasklistCheck };
-	exports.text = { 91: tasklistCheck };
-	function tokenizeTasklistCheck(effects, ok, nok) {
-		var self = this;
-		return open;
-		function open(code) {
-			if (code !== 91 || self.previous !== null || !self._gfmTasklistFirstContentOfListItem) return nok(code);
-			effects.enter("taskListCheck");
-			effects.enter("taskListCheckMarker");
-			effects.consume(code);
-			effects.exit("taskListCheckMarker");
-			return inside;
-		}
-		function inside(code) {
-			if (code === -2 || code === 32) {
-				effects.enter("taskListCheckValueUnchecked");
-				effects.consume(code);
-				effects.exit("taskListCheckValueUnchecked");
-				return close;
-			}
-			if (code === 88 || code === 120) {
-				effects.enter("taskListCheckValueChecked");
-				effects.consume(code);
-				effects.exit("taskListCheckValueChecked");
-				return close;
-			}
-			return nok(code);
-		}
-		function close(code) {
-			if (code === 93) {
-				effects.enter("taskListCheckMarker");
-				effects.consume(code);
-				effects.exit("taskListCheckMarker");
-				effects.exit("taskListCheck");
-				return effects.check({ tokenize: spaceThenNonSpace }, ok, nok);
-			}
-			return nok(code);
-		}
-	}
-	function spaceThenNonSpace(effects, ok, nok) {
-		var self = this;
-		return spaceFactory(effects, after, "whitespace");
-		function after(code) {
-			return prefixSize(self.events, "whitespace") && code !== null && !markdownLineEndingOrSpace(code) ? ok(code) : nok(code);
-		}
-	}
-}));
-//#endregion
-//#region node_modules/micromark-extension-gfm-task-list-item/index.js
-var require_micromark_extension_gfm_task_list_item = /* @__PURE__ */ __commonJSMin(((exports, module) => {
-	module.exports = require_syntax$1();
-}));
-//#endregion
-//#region node_modules/micromark-extension-gfm/syntax.js
-var require_syntax = /* @__PURE__ */ __commonJSMin(((exports, module) => {
-	var combine = require_combine_extensions();
-	var autolink = require_micromark_extension_gfm_autolink_literal();
-	var strikethrough = require_micromark_extension_gfm_strikethrough();
-	var table = require_micromark_extension_gfm_table();
-	var tasklist = require_micromark_extension_gfm_task_list_item();
-	module.exports = create;
-	function create(options) {
-		return combine([
-			autolink,
-			strikethrough(options),
-			table,
-			tasklist
-		]);
-	}
-}));
-//#endregion
-//#region node_modules/micromark-extension-gfm/index.js
-var require_micromark_extension_gfm = /* @__PURE__ */ __commonJSMin(((exports, module) => {
-	module.exports = require_syntax();
-}));
-//#endregion
-//#region node_modules/ccount/index.js
-var require_ccount = /* @__PURE__ */ __commonJSMin(((exports, module) => {
-	module.exports = ccount;
-	function ccount(source, character) {
-		var value = String(source);
-		var count = 0;
-		var index;
-		if (typeof character !== "string") throw new Error("Expected character");
-		index = value.indexOf(character);
-		while (index !== -1) {
-			count++;
-			index = value.indexOf(character, index + character.length);
-		}
-		return count;
-	}
-}));
-//#endregion
-//#region node_modules/unist-util-is/convert.js
-var require_convert$1 = /* @__PURE__ */ __commonJSMin(((exports, module) => {
-	module.exports = convert;
-	function convert(test) {
-		if (test == null) return ok;
-		if (typeof test === "string") return typeFactory(test);
-		if (typeof test === "object") return "length" in test ? anyFactory(test) : allFactory(test);
-		if (typeof test === "function") return test;
-		throw new Error("Expected function, string, or object as test");
-	}
-	function allFactory(test) {
-		return all;
-		function all(node) {
-			var key;
-			for (key in test) if (node[key] !== test[key]) return false;
-			return true;
-		}
-	}
-	function anyFactory(tests) {
-		var checks = [];
-		var index = -1;
-		while (++index < tests.length) checks[index] = convert(tests[index]);
-		return any;
-		function any() {
-			var index = -1;
-			while (++index < checks.length) if (checks[index].apply(this, arguments)) return true;
-			return false;
-		}
-	}
-	function typeFactory(test) {
-		return type;
-		function type(node) {
-			return Boolean(node && node.type === test);
-		}
-	}
-	function ok() {
-		return true;
-	}
-}));
-//#endregion
-//#region node_modules/unist-util-visit-parents/color.js
-var require_color = /* @__PURE__ */ __commonJSMin(((exports, module) => {
-	module.exports = color;
-	function color(d) {
-		return "\x1B[33m" + d + "\x1B[39m";
-	}
-}));
-//#endregion
-//#region node_modules/unist-util-visit-parents/index.js
-var require_unist_util_visit_parents = /* @__PURE__ */ __commonJSMin(((exports, module) => {
-	module.exports = visitParents;
-	var convert = require_convert$1();
-	var color = require_color();
-	var CONTINUE = true;
-	var SKIP = "skip";
-	var EXIT = false;
-	visitParents.CONTINUE = CONTINUE;
-	visitParents.SKIP = SKIP;
-	visitParents.EXIT = EXIT;
-	function visitParents(tree, test, visitor, reverse) {
-		var step;
-		var is;
-		if (typeof test === "function" && typeof visitor !== "function") {
-			reverse = visitor;
-			visitor = test;
-			test = null;
-		}
-		is = convert(test);
-		step = reverse ? -1 : 1;
-		factory(tree, null, [])();
-		function factory(node, index, parents) {
-			var value = typeof node === "object" && node !== null ? node : {};
-			var name;
-			if (typeof value.type === "string") {
-				name = typeof value.tagName === "string" ? value.tagName : typeof value.name === "string" ? value.name : void 0;
-				visit.displayName = "node (" + color(value.type + (name ? "<" + name + ">" : "")) + ")";
-			}
-			return visit;
-			function visit() {
-				var grandparents = parents.concat(node);
-				var result = [];
-				var subresult;
-				var offset;
-				if (!test || is(node, index, parents[parents.length - 1] || null)) {
-					result = toResult(visitor(node, parents));
-					if (result[0] === EXIT) return result;
-				}
-				if (node.children && result[0] !== SKIP) {
-					offset = (reverse ? node.children.length : -1) + step;
-					while (offset > -1 && offset < node.children.length) {
-						subresult = factory(node.children[offset], offset, grandparents)();
-						if (subresult[0] === EXIT) return subresult;
-						offset = typeof subresult[1] === "number" ? subresult[1] : offset + step;
-					}
-				}
-				return result;
-			}
-		}
-	}
-	function toResult(value) {
-		if (value !== null && typeof value === "object" && "length" in value) return value;
-		if (typeof value === "number") return [CONTINUE, value];
-		return [value];
-	}
-}));
-//#endregion
-//#region node_modules/escape-string-regexp/index.js
-var require_escape_string_regexp = /* @__PURE__ */ __commonJSMin(((exports, module) => {
-	module.exports = (string) => {
-		if (typeof string !== "string") throw new TypeError("Expected a string");
-		return string.replace(/[|\\{}()[\]^$+*?.]/g, "\\$&").replace(/-/g, "\\x2d");
-	};
-}));
-//#endregion
-//#region node_modules/mdast-util-find-and-replace/index.js
-var require_mdast_util_find_and_replace = /* @__PURE__ */ __commonJSMin(((exports, module) => {
-	module.exports = findAndReplace;
-	var visit = require_unist_util_visit_parents();
-	var convert = require_convert$1();
-	var escape = require_escape_string_regexp();
-	var splice = [].splice;
-	function findAndReplace(tree, find, replace, options) {
-		var settings;
-		var schema;
-		if (typeof find === "string" || find && typeof find.exec === "function") schema = [[find, replace]];
-		else {
-			schema = find;
-			options = replace;
-		}
-		settings = options || {};
-		search(tree, settings, handlerFactory(toPairs(schema)));
-		return tree;
-		function handlerFactory(pairs) {
-			var pair = pairs[0];
-			return handler;
-			function handler(node, parent) {
-				var find = pair[0];
-				var replace = pair[1];
-				var nodes = [];
-				var start = 0;
-				var index = parent.children.indexOf(node);
-				var position;
-				var match;
-				var subhandler;
-				var value;
-				find.lastIndex = 0;
-				match = find.exec(node.value);
-				while (match) {
-					position = match.index;
-					value = replace.apply(null, [].concat(match, {
-						index: match.index,
-						input: match.input
-					}));
-					if (value !== false) {
-						if (start !== position) nodes.push({
-							type: "text",
-							value: node.value.slice(start, position)
-						});
-						if (typeof value === "string" && value.length > 0) value = {
-							type: "text",
-							value
-						};
-						if (value) nodes = [].concat(nodes, value);
-						start = position + match[0].length;
-					}
-					if (!find.global) break;
-					match = find.exec(node.value);
-				}
-				if (position === void 0) {
-					nodes = [node];
-					index--;
-				} else {
-					if (start < node.value.length) nodes.push({
-						type: "text",
-						value: node.value.slice(start)
-					});
-					nodes.unshift(index, 1);
-					splice.apply(parent.children, nodes);
-				}
-				if (pairs.length > 1) {
-					subhandler = handlerFactory(pairs.slice(1));
-					position = -1;
-					while (++position < nodes.length) {
-						node = nodes[position];
-						if (node.type === "text") subhandler(node, parent);
-						else search(node, settings, subhandler);
-					}
-				}
-				return index + nodes.length + 1;
-			}
-		}
-	}
-	function search(tree, settings, handler) {
-		var ignored = convert(settings.ignore || []);
-		var result = [];
-		visit(tree, "text", visitor);
-		return result;
-		function visitor(node, parents) {
-			var index = -1;
-			var parent;
-			var grandparent;
-			while (++index < parents.length) {
-				parent = parents[index];
-				if (ignored(parent, grandparent ? grandparent.children.indexOf(parent) : void 0, grandparent)) return;
-				grandparent = parent;
-			}
-			return handler(node, grandparent);
-		}
-	}
-	function toPairs(schema) {
-		var result = [];
-		var key;
-		var index;
-		if (typeof schema !== "object") throw new Error("Expected array or object as schema");
-		if ("length" in schema) {
-			index = -1;
-			while (++index < schema.length) result.push([toExpression(schema[index][0]), toFunction(schema[index][1])]);
-		} else for (key in schema) result.push([toExpression(key), toFunction(schema[key])]);
-		return result;
-	}
-	function toExpression(find) {
-		return typeof find === "string" ? new RegExp(escape(find), "g") : find;
-	}
-	function toFunction(replace) {
-		return typeof replace === "function" ? replace : returner;
-		function returner() {
-			return replace;
-		}
-	}
-}));
-//#endregion
-//#region node_modules/mdast-util-gfm-autolink-literal/from-markdown.js
-var require_from_markdown$4 = /* @__PURE__ */ __commonJSMin(((exports) => {
-	var ccount = require_ccount();
-	var findAndReplace = require_mdast_util_find_and_replace();
-	var unicodePunctuation = require_unicode_punctuation();
-	var unicodeWhitespace = require_unicode_whitespace();
-	exports.transforms = [transformGfmAutolinkLiterals];
-	exports.enter = {
-		literalAutolink: enterLiteralAutolink,
-		literalAutolinkEmail: enterLiteralAutolinkValue,
-		literalAutolinkHttp: enterLiteralAutolinkValue,
-		literalAutolinkWww: enterLiteralAutolinkValue
-	};
-	exports.exit = {
-		literalAutolink: exitLiteralAutolink,
-		literalAutolinkEmail: exitLiteralAutolinkEmail,
-		literalAutolinkHttp: exitLiteralAutolinkHttp,
-		literalAutolinkWww: exitLiteralAutolinkWww
-	};
-	function enterLiteralAutolink(token) {
-		this.enter({
-			type: "link",
-			title: null,
-			url: "",
-			children: []
-		}, token);
-	}
-	function enterLiteralAutolinkValue(token) {
-		this.config.enter.autolinkProtocol.call(this, token);
-	}
-	function exitLiteralAutolinkHttp(token) {
-		this.config.exit.autolinkProtocol.call(this, token);
-	}
-	function exitLiteralAutolinkWww(token) {
-		this.config.exit.data.call(this, token);
-		this.stack[this.stack.length - 1].url = "http://" + this.sliceSerialize(token);
-	}
-	function exitLiteralAutolinkEmail(token) {
-		this.config.exit.autolinkEmail.call(this, token);
-	}
-	function exitLiteralAutolink(token) {
-		this.exit(token);
-	}
-	function transformGfmAutolinkLiterals(tree) {
-		findAndReplace(tree, [[/(https?:\/\/|www(?=\.))([-.\w]+)([^ \t\r\n]*)/i, findUrl], [/([-.\w+]+)@([-\w]+(?:\.[-\w]+)+)/, findEmail]], { ignore: ["link", "linkReference"] });
-	}
-	function findUrl($0, protocol, domain, path, match) {
-		var prefix = "";
-		var parts;
-		var result;
-		if (!previous(match)) return false;
-		if (/^w/i.test(protocol)) {
-			domain = protocol + domain;
-			protocol = "";
-			prefix = "http://";
-		}
-		if (!isCorrectDomain(domain)) return false;
-		parts = splitUrl(domain + path);
-		if (!parts[0]) return false;
-		result = {
-			type: "link",
-			title: null,
-			url: prefix + protocol + parts[0],
-			children: [{
-				type: "text",
-				value: protocol + parts[0]
-			}]
-		};
-		if (parts[1]) result = [result, {
-			type: "text",
-			value: parts[1]
-		}];
-		return result;
-	}
-	function findEmail($0, atext, label, match) {
-		if (!previous(match, true) || /[_-]$/.test(label)) return false;
-		return {
-			type: "link",
-			title: null,
-			url: "mailto:" + atext + "@" + label,
-			children: [{
-				type: "text",
-				value: atext + "@" + label
-			}]
-		};
-	}
-	function isCorrectDomain(domain) {
-		var parts = domain.split(".");
-		if (parts.length < 2 || parts[parts.length - 1] && (/_/.test(parts[parts.length - 1]) || !/[a-zA-Z\d]/.test(parts[parts.length - 1])) || parts[parts.length - 2] && (/_/.test(parts[parts.length - 2]) || !/[a-zA-Z\d]/.test(parts[parts.length - 2]))) return false;
-		return true;
-	}
-	function splitUrl(url) {
-		var trail = /[!"&'),.:;<>?\]}]+$/.exec(url);
-		var closingParenIndex;
-		var openingParens;
-		var closingParens;
-		if (trail) {
-			url = url.slice(0, trail.index);
-			trail = trail[0];
-			closingParenIndex = trail.indexOf(")");
-			openingParens = ccount(url, "(");
-			closingParens = ccount(url, ")");
-			while (closingParenIndex !== -1 && openingParens > closingParens) {
-				url += trail.slice(0, closingParenIndex + 1);
-				trail = trail.slice(closingParenIndex + 1);
-				closingParenIndex = trail.indexOf(")");
-				closingParens++;
-			}
-		}
-		return [url, trail];
-	}
-	function previous(match, email) {
-		var code = match.input.charCodeAt(match.index - 1);
-		return (code !== code || unicodeWhitespace(code) || unicodePunctuation(code)) && (!email || code !== 47);
-	}
-}));
-//#endregion
-//#region node_modules/mdast-util-gfm-strikethrough/from-markdown.js
-var require_from_markdown$3 = /* @__PURE__ */ __commonJSMin(((exports) => {
-	exports.canContainEols = ["delete"];
-	exports.enter = { strikethrough: enterStrikethrough };
-	exports.exit = { strikethrough: exitStrikethrough };
-	function enterStrikethrough(token) {
-		this.enter({
-			type: "delete",
-			children: []
-		}, token);
-	}
-	function exitStrikethrough(token) {
-		this.exit(token);
-	}
-}));
-//#endregion
-//#region node_modules/mdast-util-gfm-table/from-markdown.js
-var require_from_markdown$2 = /* @__PURE__ */ __commonJSMin(((exports) => {
-	exports.enter = {
-		table: enterTable,
-		tableData: enterCell,
-		tableHeader: enterCell,
-		tableRow: enterRow
-	};
-	exports.exit = {
-		codeText: exitCodeText,
-		table: exitTable,
-		tableData: exit,
-		tableHeader: exit,
-		tableRow: exit
-	};
-	function enterTable(token) {
-		this.enter({
-			type: "table",
-			align: token._align,
-			children: []
-		}, token);
-		this.setData("inTable", true);
-	}
-	function exitTable(token) {
-		this.exit(token);
-		this.setData("inTable");
-	}
-	function enterRow(token) {
-		this.enter({
-			type: "tableRow",
-			children: []
-		}, token);
-	}
-	function exit(token) {
-		this.exit(token);
-	}
-	function enterCell(token) {
-		this.enter({
-			type: "tableCell",
-			children: []
-		}, token);
-	}
-	function exitCodeText(token) {
-		var value = this.resume();
-		if (this.getData("inTable")) value = value.replace(/\\([\\|])/g, replace);
-		this.stack[this.stack.length - 1].value = value;
-		this.exit(token);
-	}
-	function replace($0, $1) {
-		return $1 === "|" ? $1 : $0;
-	}
-}));
-//#endregion
-//#region node_modules/mdast-util-gfm-task-list-item/from-markdown.js
-var require_from_markdown$1 = /* @__PURE__ */ __commonJSMin(((exports) => {
-	exports.exit = {
-		taskListCheckValueChecked: exitCheck,
-		taskListCheckValueUnchecked: exitCheck,
-		paragraph: exitParagraphWithTaskListItem
-	};
-	function exitCheck(token) {
-		this.stack[this.stack.length - 2].checked = token.type === "taskListCheckValueChecked";
-	}
-	function exitParagraphWithTaskListItem(token) {
-		var parent = this.stack[this.stack.length - 2];
-		var node = this.stack[this.stack.length - 1];
-		var siblings = parent.children;
-		var head = node.children[0];
-		var index = -1;
-		var firstParaghraph;
-		if (parent && parent.type === "listItem" && typeof parent.checked === "boolean" && head && head.type === "text") {
-			while (++index < siblings.length) if (siblings[index].type === "paragraph") {
-				firstParaghraph = siblings[index];
-				break;
-			}
-			if (firstParaghraph === node) {
-				head.value = head.value.slice(1);
-				if (head.value.length === 0) node.children.shift();
-				else {
-					head.position.start.column++;
-					head.position.start.offset++;
-					node.position.start = Object.assign({}, head.position.start);
-				}
-			}
-		}
-		this.exit(token);
-	}
-}));
-//#endregion
-//#region node_modules/mdast-util-gfm/from-markdown.js
-var require_from_markdown = /* @__PURE__ */ __commonJSMin(((exports, module) => {
-	var autolinkLiteral = require_from_markdown$4();
-	var strikethrough = require_from_markdown$3();
-	var table = require_from_markdown$2();
-	var taskListItem = require_from_markdown$1();
-	var own = {}.hasOwnProperty;
-	module.exports = configure([
-		autolinkLiteral,
-		strikethrough,
-		table,
-		taskListItem
-	]);
-	function configure(extensions) {
-		var config = {
-			transforms: [],
-			canContainEols: []
-		};
-		var length = extensions.length;
-		var index = -1;
-		while (++index < length) extension(config, extensions[index]);
-		return config;
-	}
-	function extension(config, extension) {
-		var key;
-		var left;
-		var right;
-		for (key in extension) {
-			left = own.call(config, key) ? config[key] : config[key] = {};
-			right = extension[key];
-			if (key === "canContainEols" || key === "transforms") config[key] = [].concat(left, right);
-			else Object.assign(left, right);
-		}
-	}
-}));
-//#endregion
-//#region node_modules/mdast-util-gfm-autolink-literal/to-markdown.js
-var require_to_markdown$4 = /* @__PURE__ */ __commonJSMin(((exports) => {
-	var inConstruct = "phrasing";
-	var notInConstruct = [
-		"autolink",
-		"link",
-		"image",
-		"label"
-	];
-	exports.unsafe = [
-		{
-			character: "@",
-			before: "[+\\-.\\w]",
-			after: "[\\-.\\w]",
-			inConstruct,
-			notInConstruct
-		},
-		{
-			character: ".",
-			before: "[Ww]",
-			after: "[\\-.\\w]",
-			inConstruct,
-			notInConstruct
-		},
-		{
-			character: ":",
-			before: "[ps]",
-			after: "\\/",
-			inConstruct,
-			notInConstruct
-		}
-	];
-}));
-//#endregion
-//#region node_modules/mdast-util-to-markdown/lib/util/container-phrasing.js
-var require_container_phrasing = /* @__PURE__ */ __commonJSMin(((exports, module) => {
-	module.exports = phrasing;
-	function phrasing(parent, context, safeOptions) {
-		var children = parent.children || [];
-		var results = [];
-		var index = -1;
-		var before = safeOptions.before;
-		var after;
-		var handle;
-		var child;
-		while (++index < children.length) {
-			child = children[index];
-			if (index + 1 < children.length) {
-				handle = context.handle.handlers[children[index + 1].type];
-				if (handle && handle.peek) handle = handle.peek;
-				after = handle ? handle(children[index + 1], parent, context, {
-					before: "",
-					after: ""
-				}).charAt(0) : "";
-			} else after = safeOptions.after;
-			if (results.length > 0 && (before === "\r" || before === "\n") && child.type === "html") {
-				results[results.length - 1] = results[results.length - 1].replace(/(\r?\n|\r)$/, " ");
-				before = " ";
-			}
-			results.push(context.handle(child, parent, context, {
-				before,
-				after
-			}));
-			before = results[results.length - 1].slice(-1);
-		}
-		return results.join("");
-	}
-}));
-//#endregion
-//#region node_modules/mdast-util-gfm-strikethrough/to-markdown.js
-var require_to_markdown$3 = /* @__PURE__ */ __commonJSMin(((exports) => {
-	var phrasing = require_container_phrasing();
-	exports.unsafe = [{
-		character: "~",
-		inConstruct: "phrasing"
-	}];
-	exports.handlers = { delete: handleDelete };
-	handleDelete.peek = peekDelete;
-	function handleDelete(node, _, context) {
-		var exit = context.enter("emphasis");
-		var value = phrasing(node, context, {
-			before: "~",
-			after: "~"
-		});
-		exit();
-		return "~~" + value + "~~";
-	}
-	function peekDelete() {
-		return "~";
-	}
-}));
-//#endregion
-//#region node_modules/mdast-util-to-markdown/lib/util/pattern-compile.js
-var require_pattern_compile = /* @__PURE__ */ __commonJSMin(((exports, module) => {
-	module.exports = patternCompile;
-	function patternCompile(pattern) {
-		var before;
-		var after;
-		if (!pattern._compiled) {
-			before = pattern.before ? "(?:" + pattern.before + ")" : "";
-			after = pattern.after ? "(?:" + pattern.after + ")" : "";
-			if (pattern.atBreak) before = "[\\r\\n][\\t ]*" + before;
-			pattern._compiled = new RegExp((before ? "(" + before + ")" : "") + (/[|\\{}()[\]^$+*?.-]/.test(pattern.character) ? "\\" : "") + pattern.character + (after || ""), "g");
-		}
-		return pattern._compiled;
-	}
-}));
-//#endregion
-//#region node_modules/mdast-util-to-markdown/lib/handle/inline-code.js
-var require_inline_code = /* @__PURE__ */ __commonJSMin(((exports, module) => {
-	module.exports = inlineCode;
-	inlineCode.peek = inlineCodePeek;
-	var patternCompile = require_pattern_compile();
-	function inlineCode(node, parent, context) {
-		var value = node.value || "";
-		var sequence = "`";
-		var index = -1;
-		var pattern;
-		var expression;
-		var match;
-		var position;
-		while (new RegExp("(^|[^`])" + sequence + "([^`]|$)").test(value)) sequence += "`";
-		if (/[^ \r\n]/.test(value) && (/[ \r\n`]/.test(value.charAt(0)) || /[ \r\n`]/.test(value.charAt(value.length - 1)))) value = " " + value + " ";
-		while (++index < context.unsafe.length) {
-			pattern = context.unsafe[index];
-			if (!pattern.atBreak) continue;
-			expression = patternCompile(pattern);
-			while (match = expression.exec(value)) {
-				position = match.index;
-				if (value.charCodeAt(position) === 10 && value.charCodeAt(position - 1) === 13) position--;
-				value = value.slice(0, position) + " " + value.slice(match.index + 1);
-			}
-		}
-		return sequence + value + sequence;
-	}
-	function inlineCodePeek() {
-		return "`";
-	}
-}));
-//#endregion
-//#region node_modules/repeat-string/index.js
-/*!
-* repeat-string <https://github.com/jonschlinkert/repeat-string>
-*
-* Copyright (c) 2014-2015, Jon Schlinkert.
-* Licensed under the MIT License.
-*/
-var require_repeat_string = /* @__PURE__ */ __commonJSMin(((exports, module) => {
-	/**
-	* Results cache
-	*/
-	var res = "";
-	var cache;
-	/**
-	* Expose `repeat`
-	*/
-	module.exports = repeat;
-	/**
-	* Repeat the given `string` the specified `number`
-	* of times.
-	*
-	* **Example:**
-	*
-	* ```js
-	* var repeat = require('repeat-string');
-	* repeat('A', 5);
-	* //=> AAAAA
-	* ```
-	*
-	* @param {String} `string` The string to repeat
-	* @param {Number} `number` The number of times to repeat the string
-	* @return {String} Repeated string
-	* @api public
-	*/
-	function repeat(str, num) {
-		if (typeof str !== "string") throw new TypeError("expected a string");
-		if (num === 1) return str;
-		if (num === 2) return str + str;
-		var max = str.length * num;
-		if (cache !== str || typeof cache === "undefined") {
-			cache = str;
-			res = "";
-		} else if (res.length >= max) return res.substr(0, max);
-		while (max > res.length && num > 1) {
-			if (num & 1) res += str;
-			num >>= 1;
-			str += str;
-		}
-		res += str;
-		res = res.substr(0, max);
-		return res;
-	}
-}));
-//#endregion
-//#region node_modules/markdown-table/index.js
-var require_markdown_table = /* @__PURE__ */ __commonJSMin(((exports, module) => {
-	var repeat = require_repeat_string();
-	module.exports = markdownTable;
-	var trailingWhitespace = / +$/;
-	var space = " ";
-	var lineFeed = "\n";
-	var dash = "-";
-	var colon = ":";
-	var verticalBar = "|";
-	var x = 0;
-	var C = 67;
-	var L = 76;
-	var R = 82;
-	var c = 99;
-	var l = 108;
-	var r = 114;
-	function markdownTable(table, options) {
-		var settings = options || {};
-		var padding = settings.padding !== false;
-		var start = settings.delimiterStart !== false;
-		var end = settings.delimiterEnd !== false;
-		var align = (settings.align || []).concat();
-		var alignDelimiters = settings.alignDelimiters !== false;
-		var alignments = [];
-		var stringLength = settings.stringLength || defaultStringLength;
-		var rowIndex = -1;
-		var rowLength = table.length;
-		var cellMatrix = [];
-		var sizeMatrix = [];
-		var row = [];
-		var sizes = [];
-		var longestCellByColumn = [];
-		var mostCellsPerRow = 0;
-		var cells;
-		var columnIndex;
-		var columnLength;
-		var largest;
-		var size;
-		var cell;
-		var lines;
-		var line;
-		var before;
-		var after;
-		var code;
-		while (++rowIndex < rowLength) {
-			cells = table[rowIndex];
-			columnIndex = -1;
-			columnLength = cells.length;
-			row = [];
-			sizes = [];
-			if (columnLength > mostCellsPerRow) mostCellsPerRow = columnLength;
-			while (++columnIndex < columnLength) {
-				cell = serialize(cells[columnIndex]);
-				if (alignDelimiters === true) {
-					size = stringLength(cell);
-					sizes[columnIndex] = size;
-					largest = longestCellByColumn[columnIndex];
-					if (largest === void 0 || size > largest) longestCellByColumn[columnIndex] = size;
-				}
-				row.push(cell);
-			}
-			cellMatrix[rowIndex] = row;
-			sizeMatrix[rowIndex] = sizes;
-		}
-		columnIndex = -1;
-		columnLength = mostCellsPerRow;
-		if (typeof align === "object" && "length" in align) while (++columnIndex < columnLength) alignments[columnIndex] = toAlignment(align[columnIndex]);
-		else {
-			code = toAlignment(align);
-			while (++columnIndex < columnLength) alignments[columnIndex] = code;
-		}
-		columnIndex = -1;
-		columnLength = mostCellsPerRow;
-		row = [];
-		sizes = [];
-		while (++columnIndex < columnLength) {
-			code = alignments[columnIndex];
-			before = "";
-			after = "";
-			if (code === l) before = colon;
-			else if (code === r) after = colon;
-			else if (code === c) {
-				before = colon;
-				after = colon;
-			}
-			size = alignDelimiters ? Math.max(1, longestCellByColumn[columnIndex] - before.length - after.length) : 1;
-			cell = before + repeat(dash, size) + after;
-			if (alignDelimiters === true) {
-				size = before.length + size + after.length;
-				if (size > longestCellByColumn[columnIndex]) longestCellByColumn[columnIndex] = size;
-				sizes[columnIndex] = size;
-			}
-			row[columnIndex] = cell;
-		}
-		cellMatrix.splice(1, 0, row);
-		sizeMatrix.splice(1, 0, sizes);
-		rowIndex = -1;
-		rowLength = cellMatrix.length;
-		lines = [];
-		while (++rowIndex < rowLength) {
-			row = cellMatrix[rowIndex];
-			sizes = sizeMatrix[rowIndex];
-			columnIndex = -1;
-			columnLength = mostCellsPerRow;
-			line = [];
-			while (++columnIndex < columnLength) {
-				cell = row[columnIndex] || "";
-				before = "";
-				after = "";
-				if (alignDelimiters === true) {
-					size = longestCellByColumn[columnIndex] - (sizes[columnIndex] || 0);
-					code = alignments[columnIndex];
-					if (code === r) before = repeat(space, size);
-					else if (code === c) if (size % 2 === 0) {
-						before = repeat(space, size / 2);
-						after = before;
-					} else {
-						before = repeat(space, size / 2 + .5);
-						after = repeat(space, size / 2 - .5);
-					}
-					else after = repeat(space, size);
-				}
-				if (start === true && columnIndex === 0) line.push(verticalBar);
-				if (padding === true && !(alignDelimiters === false && cell === "") && (start === true || columnIndex !== 0)) line.push(space);
-				if (alignDelimiters === true) line.push(before);
-				line.push(cell);
-				if (alignDelimiters === true) line.push(after);
-				if (padding === true) line.push(space);
-				if (end === true || columnIndex !== columnLength - 1) line.push(verticalBar);
-			}
-			line = line.join("");
-			if (end === false) line = line.replace(trailingWhitespace, "");
-			lines.push(line);
-		}
-		return lines.join(lineFeed);
-	}
-	function serialize(value) {
-		return value === null || value === void 0 ? "" : String(value);
-	}
-	function defaultStringLength(value) {
-		return value.length;
-	}
-	function toAlignment(value) {
-		var code = typeof value === "string" ? value.charCodeAt(0) : x;
-		return code === L || code === l ? l : code === R || code === r ? r : code === C || code === c ? c : x;
-	}
-}));
-//#endregion
-//#region node_modules/mdast-util-gfm-table/to-markdown.js
-var require_to_markdown$2 = /* @__PURE__ */ __commonJSMin(((exports, module) => {
-	var phrasing = require_container_phrasing();
-	var defaultInlineCode = require_inline_code();
-	var markdownTable = require_markdown_table();
-	module.exports = toMarkdown;
-	function toMarkdown(options) {
-		var settings = options || {};
-		var padding = settings.tableCellPadding;
-		var alignDelimiters = settings.tablePipeAlign;
-		var stringLength = settings.stringLength;
-		var around = padding ? " " : "|";
-		return {
-			unsafe: [
-				{
-					character: "\r",
-					inConstruct: "tableCell"
-				},
-				{
-					character: "\n",
-					inConstruct: "tableCell"
-				},
-				{
-					atBreak: true,
-					character: "|",
-					after: "[	 :-]"
-				},
-				{
-					character: "|",
-					inConstruct: "tableCell"
-				},
-				{
-					atBreak: true,
-					character: ":",
-					after: "-"
-				},
-				{
-					atBreak: true,
-					character: "-",
-					after: "[:|-]"
-				}
-			],
-			handlers: {
-				table: handleTable,
-				tableRow: handleTableRow,
-				tableCell: handleTableCell,
-				inlineCode: inlineCodeWithTable
-			}
-		};
-		function handleTable(node, _, context) {
-			return serializeData(handleTableAsData(node, context), node.align);
-		}
-		function handleTableRow(node, _, context) {
-			var value = serializeData([handleTableRowAsData(node, context)]);
-			return value.slice(0, value.indexOf("\n"));
-		}
-		function handleTableCell(node, _, context) {
-			var exit = context.enter("tableCell");
-			var value = phrasing(node, context, {
-				before: around,
-				after: around
-			});
-			exit();
-			return value;
-		}
-		function serializeData(matrix, align) {
-			return markdownTable(matrix, {
-				align,
-				alignDelimiters,
-				padding,
-				stringLength
-			});
-		}
-		function handleTableAsData(node, context) {
-			var children = node.children;
-			var index = -1;
-			var length = children.length;
-			var result = [];
-			var subexit = context.enter("table");
-			while (++index < length) result[index] = handleTableRowAsData(children[index], context);
-			subexit();
-			return result;
-		}
-		function handleTableRowAsData(node, context) {
-			var children = node.children;
-			var index = -1;
-			var length = children.length;
-			var result = [];
-			var subexit = context.enter("tableRow");
-			while (++index < length) result[index] = handleTableCell(children[index], node, context);
-			subexit();
-			return result;
-		}
-		function inlineCodeWithTable(node, parent, context) {
-			var value = defaultInlineCode(node, parent, context);
-			if (context.stack.indexOf("tableCell") !== -1) value = value.replace(/\|/g, "\\$&");
-			return value;
-		}
-	}
-}));
-//#endregion
-//#region node_modules/mdast-util-to-markdown/lib/util/check-bullet.js
-var require_check_bullet = /* @__PURE__ */ __commonJSMin(((exports, module) => {
-	module.exports = checkBullet;
-	function checkBullet(context) {
-		var marker = context.options.bullet || "*";
-		if (marker !== "*" && marker !== "+" && marker !== "-") throw new Error("Cannot serialize items with `" + marker + "` for `options.bullet`, expected `*`, `+`, or `-`");
-		return marker;
-	}
-}));
-//#endregion
-//#region node_modules/mdast-util-to-markdown/lib/util/check-list-item-indent.js
-var require_check_list_item_indent = /* @__PURE__ */ __commonJSMin(((exports, module) => {
-	module.exports = checkListItemIndent;
-	function checkListItemIndent(context) {
-		var style = context.options.listItemIndent || "tab";
-		if (style === 1 || style === "1") return "one";
-		if (style !== "tab" && style !== "one" && style !== "mixed") throw new Error("Cannot serialize items with `" + style + "` for `options.listItemIndent`, expected `tab`, `one`, or `mixed`");
-		return style;
-	}
-}));
-//#endregion
-//#region node_modules/mdast-util-to-markdown/lib/util/container-flow.js
-var require_container_flow = /* @__PURE__ */ __commonJSMin(((exports, module) => {
-	module.exports = flow;
-	var repeat = require_repeat_string();
-	function flow(parent, context) {
-		var children = parent.children || [];
-		var results = [];
-		var index = -1;
-		var child;
-		while (++index < children.length) {
-			child = children[index];
-			results.push(context.handle(child, parent, context, {
-				before: "\n",
-				after: "\n"
-			}));
-			if (index + 1 < children.length) results.push(between(child, children[index + 1]));
-		}
-		return results.join("");
-		function between(left, right) {
-			var index = -1;
-			var result;
-			while (++index < context.join.length) {
-				result = context.join[index](left, right, parent, context);
-				if (result === true || result === 1) break;
-				if (typeof result === "number") return repeat("\n", 1 + Number(result));
-				if (result === false) return "\n\n<!---->\n\n";
-			}
-			return "\n\n";
-		}
-	}
-}));
-//#endregion
-//#region node_modules/mdast-util-to-markdown/lib/util/indent-lines.js
-var require_indent_lines = /* @__PURE__ */ __commonJSMin(((exports, module) => {
-	module.exports = indentLines;
-	var eol = /\r?\n|\r/g;
-	function indentLines(value, map) {
-		var result = [];
-		var start = 0;
-		var line = 0;
-		var match;
-		while (match = eol.exec(value)) {
-			one(value.slice(start, match.index));
-			result.push(match[0]);
-			start = match.index + match[0].length;
-			line++;
-		}
-		one(value.slice(start));
-		return result.join("");
-		function one(value) {
-			result.push(map(value, line, !value));
-		}
-	}
-}));
-//#endregion
-//#region node_modules/mdast-util-to-markdown/lib/handle/list-item.js
-var require_list_item = /* @__PURE__ */ __commonJSMin(((exports, module) => {
-	module.exports = listItem;
-	var repeat = require_repeat_string();
-	var checkBullet = require_check_bullet();
-	var checkListItemIndent = require_check_list_item_indent();
-	var flow = require_container_flow();
-	var indentLines = require_indent_lines();
-	function listItem(node, parent, context) {
-		var bullet = checkBullet(context);
-		var listItemIndent = checkListItemIndent(context);
-		var size;
-		var value;
-		var exit;
-		if (parent && parent.ordered) bullet = (parent.start > -1 ? parent.start : 1) + (context.options.incrementListMarker === false ? 0 : parent.children.indexOf(node)) + ".";
-		size = bullet.length + 1;
-		if (listItemIndent === "tab" || listItemIndent === "mixed" && (parent && parent.spread || node.spread)) size = Math.ceil(size / 4) * 4;
-		exit = context.enter("listItem");
-		value = indentLines(flow(node, context), map);
-		exit();
-		return value;
-		function map(line, index, blank) {
-			if (index) return (blank ? "" : repeat(" ", size)) + line;
-			return (blank ? bullet : bullet + repeat(" ", size - bullet.length)) + line;
-		}
-	}
-}));
-//#endregion
-//#region node_modules/mdast-util-gfm-task-list-item/to-markdown.js
-var require_to_markdown$1 = /* @__PURE__ */ __commonJSMin(((exports) => {
-	var defaultListItem = require_list_item();
-	exports.unsafe = [{
-		atBreak: true,
-		character: "-",
-		after: "[:|-]"
-	}];
-	exports.handlers = { listItem: listItemWithTaskListItem };
-	function listItemWithTaskListItem(node, parent, context) {
-		var value = defaultListItem(node, parent, context);
-		var head = node.children[0];
-		if (typeof node.checked === "boolean" && head && head.type === "paragraph") value = value.replace(/^(?:[*+-]|\d+\.)([\r\n]| {1,3})/, check);
-		return value;
-		function check($0) {
-			return $0 + "[" + (node.checked ? "x" : " ") + "] ";
-		}
-	}
-}));
-//#endregion
-//#region node_modules/mdast-util-to-markdown/lib/configure.js
-var require_configure = /* @__PURE__ */ __commonJSMin(((exports, module) => {
-	module.exports = configure;
-	function configure(base, extension) {
-		var index = -1;
-		var key;
-		if (extension.extensions) while (++index < extension.extensions.length) configure(base, extension.extensions[index]);
-		for (key in extension) if (key === "extensions") {} else if (key === "unsafe" || key === "join") base[key] = base[key].concat(extension[key] || []);
-		else if (key === "handlers") base[key] = Object.assign(base[key], extension[key] || {});
-		else base.options[key] = extension[key];
-		return base;
-	}
-}));
-//#endregion
-//#region node_modules/mdast-util-gfm/to-markdown.js
-var require_to_markdown = /* @__PURE__ */ __commonJSMin(((exports, module) => {
-	var autolinkLiteral = require_to_markdown$4();
-	var strikethrough = require_to_markdown$3();
-	var table = require_to_markdown$2();
-	var taskListItem = require_to_markdown$1();
-	var configure = require_configure();
-	module.exports = toMarkdown;
-	function toMarkdown(options) {
-		var config = configure({
-			handlers: {},
-			join: [],
-			unsafe: [],
-			options: {}
-		}, { extensions: [
-			autolinkLiteral,
-			strikethrough,
-			table(options),
-			taskListItem
-		] });
-		return Object.assign(config.options, {
-			handlers: config.handlers,
-			join: config.join,
-			unsafe: config.unsafe
-		});
-	}
-}));
-//#endregion
-//#region node_modules/remark-gfm/index.js
-var require_remark_gfm = /* @__PURE__ */ __commonJSMin(((exports, module) => {
-	var syntax = require_micromark_extension_gfm();
-	var fromMarkdown = require_from_markdown();
-	var toMarkdown = require_to_markdown();
-	var warningIssued;
-	module.exports = gfm;
-	function gfm(options) {
-		var data = this.data();
-		/* istanbul ignore next - old remark. */
-		if (!warningIssued && (this.Parser && this.Parser.prototype && this.Parser.prototype.blockTokenizers || this.Compiler && this.Compiler.prototype && this.Compiler.prototype.visitors)) {
-			warningIssued = true;
-			console.warn("[remark-gfm] Warning: please upgrade to remark 13 to use this plugin");
-		}
-		add("micromarkExtensions", syntax(options));
-		add("fromMarkdownExtensions", fromMarkdown);
-		add("toMarkdownExtensions", toMarkdown(options));
-		function add(field, value) {
-			/* istanbul ignore if - other extensions. */
-			if (data[field]) data[field].push(value);
-			else data[field] = [value];
-		}
-	}
-}));
-//#endregion
-//#region node_modules/mdast-util-to-string/index.js
-var require_mdast_util_to_string = /* @__PURE__ */ __commonJSMin(((exports, module) => {
-	module.exports = toString;
-	function toString(node) {
-		return node && (node.value || node.alt || node.title || "children" in node && all(node.children) || "length" in node && all(node)) || "";
-	}
-	function all(values) {
-		var result = [];
-		var index = -1;
-		while (++index < values.length) result[index] = toString(values[index]);
-		return result.join("");
-	}
-}));
-//#endregion
-//#region node_modules/micromark/dist/util/normalize-identifier.js
-var require_normalize_identifier = /* @__PURE__ */ __commonJSMin(((exports, module) => {
-	function normalizeIdentifier(value) {
-		return value.replace(/[\t\n\r ]+/g, " ").replace(/^ | $/g, "").toLowerCase().toUpperCase();
-	}
-	module.exports = normalizeIdentifier;
-}));
-//#endregion
-//#region node_modules/micromark/dist/util/safe-from-int.js
-var require_safe_from_int = /* @__PURE__ */ __commonJSMin(((exports, module) => {
-	var fromCharCode = require_from_char_code();
-	function safeFromInt(value, base) {
-		var code = parseInt(value, base);
-		if (code < 9 || code === 11 || code > 13 && code < 32 || code > 126 && code < 160 || code > 55295 && code < 57344 || code > 64975 && code < 65008 || (code & 65535) === 65535 || (code & 65535) === 65534 || code > 1114111) return "�";
-		return fromCharCode(code);
-	}
-	module.exports = safeFromInt;
-}));
-//#endregion
-//#region node_modules/micromark/dist/initialize/content.js
-var require_content$1 = /* @__PURE__ */ __commonJSMin(((exports) => {
-	Object.defineProperty(exports, "__esModule", { value: true });
-	var markdownLineEnding = require_markdown_line_ending();
-	var factorySpace = require_factory_space();
-	var tokenize = initializeContent;
-	function initializeContent(effects) {
-		var contentStart = effects.attempt(this.parser.constructs.contentInitial, afterContentStartConstruct, paragraphInitial);
-		var previous;
-		return contentStart;
-		function afterContentStartConstruct(code) {
-			if (code === null) {
-				effects.consume(code);
-				return;
-			}
-			effects.enter("lineEnding");
-			effects.consume(code);
-			effects.exit("lineEnding");
-			return factorySpace(effects, contentStart, "linePrefix");
-		}
-		function paragraphInitial(code) {
-			effects.enter("paragraph");
-			return lineStart(code);
-		}
-		function lineStart(code) {
-			var token = effects.enter("chunkText", {
-				contentType: "text",
-				previous
-			});
-			if (previous) previous.next = token;
-			previous = token;
-			return data(code);
-		}
-		function data(code) {
-			if (code === null) {
-				effects.exit("chunkText");
-				effects.exit("paragraph");
-				effects.consume(code);
-				return;
-			}
-			if (markdownLineEnding(code)) {
-				effects.consume(code);
-				effects.exit("chunkText");
-				return lineStart;
-			}
-			effects.consume(code);
-			return data;
-		}
-	}
-	exports.tokenize = tokenize;
-}));
-//#endregion
-//#region node_modules/micromark/dist/tokenize/partial-blank-line.js
-var require_partial_blank_line = /* @__PURE__ */ __commonJSMin(((exports, module) => {
-	var markdownLineEnding = require_markdown_line_ending();
-	var factorySpace = require_factory_space();
-	var partialBlankLine = {
-		tokenize: tokenizePartialBlankLine,
-		partial: true
-	};
-	function tokenizePartialBlankLine(effects, ok, nok) {
-		return factorySpace(effects, afterWhitespace, "linePrefix");
-		function afterWhitespace(code) {
-			return code === null || markdownLineEnding(code) ? ok(code) : nok(code);
-		}
-	}
-	module.exports = partialBlankLine;
-}));
-//#endregion
-//#region node_modules/micromark/dist/initialize/document.js
-var require_document = /* @__PURE__ */ __commonJSMin(((exports) => {
-	Object.defineProperty(exports, "__esModule", { value: true });
-	var markdownLineEnding = require_markdown_line_ending();
-	var factorySpace = require_factory_space();
-	var partialBlankLine = require_partial_blank_line();
-	var tokenize = initializeDocument;
-	var containerConstruct = { tokenize: tokenizeContainer };
-	var lazyFlowConstruct = { tokenize: tokenizeLazyFlow };
-	function initializeDocument(effects) {
-		var self = this;
-		var stack = [];
-		var continued = 0;
-		var inspectConstruct = {
-			tokenize: tokenizeInspect,
-			partial: true
-		};
-		var inspectResult;
-		var childFlow;
-		var childToken;
-		return start;
-		function start(code) {
-			if (continued < stack.length) {
-				self.containerState = stack[continued][1];
-				return effects.attempt(stack[continued][0].continuation, documentContinue, documentContinued)(code);
-			}
-			return documentContinued(code);
-		}
-		function documentContinue(code) {
-			continued++;
-			return start(code);
-		}
-		function documentContinued(code) {
-			if (inspectResult && inspectResult.flowContinue) return flowStart(code);
-			self.interrupt = childFlow && childFlow.currentConstruct && childFlow.currentConstruct.interruptible;
-			self.containerState = {};
-			return effects.attempt(containerConstruct, containerContinue, flowStart)(code);
-		}
-		function containerContinue(code) {
-			stack.push([self.currentConstruct, self.containerState]);
-			self.containerState = void 0;
-			return documentContinued(code);
-		}
-		function flowStart(code) {
-			if (code === null) {
-				exitContainers(0, true);
-				effects.consume(code);
-				return;
-			}
-			childFlow = childFlow || self.parser.flow(self.now());
-			effects.enter("chunkFlow", {
-				contentType: "flow",
-				previous: childToken,
-				_tokenizer: childFlow
-			});
-			return flowContinue(code);
-		}
-		function flowContinue(code) {
-			if (code === null) {
-				continueFlow(effects.exit("chunkFlow"));
-				return flowStart(code);
-			}
-			if (markdownLineEnding(code)) {
-				effects.consume(code);
-				continueFlow(effects.exit("chunkFlow"));
-				return effects.check(inspectConstruct, documentAfterPeek);
-			}
-			effects.consume(code);
-			return flowContinue;
-		}
-		function documentAfterPeek(code) {
-			exitContainers(inspectResult.continued, inspectResult && inspectResult.flowEnd);
-			continued = 0;
-			return start(code);
-		}
-		function continueFlow(token) {
-			if (childToken) childToken.next = token;
-			childToken = token;
-			childFlow.lazy = inspectResult && inspectResult.lazy;
-			childFlow.defineSkip(token.start);
-			childFlow.write(self.sliceStream(token));
-		}
-		function exitContainers(size, end) {
-			var index = stack.length;
-			if (childFlow && end) {
-				childFlow.write([null]);
-				childToken = childFlow = void 0;
-			}
-			while (index-- > size) {
-				self.containerState = stack[index][1];
-				stack[index][0].exit.call(self, effects);
-			}
-			stack.length = size;
-		}
-		function tokenizeInspect(effects, ok) {
-			var subcontinued = 0;
-			inspectResult = {};
-			return inspectStart;
-			function inspectStart(code) {
-				if (subcontinued < stack.length) {
-					self.containerState = stack[subcontinued][1];
-					return effects.attempt(stack[subcontinued][0].continuation, inspectContinue, inspectLess)(code);
-				}
-				if (childFlow.currentConstruct && childFlow.currentConstruct.concrete) {
-					inspectResult.flowContinue = true;
-					return inspectDone(code);
-				}
-				self.interrupt = childFlow.currentConstruct && childFlow.currentConstruct.interruptible;
-				self.containerState = {};
-				return effects.attempt(containerConstruct, inspectFlowEnd, inspectDone)(code);
-			}
-			function inspectContinue(code) {
-				subcontinued++;
-				return self.containerState._closeFlow ? inspectFlowEnd(code) : inspectStart(code);
-			}
-			function inspectLess(code) {
-				if (childFlow.currentConstruct && childFlow.currentConstruct.lazy) {
-					self.containerState = {};
-					return effects.attempt(containerConstruct, inspectFlowEnd, effects.attempt(lazyFlowConstruct, inspectFlowEnd, effects.check(partialBlankLine, inspectFlowEnd, inspectLazy)))(code);
-				}
-				return inspectFlowEnd(code);
-			}
-			function inspectLazy(code) {
-				subcontinued = stack.length;
-				inspectResult.lazy = true;
-				inspectResult.flowContinue = true;
-				return inspectDone(code);
-			}
-			function inspectFlowEnd(code) {
-				inspectResult.flowEnd = true;
-				return inspectDone(code);
-			}
-			function inspectDone(code) {
-				inspectResult.continued = subcontinued;
-				self.interrupt = self.containerState = void 0;
-				return ok(code);
-			}
-		}
-	}
-	function tokenizeContainer(effects, ok, nok) {
-		return factorySpace(effects, effects.attempt(this.parser.constructs.document, ok, nok), "linePrefix", this.parser.constructs.disable.null.indexOf("codeIndented") > -1 ? void 0 : 4);
-	}
-	function tokenizeLazyFlow(effects, ok, nok) {
-		return factorySpace(effects, effects.lazy(this.parser.constructs.flow, ok, nok), "linePrefix", this.parser.constructs.disable.null.indexOf("codeIndented") > -1 ? void 0 : 4);
-	}
-	exports.tokenize = tokenize;
-}));
-//#endregion
-//#region node_modules/micromark/dist/util/subtokenize.js
-var require_subtokenize = /* @__PURE__ */ __commonJSMin(((exports, module) => {
-	var assign = require_assign();
-	var chunkedSplice = require_chunked_splice();
-	var shallow = require_shallow();
-	function subtokenize(events) {
-		var jumps = {};
-		var index = -1;
-		var event;
-		var lineIndex;
-		var otherIndex;
-		var otherEvent;
-		var parameters;
-		var subevents;
-		var more;
-		while (++index < events.length) {
-			while (index in jumps) index = jumps[index];
-			event = events[index];
-			if (index && event[1].type === "chunkFlow" && events[index - 1][1].type === "listItemPrefix") {
-				subevents = event[1]._tokenizer.events;
-				otherIndex = 0;
-				if (otherIndex < subevents.length && subevents[otherIndex][1].type === "lineEndingBlank") otherIndex += 2;
-				if (otherIndex < subevents.length && subevents[otherIndex][1].type === "content") while (++otherIndex < subevents.length) {
-					if (subevents[otherIndex][1].type === "content") break;
-					if (subevents[otherIndex][1].type === "chunkText") {
-						subevents[otherIndex][1].isInFirstContentOfListItem = true;
-						otherIndex++;
-					}
-				}
-			}
-			if (event[0] === "enter") {
-				if (event[1].contentType) {
-					assign(jumps, subcontent(events, index));
-					index = jumps[index];
-					more = true;
-				}
-			} else if (event[1]._container || event[1]._movePreviousLineEndings) {
-				otherIndex = index;
-				lineIndex = void 0;
-				while (otherIndex--) {
-					otherEvent = events[otherIndex];
-					if (otherEvent[1].type === "lineEnding" || otherEvent[1].type === "lineEndingBlank") {
-						if (otherEvent[0] === "enter") {
-							if (lineIndex) events[lineIndex][1].type = "lineEndingBlank";
-							otherEvent[1].type = "lineEnding";
-							lineIndex = otherIndex;
-						}
-					} else break;
-				}
-				if (lineIndex) {
-					event[1].end = shallow(events[lineIndex][1].start);
-					parameters = events.slice(lineIndex, index);
-					parameters.unshift(event);
-					chunkedSplice(events, lineIndex, index - lineIndex + 1, parameters);
-				}
-			}
-		}
-		return !more;
-	}
-	function subcontent(events, eventIndex) {
-		var token = events[eventIndex][1];
-		var context = events[eventIndex][2];
-		var startPosition = eventIndex - 1;
-		var startPositions = [];
-		var tokenizer = token._tokenizer || context.parser[token.contentType](token.start);
-		var childEvents = tokenizer.events;
-		var jumps = [];
-		var gaps = {};
-		var stream;
-		var previous;
-		var index;
-		var entered;
-		var end;
-		var adjust;
-		while (token) {
-			while (events[++startPosition][1] !== token);
-			startPositions.push(startPosition);
-			if (!token._tokenizer) {
-				stream = context.sliceStream(token);
-				if (!token.next) stream.push(null);
-				if (previous) tokenizer.defineSkip(token.start);
-				if (token.isInFirstContentOfListItem) tokenizer._gfmTasklistFirstContentOfListItem = true;
-				tokenizer.write(stream);
-				if (token.isInFirstContentOfListItem) tokenizer._gfmTasklistFirstContentOfListItem = void 0;
-			}
-			previous = token;
-			token = token.next;
-		}
-		token = previous;
-		index = childEvents.length;
-		while (index--) if (childEvents[index][0] === "enter") entered = true;
-		else if (entered && childEvents[index][1].type === childEvents[index - 1][1].type && childEvents[index][1].start.line !== childEvents[index][1].end.line) {
-			add(childEvents.slice(index + 1, end));
-			token._tokenizer = token.next = void 0;
-			token = token.previous;
-			end = index + 1;
-		}
-		tokenizer.events = token._tokenizer = token.next = void 0;
-		add(childEvents.slice(0, end));
-		index = -1;
-		adjust = 0;
-		while (++index < jumps.length) {
-			gaps[adjust + jumps[index][0]] = adjust + jumps[index][1];
-			adjust += jumps[index][1] - jumps[index][0] - 1;
-		}
-		return gaps;
-		function add(slice) {
-			var start = startPositions.pop();
-			jumps.unshift([start, start + slice.length - 1]);
-			chunkedSplice(events, start, 2, slice);
-		}
-	}
-	module.exports = subtokenize;
-}));
-//#endregion
-//#region node_modules/micromark/dist/tokenize/content.js
-var require_content = /* @__PURE__ */ __commonJSMin(((exports, module) => {
-	var markdownLineEnding = require_markdown_line_ending();
-	var prefixSize = require_prefix_size();
-	var subtokenize = require_subtokenize();
-	var factorySpace = require_factory_space();
-	var content = {
-		tokenize: tokenizeContent,
-		resolve: resolveContent,
-		interruptible: true,
-		lazy: true
-	};
-	var continuationConstruct = {
-		tokenize: tokenizeContinuation,
-		partial: true
-	};
-	function resolveContent(events) {
-		subtokenize(events);
-		return events;
-	}
-	function tokenizeContent(effects, ok) {
-		var previous;
-		return start;
-		function start(code) {
-			effects.enter("content");
-			previous = effects.enter("chunkContent", { contentType: "content" });
-			return data(code);
-		}
-		function data(code) {
-			if (code === null) return contentEnd(code);
-			if (markdownLineEnding(code)) return effects.check(continuationConstruct, contentContinue, contentEnd)(code);
-			effects.consume(code);
-			return data;
-		}
-		function contentEnd(code) {
-			effects.exit("chunkContent");
-			effects.exit("content");
-			return ok(code);
-		}
-		function contentContinue(code) {
-			effects.consume(code);
-			effects.exit("chunkContent");
-			previous = previous.next = effects.enter("chunkContent", {
-				contentType: "content",
-				previous
-			});
-			return data;
-		}
-	}
-	function tokenizeContinuation(effects, ok, nok) {
-		var self = this;
-		return startLookahead;
-		function startLookahead(code) {
-			effects.enter("lineEnding");
-			effects.consume(code);
-			effects.exit("lineEnding");
-			return factorySpace(effects, prefixed, "linePrefix");
-		}
-		function prefixed(code) {
-			if (code === null || markdownLineEnding(code)) return nok(code);
-			if (self.parser.constructs.disable.null.indexOf("codeIndented") > -1 || prefixSize(self.events, "linePrefix") < 4) return effects.interrupt(self.parser.constructs.flow, nok, ok)(code);
-			return ok(code);
-		}
-	}
-	module.exports = content;
-}));
-//#endregion
-//#region node_modules/micromark/dist/initialize/flow.js
-var require_flow = /* @__PURE__ */ __commonJSMin(((exports) => {
-	Object.defineProperty(exports, "__esModule", { value: true });
-	var content = require_content();
-	var factorySpace = require_factory_space();
-	var partialBlankLine = require_partial_blank_line();
-	var tokenize = initializeFlow;
-	function initializeFlow(effects) {
-		var self = this;
-		var initial = effects.attempt(partialBlankLine, atBlankEnding, effects.attempt(this.parser.constructs.flowInitial, afterConstruct, factorySpace(effects, effects.attempt(this.parser.constructs.flow, afterConstruct, effects.attempt(content, afterConstruct)), "linePrefix")));
-		return initial;
-		function atBlankEnding(code) {
-			if (code === null) {
-				effects.consume(code);
-				return;
-			}
-			effects.enter("lineEndingBlank");
-			effects.consume(code);
-			effects.exit("lineEndingBlank");
-			self.currentConstruct = void 0;
-			return initial;
-		}
-		function afterConstruct(code) {
-			if (code === null) {
-				effects.consume(code);
-				return;
-			}
-			effects.enter("lineEnding");
-			effects.consume(code);
-			effects.exit("lineEnding");
-			self.currentConstruct = void 0;
-			return initial;
-		}
-	}
-	exports.tokenize = tokenize;
-}));
-//#endregion
-//#region node_modules/micromark/dist/initialize/text.js
-var require_text$1 = /* @__PURE__ */ __commonJSMin(((exports) => {
-	Object.defineProperty(exports, "__esModule", { value: true });
-	var assign = require_assign();
-	var shallow = require_shallow();
-	var text = initializeFactory("text");
-	var string = initializeFactory("string");
-	var resolver = { resolveAll: createResolver() };
-	function initializeFactory(field) {
-		return {
-			tokenize: initializeText,
-			resolveAll: createResolver(field === "text" ? resolveAllLineSuffixes : void 0)
-		};
-		function initializeText(effects) {
-			var self = this;
-			var constructs = this.parser.constructs[field];
-			var text = effects.attempt(constructs, start, notText);
-			return start;
-			function start(code) {
-				return atBreak(code) ? text(code) : notText(code);
-			}
-			function notText(code) {
-				if (code === null) {
-					effects.consume(code);
-					return;
-				}
-				effects.enter("data");
-				effects.consume(code);
-				return data;
-			}
-			function data(code) {
-				if (atBreak(code)) {
-					effects.exit("data");
-					return text(code);
-				}
-				effects.consume(code);
-				return data;
-			}
-			function atBreak(code) {
-				var list = constructs[code];
-				var index = -1;
-				if (code === null) return true;
-				if (list) {
-					while (++index < list.length) if (!list[index].previous || list[index].previous.call(self, self.previous)) return true;
-				}
-			}
-		}
-	}
-	function createResolver(extraResolver) {
-		return resolveAllText;
-		function resolveAllText(events, context) {
-			var index = -1;
-			var enter;
-			while (++index <= events.length) if (enter === void 0) {
-				if (events[index] && events[index][1].type === "data") {
-					enter = index;
-					index++;
-				}
-			} else if (!events[index] || events[index][1].type !== "data") {
-				if (index !== enter + 2) {
-					events[enter][1].end = events[index - 1][1].end;
-					events.splice(enter + 2, index - enter - 2);
-					index = enter + 2;
-				}
-				enter = void 0;
-			}
-			return extraResolver ? extraResolver(events, context) : events;
-		}
-	}
-	function resolveAllLineSuffixes(events, context) {
-		var eventIndex = -1;
-		var chunks;
-		var data;
-		var chunk;
-		var index;
-		var bufferIndex;
-		var size;
-		var tabs;
-		var token;
-		while (++eventIndex <= events.length) if ((eventIndex === events.length || events[eventIndex][1].type === "lineEnding") && events[eventIndex - 1][1].type === "data") {
-			data = events[eventIndex - 1][1];
-			chunks = context.sliceStream(data);
-			index = chunks.length;
-			bufferIndex = -1;
-			size = 0;
-			tabs = void 0;
-			while (index--) {
-				chunk = chunks[index];
-				if (typeof chunk === "string") {
-					bufferIndex = chunk.length;
-					while (chunk.charCodeAt(bufferIndex - 1) === 32) {
-						size++;
-						bufferIndex--;
-					}
-					if (bufferIndex) break;
-					bufferIndex = -1;
-				} else if (chunk === -2) {
-					tabs = true;
-					size++;
-				} else if (chunk === -1);
-				else {
-					index++;
-					break;
-				}
-			}
-			if (size) {
-				token = {
-					type: eventIndex === events.length || tabs || size < 2 ? "lineSuffix" : "hardBreakTrailing",
-					start: {
-						line: data.end.line,
-						column: data.end.column - size,
-						offset: data.end.offset - size,
-						_index: data.start._index + index,
-						_bufferIndex: index ? bufferIndex : data.start._bufferIndex + bufferIndex
-					},
-					end: shallow(data.end)
-				};
-				data.end = shallow(token.start);
-				if (data.start.offset === data.end.offset) assign(data, token);
-				else {
-					events.splice(eventIndex, 0, [
-						"enter",
-						token,
-						context
-					], [
-						"exit",
-						token,
-						context
-					]);
-					eventIndex += 2;
-				}
-			}
-			eventIndex++;
-		}
-		return events;
-	}
-	exports.resolver = resolver;
-	exports.string = string;
-	exports.text = text;
-}));
-//#endregion
-//#region node_modules/micromark/dist/util/chunked-push.js
-var require_chunked_push = /* @__PURE__ */ __commonJSMin(((exports, module) => {
-	var chunkedSplice = require_chunked_splice();
-	function chunkedPush(list, items) {
-		if (list.length) {
-			chunkedSplice(list, list.length, 0, items);
-			return list;
-		}
-		return items;
-	}
-	module.exports = chunkedPush;
-}));
-//#endregion
-//#region node_modules/micromark/dist/util/serialize-chunks.js
-var require_serialize_chunks = /* @__PURE__ */ __commonJSMin(((exports, module) => {
-	var fromCharCode = require_from_char_code();
-	function serializeChunks(chunks) {
-		var index = -1;
-		var result = [];
-		var chunk;
-		var value;
-		var atTab;
-		while (++index < chunks.length) {
-			chunk = chunks[index];
-			if (typeof chunk === "string") value = chunk;
-			else if (chunk === -5) value = "\r";
-			else if (chunk === -4) value = "\n";
-			else if (chunk === -3) value = "\r\n";
-			else if (chunk === -2) value = "	";
-			else if (chunk === -1) {
-				if (atTab) continue;
-				value = " ";
-			} else value = fromCharCode(chunk);
-			atTab = chunk === -2;
-			result.push(value);
-		}
-		return result.join("");
-	}
-	module.exports = serializeChunks;
-}));
-//#endregion
-//#region node_modules/micromark/dist/util/slice-chunks.js
-var require_slice_chunks = /* @__PURE__ */ __commonJSMin(((exports, module) => {
-	function sliceChunks(chunks, token) {
-		var startIndex = token.start._index;
-		var startBufferIndex = token.start._bufferIndex;
-		var endIndex = token.end._index;
-		var endBufferIndex = token.end._bufferIndex;
-		var view;
-		if (startIndex === endIndex) view = [chunks[startIndex].slice(startBufferIndex, endBufferIndex)];
-		else {
-			view = chunks.slice(startIndex, endIndex);
-			if (startBufferIndex > -1) view[0] = view[0].slice(startBufferIndex);
-			if (endBufferIndex > 0) view.push(chunks[endIndex].slice(0, endBufferIndex));
-		}
-		return view;
-	}
-	module.exports = sliceChunks;
-}));
-//#endregion
-//#region node_modules/micromark/dist/util/create-tokenizer.js
-var require_create_tokenizer = /* @__PURE__ */ __commonJSMin(((exports, module) => {
-	var assign = require_assign();
-	var markdownLineEnding = require_markdown_line_ending();
-	var chunkedPush = require_chunked_push();
-	var chunkedSplice = require_chunked_splice();
-	var miniflat = require_miniflat();
-	var resolveAll = require_resolve_all();
-	var serializeChunks = require_serialize_chunks();
-	var shallow = require_shallow();
-	var sliceChunks = require_slice_chunks();
-	function createTokenizer(parser, initialize, from) {
-		var point = from ? shallow(from) : {
-			line: 1,
-			column: 1,
-			offset: 0
-		};
-		var columnStart = {};
-		var resolveAllConstructs = [];
-		var chunks = [];
-		var stack = [];
-		var effects = {
-			consume,
-			enter,
-			exit,
-			attempt: constructFactory(onsuccessfulconstruct),
-			check: constructFactory(onsuccessfulcheck),
-			interrupt: constructFactory(onsuccessfulcheck, { interrupt: true }),
-			lazy: constructFactory(onsuccessfulcheck, { lazy: true })
-		};
-		var context = {
-			previous: null,
-			events: [],
-			parser,
-			sliceStream,
-			sliceSerialize,
-			now,
-			defineSkip: skip,
-			write
-		};
-		var state = initialize.tokenize.call(context, effects);
-		if (initialize.resolveAll) resolveAllConstructs.push(initialize);
-		point._index = 0;
-		point._bufferIndex = -1;
-		return context;
-		function write(slice) {
-			chunks = chunkedPush(chunks, slice);
-			main();
-			if (chunks[chunks.length - 1] !== null) return [];
-			addResult(initialize, 0);
-			context.events = resolveAll(resolveAllConstructs, context.events, context);
-			return context.events;
-		}
-		function sliceSerialize(token) {
-			return serializeChunks(sliceStream(token));
-		}
-		function sliceStream(token) {
-			return sliceChunks(chunks, token);
-		}
-		function now() {
-			return shallow(point);
-		}
-		function skip(value) {
-			columnStart[value.line] = value.column;
-			accountForPotentialSkip();
-		}
-		function main() {
-			var chunkIndex;
-			var chunk;
-			while (point._index < chunks.length) {
-				chunk = chunks[point._index];
-				if (typeof chunk === "string") {
-					chunkIndex = point._index;
-					if (point._bufferIndex < 0) point._bufferIndex = 0;
-					while (point._index === chunkIndex && point._bufferIndex < chunk.length) go(chunk.charCodeAt(point._bufferIndex));
-				} else go(chunk);
-			}
-		}
-		function go(code) {
-			state = state(code);
-		}
-		function consume(code) {
-			if (markdownLineEnding(code)) {
-				point.line++;
-				point.column = 1;
-				point.offset += code === -3 ? 2 : 1;
-				accountForPotentialSkip();
-			} else if (code !== -1) {
-				point.column++;
-				point.offset++;
-			}
-			if (point._bufferIndex < 0) point._index++;
-			else {
-				point._bufferIndex++;
-				if (point._bufferIndex === chunks[point._index].length) {
-					point._bufferIndex = -1;
-					point._index++;
-				}
-			}
-			context.previous = code;
-		}
-		function enter(type, fields) {
-			var token = fields || {};
-			token.type = type;
-			token.start = now();
-			context.events.push([
-				"enter",
-				token,
-				context
-			]);
-			stack.push(token);
-			return token;
-		}
-		function exit(type) {
-			var token = stack.pop();
-			token.end = now();
-			context.events.push([
-				"exit",
-				token,
-				context
-			]);
-			return token;
-		}
-		function onsuccessfulconstruct(construct, info) {
-			addResult(construct, info.from);
-		}
-		function onsuccessfulcheck(construct, info) {
-			info.restore();
-		}
-		function constructFactory(onreturn, fields) {
-			return hook;
-			function hook(constructs, returnState, bogusState) {
-				var listOfConstructs;
-				var constructIndex;
-				var currentConstruct;
-				var info;
-				return constructs.tokenize || "length" in constructs ? handleListOfConstructs(miniflat(constructs)) : handleMapOfConstructs;
-				function handleMapOfConstructs(code) {
-					if (code in constructs || null in constructs) return handleListOfConstructs(constructs.null ? miniflat(constructs[code]).concat(miniflat(constructs.null)) : constructs[code])(code);
-					return bogusState(code);
-				}
-				function handleListOfConstructs(list) {
-					listOfConstructs = list;
-					constructIndex = 0;
-					return handleConstruct(list[constructIndex]);
-				}
-				function handleConstruct(construct) {
-					return start;
-					function start(code) {
-						info = store();
-						currentConstruct = construct;
-						if (!construct.partial) context.currentConstruct = construct;
-						if (construct.name && context.parser.constructs.disable.null.indexOf(construct.name) > -1) return nok();
-						return construct.tokenize.call(fields ? assign({}, context, fields) : context, effects, ok, nok)(code);
-					}
-				}
-				function ok(code) {
-					onreturn(currentConstruct, info);
-					return returnState;
-				}
-				function nok(code) {
-					info.restore();
-					if (++constructIndex < listOfConstructs.length) return handleConstruct(listOfConstructs[constructIndex]);
-					return bogusState;
-				}
-			}
-		}
-		function addResult(construct, from) {
-			if (construct.resolveAll && resolveAllConstructs.indexOf(construct) < 0) resolveAllConstructs.push(construct);
-			if (construct.resolve) chunkedSplice(context.events, from, context.events.length - from, construct.resolve(context.events.slice(from), context));
-			if (construct.resolveTo) context.events = construct.resolveTo(context.events, context);
-		}
-		function store() {
-			var startPoint = now();
-			var startPrevious = context.previous;
-			var startCurrentConstruct = context.currentConstruct;
-			var startEventsIndex = context.events.length;
-			var startStack = Array.from(stack);
-			return {
-				restore,
-				from: startEventsIndex
-			};
-			function restore() {
-				point = startPoint;
-				context.previous = startPrevious;
-				context.currentConstruct = startCurrentConstruct;
-				context.events.length = startEventsIndex;
-				stack = startStack;
-				accountForPotentialSkip();
-			}
-		}
-		function accountForPotentialSkip() {
-			if (point.line in columnStart && point.column < 2) {
-				point.column = columnStart[point.line];
-				point.offset += columnStart[point.line] - 1;
-			}
-		}
-	}
-	module.exports = createTokenizer;
-}));
-//#endregion
-//#region node_modules/micromark/dist/util/move-point.js
-var require_move_point = /* @__PURE__ */ __commonJSMin(((exports, module) => {
-	function movePoint(point, offset) {
-		point.column += offset;
-		point.offset += offset;
-		point._bufferIndex += offset;
-		return point;
-	}
-	module.exports = movePoint;
-}));
-//#endregion
-//#region node_modules/micromark/dist/tokenize/attention.js
-var require_attention = /* @__PURE__ */ __commonJSMin(((exports, module) => {
-	var chunkedPush = require_chunked_push();
-	var chunkedSplice = require_chunked_splice();
-	var classifyCharacter = require_classify_character();
-	var movePoint = require_move_point();
-	var resolveAll = require_resolve_all();
-	var shallow = require_shallow();
-	var attention = {
-		name: "attention",
-		tokenize: tokenizeAttention,
-		resolveAll: resolveAllAttention
-	};
-	function resolveAllAttention(events, context) {
-		var index = -1;
-		var open;
-		var group;
-		var text;
-		var openingSequence;
-		var closingSequence;
-		var use;
-		var nextEvents;
-		var offset;
-		while (++index < events.length) if (events[index][0] === "enter" && events[index][1].type === "attentionSequence" && events[index][1]._close) {
-			open = index;
-			while (open--) if (events[open][0] === "exit" && events[open][1].type === "attentionSequence" && events[open][1]._open && context.sliceSerialize(events[open][1]).charCodeAt(0) === context.sliceSerialize(events[index][1]).charCodeAt(0)) {
-				if ((events[open][1]._close || events[index][1]._open) && (events[index][1].end.offset - events[index][1].start.offset) % 3 && !((events[open][1].end.offset - events[open][1].start.offset + events[index][1].end.offset - events[index][1].start.offset) % 3)) continue;
-				use = events[open][1].end.offset - events[open][1].start.offset > 1 && events[index][1].end.offset - events[index][1].start.offset > 1 ? 2 : 1;
-				openingSequence = {
-					type: use > 1 ? "strongSequence" : "emphasisSequence",
-					start: movePoint(shallow(events[open][1].end), -use),
-					end: shallow(events[open][1].end)
-				};
-				closingSequence = {
-					type: use > 1 ? "strongSequence" : "emphasisSequence",
-					start: shallow(events[index][1].start),
-					end: movePoint(shallow(events[index][1].start), use)
-				};
-				text = {
-					type: use > 1 ? "strongText" : "emphasisText",
-					start: shallow(events[open][1].end),
-					end: shallow(events[index][1].start)
-				};
-				group = {
-					type: use > 1 ? "strong" : "emphasis",
-					start: shallow(openingSequence.start),
-					end: shallow(closingSequence.end)
-				};
-				events[open][1].end = shallow(openingSequence.start);
-				events[index][1].start = shallow(closingSequence.end);
-				nextEvents = [];
-				if (events[open][1].end.offset - events[open][1].start.offset) nextEvents = chunkedPush(nextEvents, [[
-					"enter",
-					events[open][1],
-					context
-				], [
-					"exit",
-					events[open][1],
-					context
-				]]);
-				nextEvents = chunkedPush(nextEvents, [
-					[
-						"enter",
-						group,
-						context
-					],
-					[
-						"enter",
-						openingSequence,
-						context
-					],
-					[
-						"exit",
-						openingSequence,
-						context
-					],
-					[
-						"enter",
-						text,
-						context
-					]
-				]);
-				nextEvents = chunkedPush(nextEvents, resolveAll(context.parser.constructs.insideSpan.null, events.slice(open + 1, index), context));
-				nextEvents = chunkedPush(nextEvents, [
-					[
-						"exit",
-						text,
-						context
-					],
-					[
-						"enter",
-						closingSequence,
-						context
-					],
-					[
-						"exit",
-						closingSequence,
-						context
-					],
-					[
-						"exit",
-						group,
-						context
-					]
-				]);
-				if (events[index][1].end.offset - events[index][1].start.offset) {
-					offset = 2;
-					nextEvents = chunkedPush(nextEvents, [[
-						"enter",
-						events[index][1],
-						context
-					], [
-						"exit",
-						events[index][1],
-						context
-					]]);
-				} else offset = 0;
-				chunkedSplice(events, open - 1, index - open + 3, nextEvents);
-				index = open + nextEvents.length - offset - 2;
-				break;
-			}
-		}
-		index = -1;
-		while (++index < events.length) if (events[index][1].type === "attentionSequence") events[index][1].type = "data";
-		return events;
-	}
-	function tokenizeAttention(effects, ok) {
-		var before = classifyCharacter(this.previous);
-		var marker;
-		return start;
-		function start(code) {
-			effects.enter("attentionSequence");
-			marker = code;
-			return sequence(code);
-		}
-		function sequence(code) {
-			var token;
-			var after;
-			var open;
-			var close;
-			if (code === marker) {
-				effects.consume(code);
-				return sequence;
-			}
-			token = effects.exit("attentionSequence");
-			after = classifyCharacter(code);
-			open = !after || after === 2 && before;
-			close = !before || before === 2 && after;
-			token._open = marker === 42 ? open : open && (before || !close);
-			token._close = marker === 42 ? close : close && (after || !open);
-			return ok(code);
-		}
-	}
-	module.exports = attention;
-}));
-//#endregion
-//#region node_modules/micromark/dist/character/ascii-atext.js
-var require_ascii_atext = /* @__PURE__ */ __commonJSMin(((exports, module) => {
-	module.exports = require_regex_check()(/[#-'*+\--9=?A-Z^-~]/);
-}));
-//#endregion
-//#region node_modules/micromark/dist/tokenize/autolink.js
-var require_autolink = /* @__PURE__ */ __commonJSMin(((exports, module) => {
-	var asciiAlpha = require_ascii_alpha();
-	var asciiAlphanumeric = require_ascii_alphanumeric();
-	var asciiAtext = require_ascii_atext();
-	var asciiControl = require_ascii_control();
-	var autolink = {
-		name: "autolink",
-		tokenize: tokenizeAutolink
-	};
-	function tokenizeAutolink(effects, ok, nok) {
-		var size = 1;
-		return start;
-		function start(code) {
-			effects.enter("autolink");
-			effects.enter("autolinkMarker");
-			effects.consume(code);
-			effects.exit("autolinkMarker");
-			effects.enter("autolinkProtocol");
-			return open;
-		}
-		function open(code) {
-			if (asciiAlpha(code)) {
-				effects.consume(code);
-				return schemeOrEmailAtext;
-			}
-			return asciiAtext(code) ? emailAtext(code) : nok(code);
-		}
-		function schemeOrEmailAtext(code) {
-			return code === 43 || code === 45 || code === 46 || asciiAlphanumeric(code) ? schemeInsideOrEmailAtext(code) : emailAtext(code);
-		}
-		function schemeInsideOrEmailAtext(code) {
-			if (code === 58) {
-				effects.consume(code);
-				return urlInside;
-			}
-			if ((code === 43 || code === 45 || code === 46 || asciiAlphanumeric(code)) && size++ < 32) {
-				effects.consume(code);
-				return schemeInsideOrEmailAtext;
-			}
-			return emailAtext(code);
-		}
-		function urlInside(code) {
-			if (code === 62) {
-				effects.exit("autolinkProtocol");
-				return end(code);
-			}
-			if (code === 32 || code === 60 || asciiControl(code)) return nok(code);
-			effects.consume(code);
-			return urlInside;
-		}
-		function emailAtext(code) {
-			if (code === 64) {
-				effects.consume(code);
-				size = 0;
-				return emailAtSignOrDot;
-			}
-			if (asciiAtext(code)) {
-				effects.consume(code);
-				return emailAtext;
-			}
-			return nok(code);
-		}
-		function emailAtSignOrDot(code) {
-			return asciiAlphanumeric(code) ? emailLabel(code) : nok(code);
-		}
-		function emailLabel(code) {
-			if (code === 46) {
-				effects.consume(code);
-				size = 0;
-				return emailAtSignOrDot;
-			}
-			if (code === 62) {
-				effects.exit("autolinkProtocol").type = "autolinkEmail";
-				return end(code);
-			}
-			return emailValue(code);
-		}
-		function emailValue(code) {
-			if ((code === 45 || asciiAlphanumeric(code)) && size++ < 63) {
-				effects.consume(code);
-				return code === 45 ? emailValue : emailLabel;
-			}
-			return nok(code);
-		}
-		function end(code) {
-			effects.enter("autolinkMarker");
-			effects.consume(code);
-			effects.exit("autolinkMarker");
-			effects.exit("autolink");
-			return ok;
-		}
-	}
-	module.exports = autolink;
-}));
-//#endregion
-//#region node_modules/micromark/dist/tokenize/block-quote.js
-var require_block_quote = /* @__PURE__ */ __commonJSMin(((exports, module) => {
-	var markdownSpace = require_markdown_space();
-	var factorySpace = require_factory_space();
-	var blockQuote = {
-		name: "blockQuote",
-		tokenize: tokenizeBlockQuoteStart,
-		continuation: { tokenize: tokenizeBlockQuoteContinuation },
-		exit
-	};
-	function tokenizeBlockQuoteStart(effects, ok, nok) {
-		var self = this;
-		return start;
-		function start(code) {
-			if (code === 62) {
-				if (!self.containerState.open) {
-					effects.enter("blockQuote", { _container: true });
-					self.containerState.open = true;
-				}
-				effects.enter("blockQuotePrefix");
-				effects.enter("blockQuoteMarker");
-				effects.consume(code);
-				effects.exit("blockQuoteMarker");
-				return after;
-			}
-			return nok(code);
-		}
-		function after(code) {
-			if (markdownSpace(code)) {
-				effects.enter("blockQuotePrefixWhitespace");
-				effects.consume(code);
-				effects.exit("blockQuotePrefixWhitespace");
-				effects.exit("blockQuotePrefix");
-				return ok;
-			}
-			effects.exit("blockQuotePrefix");
-			return ok(code);
-		}
-	}
-	function tokenizeBlockQuoteContinuation(effects, ok, nok) {
-		return factorySpace(effects, effects.attempt(blockQuote, ok, nok), "linePrefix", this.parser.constructs.disable.null.indexOf("codeIndented") > -1 ? void 0 : 4);
-	}
-	function exit(effects) {
-		effects.exit("blockQuote");
-	}
-	module.exports = blockQuote;
-}));
-//#endregion
-//#region node_modules/micromark/dist/character/ascii-punctuation.js
-var require_ascii_punctuation = /* @__PURE__ */ __commonJSMin(((exports, module) => {
-	module.exports = require_regex_check()(/[!-/:-@[-`{-~]/);
-}));
-//#endregion
-//#region node_modules/micromark/dist/tokenize/character-escape.js
-var require_character_escape = /* @__PURE__ */ __commonJSMin(((exports, module) => {
-	var asciiPunctuation = require_ascii_punctuation();
-	var characterEscape = {
-		name: "characterEscape",
-		tokenize: tokenizeCharacterEscape
-	};
-	function tokenizeCharacterEscape(effects, ok, nok) {
-		return start;
-		function start(code) {
-			effects.enter("characterEscape");
-			effects.enter("escapeMarker");
-			effects.consume(code);
-			effects.exit("escapeMarker");
-			return open;
-		}
-		function open(code) {
-			if (asciiPunctuation(code)) {
-				effects.enter("characterEscapeValue");
-				effects.consume(code);
-				effects.exit("characterEscapeValue");
-				effects.exit("characterEscape");
-				return ok;
-			}
-			return nok(code);
-		}
-	}
-	module.exports = characterEscape;
-}));
-//#endregion
-//#region node_modules/character-entities/index.json
-var require_character_entities = /* @__PURE__ */ __commonJSMin(((exports, module) => {
-	module.exports = {
-		"AEli": "Æ",
-		"AElig": "Æ",
-		"AM": "&",
-		"AMP": "&",
-		"Aacut": "Á",
-		"Aacute": "Á",
-		"Abreve": "Ă",
-		"Acir": "Â",
-		"Acirc": "Â",
-		"Acy": "А",
-		"Afr": "𝔄",
-		"Agrav": "À",
-		"Agrave": "À",
-		"Alpha": "Α",
-		"Amacr": "Ā",
-		"And": "⩓",
-		"Aogon": "Ą",
-		"Aopf": "𝔸",
-		"ApplyFunction": "⁡",
-		"Arin": "Å",
-		"Aring": "Å",
-		"Ascr": "𝒜",
-		"Assign": "≔",
-		"Atild": "Ã",
-		"Atilde": "Ã",
-		"Aum": "Ä",
-		"Auml": "Ä",
-		"Backslash": "∖",
-		"Barv": "⫧",
-		"Barwed": "⌆",
-		"Bcy": "Б",
-		"Because": "∵",
-		"Bernoullis": "ℬ",
-		"Beta": "Β",
-		"Bfr": "𝔅",
-		"Bopf": "𝔹",
-		"Breve": "˘",
-		"Bscr": "ℬ",
-		"Bumpeq": "≎",
-		"CHcy": "Ч",
-		"COP": "©",
-		"COPY": "©",
-		"Cacute": "Ć",
-		"Cap": "⋒",
-		"CapitalDifferentialD": "ⅅ",
-		"Cayleys": "ℭ",
-		"Ccaron": "Č",
-		"Ccedi": "Ç",
-		"Ccedil": "Ç",
-		"Ccirc": "Ĉ",
-		"Cconint": "∰",
-		"Cdot": "Ċ",
-		"Cedilla": "¸",
-		"CenterDot": "·",
-		"Cfr": "ℭ",
-		"Chi": "Χ",
-		"CircleDot": "⊙",
-		"CircleMinus": "⊖",
-		"CirclePlus": "⊕",
-		"CircleTimes": "⊗",
-		"ClockwiseContourIntegral": "∲",
-		"CloseCurlyDoubleQuote": "”",
-		"CloseCurlyQuote": "’",
-		"Colon": "∷",
-		"Colone": "⩴",
-		"Congruent": "≡",
-		"Conint": "∯",
-		"ContourIntegral": "∮",
-		"Copf": "ℂ",
-		"Coproduct": "∐",
-		"CounterClockwiseContourIntegral": "∳",
-		"Cross": "⨯",
-		"Cscr": "𝒞",
-		"Cup": "⋓",
-		"CupCap": "≍",
-		"DD": "ⅅ",
-		"DDotrahd": "⤑",
-		"DJcy": "Ђ",
-		"DScy": "Ѕ",
-		"DZcy": "Џ",
-		"Dagger": "‡",
-		"Darr": "↡",
-		"Dashv": "⫤",
-		"Dcaron": "Ď",
-		"Dcy": "Д",
-		"Del": "∇",
-		"Delta": "Δ",
-		"Dfr": "𝔇",
-		"DiacriticalAcute": "´",
-		"DiacriticalDot": "˙",
-		"DiacriticalDoubleAcute": "˝",
-		"DiacriticalGrave": "`",
-		"DiacriticalTilde": "˜",
-		"Diamond": "⋄",
-		"DifferentialD": "ⅆ",
-		"Dopf": "𝔻",
-		"Dot": "¨",
-		"DotDot": "⃜",
-		"DotEqual": "≐",
-		"DoubleContourIntegral": "∯",
-		"DoubleDot": "¨",
-		"DoubleDownArrow": "⇓",
-		"DoubleLeftArrow": "⇐",
-		"DoubleLeftRightArrow": "⇔",
-		"DoubleLeftTee": "⫤",
-		"DoubleLongLeftArrow": "⟸",
-		"DoubleLongLeftRightArrow": "⟺",
-		"DoubleLongRightArrow": "⟹",
-		"DoubleRightArrow": "⇒",
-		"DoubleRightTee": "⊨",
-		"DoubleUpArrow": "⇑",
-		"DoubleUpDownArrow": "⇕",
-		"DoubleVerticalBar": "∥",
-		"DownArrow": "↓",
-		"DownArrowBar": "⤓",
-		"DownArrowUpArrow": "⇵",
-		"DownBreve": "̑",
-		"DownLeftRightVector": "⥐",
-		"DownLeftTeeVector": "⥞",
-		"DownLeftVector": "↽",
-		"DownLeftVectorBar": "⥖",
-		"DownRightTeeVector": "⥟",
-		"DownRightVector": "⇁",
-		"DownRightVectorBar": "⥗",
-		"DownTee": "⊤",
-		"DownTeeArrow": "↧",
-		"Downarrow": "⇓",
-		"Dscr": "𝒟",
-		"Dstrok": "Đ",
-		"ENG": "Ŋ",
-		"ET": "Ð",
-		"ETH": "Ð",
-		"Eacut": "É",
-		"Eacute": "É",
-		"Ecaron": "Ě",
-		"Ecir": "Ê",
-		"Ecirc": "Ê",
-		"Ecy": "Э",
-		"Edot": "Ė",
-		"Efr": "𝔈",
-		"Egrav": "È",
-		"Egrave": "È",
-		"Element": "∈",
-		"Emacr": "Ē",
-		"EmptySmallSquare": "◻",
-		"EmptyVerySmallSquare": "▫",
-		"Eogon": "Ę",
-		"Eopf": "𝔼",
-		"Epsilon": "Ε",
-		"Equal": "⩵",
-		"EqualTilde": "≂",
-		"Equilibrium": "⇌",
-		"Escr": "ℰ",
-		"Esim": "⩳",
-		"Eta": "Η",
-		"Eum": "Ë",
-		"Euml": "Ë",
-		"Exists": "∃",
-		"ExponentialE": "ⅇ",
-		"Fcy": "Ф",
-		"Ffr": "𝔉",
-		"FilledSmallSquare": "◼",
-		"FilledVerySmallSquare": "▪",
-		"Fopf": "𝔽",
-		"ForAll": "∀",
-		"Fouriertrf": "ℱ",
-		"Fscr": "ℱ",
-		"GJcy": "Ѓ",
-		"G": ">",
-		"GT": ">",
-		"Gamma": "Γ",
-		"Gammad": "Ϝ",
-		"Gbreve": "Ğ",
-		"Gcedil": "Ģ",
-		"Gcirc": "Ĝ",
-		"Gcy": "Г",
-		"Gdot": "Ġ",
-		"Gfr": "𝔊",
-		"Gg": "⋙",
-		"Gopf": "𝔾",
-		"GreaterEqual": "≥",
-		"GreaterEqualLess": "⋛",
-		"GreaterFullEqual": "≧",
-		"GreaterGreater": "⪢",
-		"GreaterLess": "≷",
-		"GreaterSlantEqual": "⩾",
-		"GreaterTilde": "≳",
-		"Gscr": "𝒢",
-		"Gt": "≫",
-		"HARDcy": "Ъ",
-		"Hacek": "ˇ",
-		"Hat": "^",
-		"Hcirc": "Ĥ",
-		"Hfr": "ℌ",
-		"HilbertSpace": "ℋ",
-		"Hopf": "ℍ",
-		"HorizontalLine": "─",
-		"Hscr": "ℋ",
-		"Hstrok": "Ħ",
-		"HumpDownHump": "≎",
-		"HumpEqual": "≏",
-		"IEcy": "Е",
-		"IJlig": "Ĳ",
-		"IOcy": "Ё",
-		"Iacut": "Í",
-		"Iacute": "Í",
-		"Icir": "Î",
-		"Icirc": "Î",
-		"Icy": "И",
-		"Idot": "İ",
-		"Ifr": "ℑ",
-		"Igrav": "Ì",
-		"Igrave": "Ì",
-		"Im": "ℑ",
-		"Imacr": "Ī",
-		"ImaginaryI": "ⅈ",
-		"Implies": "⇒",
-		"Int": "∬",
-		"Integral": "∫",
-		"Intersection": "⋂",
-		"InvisibleComma": "⁣",
-		"InvisibleTimes": "⁢",
-		"Iogon": "Į",
-		"Iopf": "𝕀",
-		"Iota": "Ι",
-		"Iscr": "ℐ",
-		"Itilde": "Ĩ",
-		"Iukcy": "І",
-		"Ium": "Ï",
-		"Iuml": "Ï",
-		"Jcirc": "Ĵ",
-		"Jcy": "Й",
-		"Jfr": "𝔍",
-		"Jopf": "𝕁",
-		"Jscr": "𝒥",
-		"Jsercy": "Ј",
-		"Jukcy": "Є",
-		"KHcy": "Х",
-		"KJcy": "Ќ",
-		"Kappa": "Κ",
-		"Kcedil": "Ķ",
-		"Kcy": "К",
-		"Kfr": "𝔎",
-		"Kopf": "𝕂",
-		"Kscr": "𝒦",
-		"LJcy": "Љ",
-		"L": "<",
-		"LT": "<",
-		"Lacute": "Ĺ",
-		"Lambda": "Λ",
-		"Lang": "⟪",
-		"Laplacetrf": "ℒ",
-		"Larr": "↞",
-		"Lcaron": "Ľ",
-		"Lcedil": "Ļ",
-		"Lcy": "Л",
-		"LeftAngleBracket": "⟨",
-		"LeftArrow": "←",
-		"LeftArrowBar": "⇤",
-		"LeftArrowRightArrow": "⇆",
-		"LeftCeiling": "⌈",
-		"LeftDoubleBracket": "⟦",
-		"LeftDownTeeVector": "⥡",
-		"LeftDownVector": "⇃",
-		"LeftDownVectorBar": "⥙",
-		"LeftFloor": "⌊",
-		"LeftRightArrow": "↔",
-		"LeftRightVector": "⥎",
-		"LeftTee": "⊣",
-		"LeftTeeArrow": "↤",
-		"LeftTeeVector": "⥚",
-		"LeftTriangle": "⊲",
-		"LeftTriangleBar": "⧏",
-		"LeftTriangleEqual": "⊴",
-		"LeftUpDownVector": "⥑",
-		"LeftUpTeeVector": "⥠",
-		"LeftUpVector": "↿",
-		"LeftUpVectorBar": "⥘",
-		"LeftVector": "↼",
-		"LeftVectorBar": "⥒",
-		"Leftarrow": "⇐",
-		"Leftrightarrow": "⇔",
-		"LessEqualGreater": "⋚",
-		"LessFullEqual": "≦",
-		"LessGreater": "≶",
-		"LessLess": "⪡",
-		"LessSlantEqual": "⩽",
-		"LessTilde": "≲",
-		"Lfr": "𝔏",
-		"Ll": "⋘",
-		"Lleftarrow": "⇚",
-		"Lmidot": "Ŀ",
-		"LongLeftArrow": "⟵",
-		"LongLeftRightArrow": "⟷",
-		"LongRightArrow": "⟶",
-		"Longleftarrow": "⟸",
-		"Longleftrightarrow": "⟺",
-		"Longrightarrow": "⟹",
-		"Lopf": "𝕃",
-		"LowerLeftArrow": "↙",
-		"LowerRightArrow": "↘",
-		"Lscr": "ℒ",
-		"Lsh": "↰",
-		"Lstrok": "Ł",
-		"Lt": "≪",
-		"Map": "⤅",
-		"Mcy": "М",
-		"MediumSpace": " ",
-		"Mellintrf": "ℳ",
-		"Mfr": "𝔐",
-		"MinusPlus": "∓",
-		"Mopf": "𝕄",
-		"Mscr": "ℳ",
-		"Mu": "Μ",
-		"NJcy": "Њ",
-		"Nacute": "Ń",
-		"Ncaron": "Ň",
-		"Ncedil": "Ņ",
-		"Ncy": "Н",
-		"NegativeMediumSpace": "​",
-		"NegativeThickSpace": "​",
-		"NegativeThinSpace": "​",
-		"NegativeVeryThinSpace": "​",
-		"NestedGreaterGreater": "≫",
-		"NestedLessLess": "≪",
-		"NewLine": "\n",
-		"Nfr": "𝔑",
-		"NoBreak": "⁠",
-		"NonBreakingSpace": "\xA0",
-		"Nopf": "ℕ",
-		"Not": "⫬",
-		"NotCongruent": "≢",
-		"NotCupCap": "≭",
-		"NotDoubleVerticalBar": "∦",
-		"NotElement": "∉",
-		"NotEqual": "≠",
-		"NotEqualTilde": "≂̸",
-		"NotExists": "∄",
-		"NotGreater": "≯",
-		"NotGreaterEqual": "≱",
-		"NotGreaterFullEqual": "≧̸",
-		"NotGreaterGreater": "≫̸",
-		"NotGreaterLess": "≹",
-		"NotGreaterSlantEqual": "⩾̸",
-		"NotGreaterTilde": "≵",
-		"NotHumpDownHump": "≎̸",
-		"NotHumpEqual": "≏̸",
-		"NotLeftTriangle": "⋪",
-		"NotLeftTriangleBar": "⧏̸",
-		"NotLeftTriangleEqual": "⋬",
-		"NotLess": "≮",
-		"NotLessEqual": "≰",
-		"NotLessGreater": "≸",
-		"NotLessLess": "≪̸",
-		"NotLessSlantEqual": "⩽̸",
-		"NotLessTilde": "≴",
-		"NotNestedGreaterGreater": "⪢̸",
-		"NotNestedLessLess": "⪡̸",
-		"NotPrecedes": "⊀",
-		"NotPrecedesEqual": "⪯̸",
-		"NotPrecedesSlantEqual": "⋠",
-		"NotReverseElement": "∌",
-		"NotRightTriangle": "⋫",
-		"NotRightTriangleBar": "⧐̸",
-		"NotRightTriangleEqual": "⋭",
-		"NotSquareSubset": "⊏̸",
-		"NotSquareSubsetEqual": "⋢",
-		"NotSquareSuperset": "⊐̸",
-		"NotSquareSupersetEqual": "⋣",
-		"NotSubset": "⊂⃒",
-		"NotSubsetEqual": "⊈",
-		"NotSucceeds": "⊁",
-		"NotSucceedsEqual": "⪰̸",
-		"NotSucceedsSlantEqual": "⋡",
-		"NotSucceedsTilde": "≿̸",
-		"NotSuperset": "⊃⃒",
-		"NotSupersetEqual": "⊉",
-		"NotTilde": "≁",
-		"NotTildeEqual": "≄",
-		"NotTildeFullEqual": "≇",
-		"NotTildeTilde": "≉",
-		"NotVerticalBar": "∤",
-		"Nscr": "𝒩",
-		"Ntild": "Ñ",
-		"Ntilde": "Ñ",
-		"Nu": "Ν",
-		"OElig": "Œ",
-		"Oacut": "Ó",
-		"Oacute": "Ó",
-		"Ocir": "Ô",
-		"Ocirc": "Ô",
-		"Ocy": "О",
-		"Odblac": "Ő",
-		"Ofr": "𝔒",
-		"Ograv": "Ò",
-		"Ograve": "Ò",
-		"Omacr": "Ō",
-		"Omega": "Ω",
-		"Omicron": "Ο",
-		"Oopf": "𝕆",
-		"OpenCurlyDoubleQuote": "“",
-		"OpenCurlyQuote": "‘",
-		"Or": "⩔",
-		"Oscr": "𝒪",
-		"Oslas": "Ø",
-		"Oslash": "Ø",
-		"Otild": "Õ",
-		"Otilde": "Õ",
-		"Otimes": "⨷",
-		"Oum": "Ö",
-		"Ouml": "Ö",
-		"OverBar": "‾",
-		"OverBrace": "⏞",
-		"OverBracket": "⎴",
-		"OverParenthesis": "⏜",
-		"PartialD": "∂",
-		"Pcy": "П",
-		"Pfr": "𝔓",
-		"Phi": "Φ",
-		"Pi": "Π",
-		"PlusMinus": "±",
-		"Poincareplane": "ℌ",
-		"Popf": "ℙ",
-		"Pr": "⪻",
-		"Precedes": "≺",
-		"PrecedesEqual": "⪯",
-		"PrecedesSlantEqual": "≼",
-		"PrecedesTilde": "≾",
-		"Prime": "″",
-		"Product": "∏",
-		"Proportion": "∷",
-		"Proportional": "∝",
-		"Pscr": "𝒫",
-		"Psi": "Ψ",
-		"QUO": "\"",
-		"QUOT": "\"",
-		"Qfr": "𝔔",
-		"Qopf": "ℚ",
-		"Qscr": "𝒬",
-		"RBarr": "⤐",
-		"RE": "®",
-		"REG": "®",
-		"Racute": "Ŕ",
-		"Rang": "⟫",
-		"Rarr": "↠",
-		"Rarrtl": "⤖",
-		"Rcaron": "Ř",
-		"Rcedil": "Ŗ",
-		"Rcy": "Р",
-		"Re": "ℜ",
-		"ReverseElement": "∋",
-		"ReverseEquilibrium": "⇋",
-		"ReverseUpEquilibrium": "⥯",
-		"Rfr": "ℜ",
-		"Rho": "Ρ",
-		"RightAngleBracket": "⟩",
-		"RightArrow": "→",
-		"RightArrowBar": "⇥",
-		"RightArrowLeftArrow": "⇄",
-		"RightCeiling": "⌉",
-		"RightDoubleBracket": "⟧",
-		"RightDownTeeVector": "⥝",
-		"RightDownVector": "⇂",
-		"RightDownVectorBar": "⥕",
-		"RightFloor": "⌋",
-		"RightTee": "⊢",
-		"RightTeeArrow": "↦",
-		"RightTeeVector": "⥛",
-		"RightTriangle": "⊳",
-		"RightTriangleBar": "⧐",
-		"RightTriangleEqual": "⊵",
-		"RightUpDownVector": "⥏",
-		"RightUpTeeVector": "⥜",
-		"RightUpVector": "↾",
-		"RightUpVectorBar": "⥔",
-		"RightVector": "⇀",
-		"RightVectorBar": "⥓",
-		"Rightarrow": "⇒",
-		"Ropf": "ℝ",
-		"RoundImplies": "⥰",
-		"Rrightarrow": "⇛",
-		"Rscr": "ℛ",
-		"Rsh": "↱",
-		"RuleDelayed": "⧴",
-		"SHCHcy": "Щ",
-		"SHcy": "Ш",
-		"SOFTcy": "Ь",
-		"Sacute": "Ś",
-		"Sc": "⪼",
-		"Scaron": "Š",
-		"Scedil": "Ş",
-		"Scirc": "Ŝ",
-		"Scy": "С",
-		"Sfr": "𝔖",
-		"ShortDownArrow": "↓",
-		"ShortLeftArrow": "←",
-		"ShortRightArrow": "→",
-		"ShortUpArrow": "↑",
-		"Sigma": "Σ",
-		"SmallCircle": "∘",
-		"Sopf": "𝕊",
-		"Sqrt": "√",
-		"Square": "□",
-		"SquareIntersection": "⊓",
-		"SquareSubset": "⊏",
-		"SquareSubsetEqual": "⊑",
-		"SquareSuperset": "⊐",
-		"SquareSupersetEqual": "⊒",
-		"SquareUnion": "⊔",
-		"Sscr": "𝒮",
-		"Star": "⋆",
-		"Sub": "⋐",
-		"Subset": "⋐",
-		"SubsetEqual": "⊆",
-		"Succeeds": "≻",
-		"SucceedsEqual": "⪰",
-		"SucceedsSlantEqual": "≽",
-		"SucceedsTilde": "≿",
-		"SuchThat": "∋",
-		"Sum": "∑",
-		"Sup": "⋑",
-		"Superset": "⊃",
-		"SupersetEqual": "⊇",
-		"Supset": "⋑",
-		"THOR": "Þ",
-		"THORN": "Þ",
-		"TRADE": "™",
-		"TSHcy": "Ћ",
-		"TScy": "Ц",
-		"Tab": "	",
-		"Tau": "Τ",
-		"Tcaron": "Ť",
-		"Tcedil": "Ţ",
-		"Tcy": "Т",
-		"Tfr": "𝔗",
-		"Therefore": "∴",
-		"Theta": "Θ",
-		"ThickSpace": "  ",
-		"ThinSpace": " ",
-		"Tilde": "∼",
-		"TildeEqual": "≃",
-		"TildeFullEqual": "≅",
-		"TildeTilde": "≈",
-		"Topf": "𝕋",
-		"TripleDot": "⃛",
-		"Tscr": "𝒯",
-		"Tstrok": "Ŧ",
-		"Uacut": "Ú",
-		"Uacute": "Ú",
-		"Uarr": "↟",
-		"Uarrocir": "⥉",
-		"Ubrcy": "Ў",
-		"Ubreve": "Ŭ",
-		"Ucir": "Û",
-		"Ucirc": "Û",
-		"Ucy": "У",
-		"Udblac": "Ű",
-		"Ufr": "𝔘",
-		"Ugrav": "Ù",
-		"Ugrave": "Ù",
-		"Umacr": "Ū",
-		"UnderBar": "_",
-		"UnderBrace": "⏟",
-		"UnderBracket": "⎵",
-		"UnderParenthesis": "⏝",
-		"Union": "⋃",
-		"UnionPlus": "⊎",
-		"Uogon": "Ų",
-		"Uopf": "𝕌",
-		"UpArrow": "↑",
-		"UpArrowBar": "⤒",
-		"UpArrowDownArrow": "⇅",
-		"UpDownArrow": "↕",
-		"UpEquilibrium": "⥮",
-		"UpTee": "⊥",
-		"UpTeeArrow": "↥",
-		"Uparrow": "⇑",
-		"Updownarrow": "⇕",
-		"UpperLeftArrow": "↖",
-		"UpperRightArrow": "↗",
-		"Upsi": "ϒ",
-		"Upsilon": "Υ",
-		"Uring": "Ů",
-		"Uscr": "𝒰",
-		"Utilde": "Ũ",
-		"Uum": "Ü",
-		"Uuml": "Ü",
-		"VDash": "⊫",
-		"Vbar": "⫫",
-		"Vcy": "В",
-		"Vdash": "⊩",
-		"Vdashl": "⫦",
-		"Vee": "⋁",
-		"Verbar": "‖",
-		"Vert": "‖",
-		"VerticalBar": "∣",
-		"VerticalLine": "|",
-		"VerticalSeparator": "❘",
-		"VerticalTilde": "≀",
-		"VeryThinSpace": " ",
-		"Vfr": "𝔙",
-		"Vopf": "𝕍",
-		"Vscr": "𝒱",
-		"Vvdash": "⊪",
-		"Wcirc": "Ŵ",
-		"Wedge": "⋀",
-		"Wfr": "𝔚",
-		"Wopf": "𝕎",
-		"Wscr": "𝒲",
-		"Xfr": "𝔛",
-		"Xi": "Ξ",
-		"Xopf": "𝕏",
-		"Xscr": "𝒳",
-		"YAcy": "Я",
-		"YIcy": "Ї",
-		"YUcy": "Ю",
-		"Yacut": "Ý",
-		"Yacute": "Ý",
-		"Ycirc": "Ŷ",
-		"Ycy": "Ы",
-		"Yfr": "𝔜",
-		"Yopf": "𝕐",
-		"Yscr": "𝒴",
-		"Yuml": "Ÿ",
-		"ZHcy": "Ж",
-		"Zacute": "Ź",
-		"Zcaron": "Ž",
-		"Zcy": "З",
-		"Zdot": "Ż",
-		"ZeroWidthSpace": "​",
-		"Zeta": "Ζ",
-		"Zfr": "ℨ",
-		"Zopf": "ℤ",
-		"Zscr": "𝒵",
-		"aacut": "á",
-		"aacute": "á",
-		"abreve": "ă",
-		"ac": "∾",
-		"acE": "∾̳",
-		"acd": "∿",
-		"acir": "â",
-		"acirc": "â",
-		"acut": "´",
-		"acute": "´",
-		"acy": "а",
-		"aeli": "æ",
-		"aelig": "æ",
-		"af": "⁡",
-		"afr": "𝔞",
-		"agrav": "à",
-		"agrave": "à",
-		"alefsym": "ℵ",
-		"aleph": "ℵ",
-		"alpha": "α",
-		"amacr": "ā",
-		"amalg": "⨿",
-		"am": "&",
-		"amp": "&",
-		"and": "∧",
-		"andand": "⩕",
-		"andd": "⩜",
-		"andslope": "⩘",
-		"andv": "⩚",
-		"ang": "∠",
-		"ange": "⦤",
-		"angle": "∠",
-		"angmsd": "∡",
-		"angmsdaa": "⦨",
-		"angmsdab": "⦩",
-		"angmsdac": "⦪",
-		"angmsdad": "⦫",
-		"angmsdae": "⦬",
-		"angmsdaf": "⦭",
-		"angmsdag": "⦮",
-		"angmsdah": "⦯",
-		"angrt": "∟",
-		"angrtvb": "⊾",
-		"angrtvbd": "⦝",
-		"angsph": "∢",
-		"angst": "Å",
-		"angzarr": "⍼",
-		"aogon": "ą",
-		"aopf": "𝕒",
-		"ap": "≈",
-		"apE": "⩰",
-		"apacir": "⩯",
-		"ape": "≊",
-		"apid": "≋",
-		"apos": "'",
-		"approx": "≈",
-		"approxeq": "≊",
-		"arin": "å",
-		"aring": "å",
-		"ascr": "𝒶",
-		"ast": "*",
-		"asymp": "≈",
-		"asympeq": "≍",
-		"atild": "ã",
-		"atilde": "ã",
-		"aum": "ä",
-		"auml": "ä",
-		"awconint": "∳",
-		"awint": "⨑",
-		"bNot": "⫭",
-		"backcong": "≌",
-		"backepsilon": "϶",
-		"backprime": "‵",
-		"backsim": "∽",
-		"backsimeq": "⋍",
-		"barvee": "⊽",
-		"barwed": "⌅",
-		"barwedge": "⌅",
-		"bbrk": "⎵",
-		"bbrktbrk": "⎶",
-		"bcong": "≌",
-		"bcy": "б",
-		"bdquo": "„",
-		"becaus": "∵",
-		"because": "∵",
-		"bemptyv": "⦰",
-		"bepsi": "϶",
-		"bernou": "ℬ",
-		"beta": "β",
-		"beth": "ℶ",
-		"between": "≬",
-		"bfr": "𝔟",
-		"bigcap": "⋂",
-		"bigcirc": "◯",
-		"bigcup": "⋃",
-		"bigodot": "⨀",
-		"bigoplus": "⨁",
-		"bigotimes": "⨂",
-		"bigsqcup": "⨆",
-		"bigstar": "★",
-		"bigtriangledown": "▽",
-		"bigtriangleup": "△",
-		"biguplus": "⨄",
-		"bigvee": "⋁",
-		"bigwedge": "⋀",
-		"bkarow": "⤍",
-		"blacklozenge": "⧫",
-		"blacksquare": "▪",
-		"blacktriangle": "▴",
-		"blacktriangledown": "▾",
-		"blacktriangleleft": "◂",
-		"blacktriangleright": "▸",
-		"blank": "␣",
-		"blk12": "▒",
-		"blk14": "░",
-		"blk34": "▓",
-		"block": "█",
-		"bne": "=⃥",
-		"bnequiv": "≡⃥",
-		"bnot": "⌐",
-		"bopf": "𝕓",
-		"bot": "⊥",
-		"bottom": "⊥",
-		"bowtie": "⋈",
-		"boxDL": "╗",
-		"boxDR": "╔",
-		"boxDl": "╖",
-		"boxDr": "╓",
-		"boxH": "═",
-		"boxHD": "╦",
-		"boxHU": "╩",
-		"boxHd": "╤",
-		"boxHu": "╧",
-		"boxUL": "╝",
-		"boxUR": "╚",
-		"boxUl": "╜",
-		"boxUr": "╙",
-		"boxV": "║",
-		"boxVH": "╬",
-		"boxVL": "╣",
-		"boxVR": "╠",
-		"boxVh": "╫",
-		"boxVl": "╢",
-		"boxVr": "╟",
-		"boxbox": "⧉",
-		"boxdL": "╕",
-		"boxdR": "╒",
-		"boxdl": "┐",
-		"boxdr": "┌",
-		"boxh": "─",
-		"boxhD": "╥",
-		"boxhU": "╨",
-		"boxhd": "┬",
-		"boxhu": "┴",
-		"boxminus": "⊟",
-		"boxplus": "⊞",
-		"boxtimes": "⊠",
-		"boxuL": "╛",
-		"boxuR": "╘",
-		"boxul": "┘",
-		"boxur": "└",
-		"boxv": "│",
-		"boxvH": "╪",
-		"boxvL": "╡",
-		"boxvR": "╞",
-		"boxvh": "┼",
-		"boxvl": "┤",
-		"boxvr": "├",
-		"bprime": "‵",
-		"breve": "˘",
-		"brvba": "¦",
-		"brvbar": "¦",
-		"bscr": "𝒷",
-		"bsemi": "⁏",
-		"bsim": "∽",
-		"bsime": "⋍",
-		"bsol": "\\",
-		"bsolb": "⧅",
-		"bsolhsub": "⟈",
-		"bull": "•",
-		"bullet": "•",
-		"bump": "≎",
-		"bumpE": "⪮",
-		"bumpe": "≏",
-		"bumpeq": "≏",
-		"cacute": "ć",
-		"cap": "∩",
-		"capand": "⩄",
-		"capbrcup": "⩉",
-		"capcap": "⩋",
-		"capcup": "⩇",
-		"capdot": "⩀",
-		"caps": "∩︀",
-		"caret": "⁁",
-		"caron": "ˇ",
-		"ccaps": "⩍",
-		"ccaron": "č",
-		"ccedi": "ç",
-		"ccedil": "ç",
-		"ccirc": "ĉ",
-		"ccups": "⩌",
-		"ccupssm": "⩐",
-		"cdot": "ċ",
-		"cedi": "¸",
-		"cedil": "¸",
-		"cemptyv": "⦲",
-		"cen": "¢",
-		"cent": "¢",
-		"centerdot": "·",
-		"cfr": "𝔠",
-		"chcy": "ч",
-		"check": "✓",
-		"checkmark": "✓",
-		"chi": "χ",
-		"cir": "○",
-		"cirE": "⧃",
-		"circ": "ˆ",
-		"circeq": "≗",
-		"circlearrowleft": "↺",
-		"circlearrowright": "↻",
-		"circledR": "®",
-		"circledS": "Ⓢ",
-		"circledast": "⊛",
-		"circledcirc": "⊚",
-		"circleddash": "⊝",
-		"cire": "≗",
-		"cirfnint": "⨐",
-		"cirmid": "⫯",
-		"cirscir": "⧂",
-		"clubs": "♣",
-		"clubsuit": "♣",
-		"colon": ":",
-		"colone": "≔",
-		"coloneq": "≔",
-		"comma": ",",
-		"commat": "@",
-		"comp": "∁",
-		"compfn": "∘",
-		"complement": "∁",
-		"complexes": "ℂ",
-		"cong": "≅",
-		"congdot": "⩭",
-		"conint": "∮",
-		"copf": "𝕔",
-		"coprod": "∐",
-		"cop": "©",
-		"copy": "©",
-		"copysr": "℗",
-		"crarr": "↵",
-		"cross": "✗",
-		"cscr": "𝒸",
-		"csub": "⫏",
-		"csube": "⫑",
-		"csup": "⫐",
-		"csupe": "⫒",
-		"ctdot": "⋯",
-		"cudarrl": "⤸",
-		"cudarrr": "⤵",
-		"cuepr": "⋞",
-		"cuesc": "⋟",
-		"cularr": "↶",
-		"cularrp": "⤽",
-		"cup": "∪",
-		"cupbrcap": "⩈",
-		"cupcap": "⩆",
-		"cupcup": "⩊",
-		"cupdot": "⊍",
-		"cupor": "⩅",
-		"cups": "∪︀",
-		"curarr": "↷",
-		"curarrm": "⤼",
-		"curlyeqprec": "⋞",
-		"curlyeqsucc": "⋟",
-		"curlyvee": "⋎",
-		"curlywedge": "⋏",
-		"curre": "¤",
-		"curren": "¤",
-		"curvearrowleft": "↶",
-		"curvearrowright": "↷",
-		"cuvee": "⋎",
-		"cuwed": "⋏",
-		"cwconint": "∲",
-		"cwint": "∱",
-		"cylcty": "⌭",
-		"dArr": "⇓",
-		"dHar": "⥥",
-		"dagger": "†",
-		"daleth": "ℸ",
-		"darr": "↓",
-		"dash": "‐",
-		"dashv": "⊣",
-		"dbkarow": "⤏",
-		"dblac": "˝",
-		"dcaron": "ď",
-		"dcy": "д",
-		"dd": "ⅆ",
-		"ddagger": "‡",
-		"ddarr": "⇊",
-		"ddotseq": "⩷",
-		"de": "°",
-		"deg": "°",
-		"delta": "δ",
-		"demptyv": "⦱",
-		"dfisht": "⥿",
-		"dfr": "𝔡",
-		"dharl": "⇃",
-		"dharr": "⇂",
-		"diam": "⋄",
-		"diamond": "⋄",
-		"diamondsuit": "♦",
-		"diams": "♦",
-		"die": "¨",
-		"digamma": "ϝ",
-		"disin": "⋲",
-		"div": "÷",
-		"divid": "÷",
-		"divide": "÷",
-		"divideontimes": "⋇",
-		"divonx": "⋇",
-		"djcy": "ђ",
-		"dlcorn": "⌞",
-		"dlcrop": "⌍",
-		"dollar": "$",
-		"dopf": "𝕕",
-		"dot": "˙",
-		"doteq": "≐",
-		"doteqdot": "≑",
-		"dotminus": "∸",
-		"dotplus": "∔",
-		"dotsquare": "⊡",
-		"doublebarwedge": "⌆",
-		"downarrow": "↓",
-		"downdownarrows": "⇊",
-		"downharpoonleft": "⇃",
-		"downharpoonright": "⇂",
-		"drbkarow": "⤐",
-		"drcorn": "⌟",
-		"drcrop": "⌌",
-		"dscr": "𝒹",
-		"dscy": "ѕ",
-		"dsol": "⧶",
-		"dstrok": "đ",
-		"dtdot": "⋱",
-		"dtri": "▿",
-		"dtrif": "▾",
-		"duarr": "⇵",
-		"duhar": "⥯",
-		"dwangle": "⦦",
-		"dzcy": "џ",
-		"dzigrarr": "⟿",
-		"eDDot": "⩷",
-		"eDot": "≑",
-		"eacut": "é",
-		"eacute": "é",
-		"easter": "⩮",
-		"ecaron": "ě",
-		"ecir": "ê",
-		"ecirc": "ê",
-		"ecolon": "≕",
-		"ecy": "э",
-		"edot": "ė",
-		"ee": "ⅇ",
-		"efDot": "≒",
-		"efr": "𝔢",
-		"eg": "⪚",
-		"egrav": "è",
-		"egrave": "è",
-		"egs": "⪖",
-		"egsdot": "⪘",
-		"el": "⪙",
-		"elinters": "⏧",
-		"ell": "ℓ",
-		"els": "⪕",
-		"elsdot": "⪗",
-		"emacr": "ē",
-		"empty": "∅",
-		"emptyset": "∅",
-		"emptyv": "∅",
-		"emsp13": " ",
-		"emsp14": " ",
-		"emsp": " ",
-		"eng": "ŋ",
-		"ensp": " ",
-		"eogon": "ę",
-		"eopf": "𝕖",
-		"epar": "⋕",
-		"eparsl": "⧣",
-		"eplus": "⩱",
-		"epsi": "ε",
-		"epsilon": "ε",
-		"epsiv": "ϵ",
-		"eqcirc": "≖",
-		"eqcolon": "≕",
-		"eqsim": "≂",
-		"eqslantgtr": "⪖",
-		"eqslantless": "⪕",
-		"equals": "=",
-		"equest": "≟",
-		"equiv": "≡",
-		"equivDD": "⩸",
-		"eqvparsl": "⧥",
-		"erDot": "≓",
-		"erarr": "⥱",
-		"escr": "ℯ",
-		"esdot": "≐",
-		"esim": "≂",
-		"eta": "η",
-		"et": "ð",
-		"eth": "ð",
-		"eum": "ë",
-		"euml": "ë",
-		"euro": "€",
-		"excl": "!",
-		"exist": "∃",
-		"expectation": "ℰ",
-		"exponentiale": "ⅇ",
-		"fallingdotseq": "≒",
-		"fcy": "ф",
-		"female": "♀",
-		"ffilig": "ﬃ",
-		"fflig": "ﬀ",
-		"ffllig": "ﬄ",
-		"ffr": "𝔣",
-		"filig": "ﬁ",
-		"fjlig": "fj",
-		"flat": "♭",
-		"fllig": "ﬂ",
-		"fltns": "▱",
-		"fnof": "ƒ",
-		"fopf": "𝕗",
-		"forall": "∀",
-		"fork": "⋔",
-		"forkv": "⫙",
-		"fpartint": "⨍",
-		"frac1": "¼",
-		"frac12": "½",
-		"frac13": "⅓",
-		"frac14": "¼",
-		"frac15": "⅕",
-		"frac16": "⅙",
-		"frac18": "⅛",
-		"frac23": "⅔",
-		"frac25": "⅖",
-		"frac3": "¾",
-		"frac34": "¾",
-		"frac35": "⅗",
-		"frac38": "⅜",
-		"frac45": "⅘",
-		"frac56": "⅚",
-		"frac58": "⅝",
-		"frac78": "⅞",
-		"frasl": "⁄",
-		"frown": "⌢",
-		"fscr": "𝒻",
-		"gE": "≧",
-		"gEl": "⪌",
-		"gacute": "ǵ",
-		"gamma": "γ",
-		"gammad": "ϝ",
-		"gap": "⪆",
-		"gbreve": "ğ",
-		"gcirc": "ĝ",
-		"gcy": "г",
-		"gdot": "ġ",
-		"ge": "≥",
-		"gel": "⋛",
-		"geq": "≥",
-		"geqq": "≧",
-		"geqslant": "⩾",
-		"ges": "⩾",
-		"gescc": "⪩",
-		"gesdot": "⪀",
-		"gesdoto": "⪂",
-		"gesdotol": "⪄",
-		"gesl": "⋛︀",
-		"gesles": "⪔",
-		"gfr": "𝔤",
-		"gg": "≫",
-		"ggg": "⋙",
-		"gimel": "ℷ",
-		"gjcy": "ѓ",
-		"gl": "≷",
-		"glE": "⪒",
-		"gla": "⪥",
-		"glj": "⪤",
-		"gnE": "≩",
-		"gnap": "⪊",
-		"gnapprox": "⪊",
-		"gne": "⪈",
-		"gneq": "⪈",
-		"gneqq": "≩",
-		"gnsim": "⋧",
-		"gopf": "𝕘",
-		"grave": "`",
-		"gscr": "ℊ",
-		"gsim": "≳",
-		"gsime": "⪎",
-		"gsiml": "⪐",
-		"g": ">",
-		"gt": ">",
-		"gtcc": "⪧",
-		"gtcir": "⩺",
-		"gtdot": "⋗",
-		"gtlPar": "⦕",
-		"gtquest": "⩼",
-		"gtrapprox": "⪆",
-		"gtrarr": "⥸",
-		"gtrdot": "⋗",
-		"gtreqless": "⋛",
-		"gtreqqless": "⪌",
-		"gtrless": "≷",
-		"gtrsim": "≳",
-		"gvertneqq": "≩︀",
-		"gvnE": "≩︀",
-		"hArr": "⇔",
-		"hairsp": " ",
-		"half": "½",
-		"hamilt": "ℋ",
-		"hardcy": "ъ",
-		"harr": "↔",
-		"harrcir": "⥈",
-		"harrw": "↭",
-		"hbar": "ℏ",
-		"hcirc": "ĥ",
-		"hearts": "♥",
-		"heartsuit": "♥",
-		"hellip": "…",
-		"hercon": "⊹",
-		"hfr": "𝔥",
-		"hksearow": "⤥",
-		"hkswarow": "⤦",
-		"hoarr": "⇿",
-		"homtht": "∻",
-		"hookleftarrow": "↩",
-		"hookrightarrow": "↪",
-		"hopf": "𝕙",
-		"horbar": "―",
-		"hscr": "𝒽",
-		"hslash": "ℏ",
-		"hstrok": "ħ",
-		"hybull": "⁃",
-		"hyphen": "‐",
-		"iacut": "í",
-		"iacute": "í",
-		"ic": "⁣",
-		"icir": "î",
-		"icirc": "î",
-		"icy": "и",
-		"iecy": "е",
-		"iexc": "¡",
-		"iexcl": "¡",
-		"iff": "⇔",
-		"ifr": "𝔦",
-		"igrav": "ì",
-		"igrave": "ì",
-		"ii": "ⅈ",
-		"iiiint": "⨌",
-		"iiint": "∭",
-		"iinfin": "⧜",
-		"iiota": "℩",
-		"ijlig": "ĳ",
-		"imacr": "ī",
-		"image": "ℑ",
-		"imagline": "ℐ",
-		"imagpart": "ℑ",
-		"imath": "ı",
-		"imof": "⊷",
-		"imped": "Ƶ",
-		"in": "∈",
-		"incare": "℅",
-		"infin": "∞",
-		"infintie": "⧝",
-		"inodot": "ı",
-		"int": "∫",
-		"intcal": "⊺",
-		"integers": "ℤ",
-		"intercal": "⊺",
-		"intlarhk": "⨗",
-		"intprod": "⨼",
-		"iocy": "ё",
-		"iogon": "į",
-		"iopf": "𝕚",
-		"iota": "ι",
-		"iprod": "⨼",
-		"iques": "¿",
-		"iquest": "¿",
-		"iscr": "𝒾",
-		"isin": "∈",
-		"isinE": "⋹",
-		"isindot": "⋵",
-		"isins": "⋴",
-		"isinsv": "⋳",
-		"isinv": "∈",
-		"it": "⁢",
-		"itilde": "ĩ",
-		"iukcy": "і",
-		"ium": "ï",
-		"iuml": "ï",
-		"jcirc": "ĵ",
-		"jcy": "й",
-		"jfr": "𝔧",
-		"jmath": "ȷ",
-		"jopf": "𝕛",
-		"jscr": "𝒿",
-		"jsercy": "ј",
-		"jukcy": "є",
-		"kappa": "κ",
-		"kappav": "ϰ",
-		"kcedil": "ķ",
-		"kcy": "к",
-		"kfr": "𝔨",
-		"kgreen": "ĸ",
-		"khcy": "х",
-		"kjcy": "ќ",
-		"kopf": "𝕜",
-		"kscr": "𝓀",
-		"lAarr": "⇚",
-		"lArr": "⇐",
-		"lAtail": "⤛",
-		"lBarr": "⤎",
-		"lE": "≦",
-		"lEg": "⪋",
-		"lHar": "⥢",
-		"lacute": "ĺ",
-		"laemptyv": "⦴",
-		"lagran": "ℒ",
-		"lambda": "λ",
-		"lang": "⟨",
-		"langd": "⦑",
-		"langle": "⟨",
-		"lap": "⪅",
-		"laqu": "«",
-		"laquo": "«",
-		"larr": "←",
-		"larrb": "⇤",
-		"larrbfs": "⤟",
-		"larrfs": "⤝",
-		"larrhk": "↩",
-		"larrlp": "↫",
-		"larrpl": "⤹",
-		"larrsim": "⥳",
-		"larrtl": "↢",
-		"lat": "⪫",
-		"latail": "⤙",
-		"late": "⪭",
-		"lates": "⪭︀",
-		"lbarr": "⤌",
-		"lbbrk": "❲",
-		"lbrace": "{",
-		"lbrack": "[",
-		"lbrke": "⦋",
-		"lbrksld": "⦏",
-		"lbrkslu": "⦍",
-		"lcaron": "ľ",
-		"lcedil": "ļ",
-		"lceil": "⌈",
-		"lcub": "{",
-		"lcy": "л",
-		"ldca": "⤶",
-		"ldquo": "“",
-		"ldquor": "„",
-		"ldrdhar": "⥧",
-		"ldrushar": "⥋",
-		"ldsh": "↲",
-		"le": "≤",
-		"leftarrow": "←",
-		"leftarrowtail": "↢",
-		"leftharpoondown": "↽",
-		"leftharpoonup": "↼",
-		"leftleftarrows": "⇇",
-		"leftrightarrow": "↔",
-		"leftrightarrows": "⇆",
-		"leftrightharpoons": "⇋",
-		"leftrightsquigarrow": "↭",
-		"leftthreetimes": "⋋",
-		"leg": "⋚",
-		"leq": "≤",
-		"leqq": "≦",
-		"leqslant": "⩽",
-		"les": "⩽",
-		"lescc": "⪨",
-		"lesdot": "⩿",
-		"lesdoto": "⪁",
-		"lesdotor": "⪃",
-		"lesg": "⋚︀",
-		"lesges": "⪓",
-		"lessapprox": "⪅",
-		"lessdot": "⋖",
-		"lesseqgtr": "⋚",
-		"lesseqqgtr": "⪋",
-		"lessgtr": "≶",
-		"lesssim": "≲",
-		"lfisht": "⥼",
-		"lfloor": "⌊",
-		"lfr": "𝔩",
-		"lg": "≶",
-		"lgE": "⪑",
-		"lhard": "↽",
-		"lharu": "↼",
-		"lharul": "⥪",
-		"lhblk": "▄",
-		"ljcy": "љ",
-		"ll": "≪",
-		"llarr": "⇇",
-		"llcorner": "⌞",
-		"llhard": "⥫",
-		"lltri": "◺",
-		"lmidot": "ŀ",
-		"lmoust": "⎰",
-		"lmoustache": "⎰",
-		"lnE": "≨",
-		"lnap": "⪉",
-		"lnapprox": "⪉",
-		"lne": "⪇",
-		"lneq": "⪇",
-		"lneqq": "≨",
-		"lnsim": "⋦",
-		"loang": "⟬",
-		"loarr": "⇽",
-		"lobrk": "⟦",
-		"longleftarrow": "⟵",
-		"longleftrightarrow": "⟷",
-		"longmapsto": "⟼",
-		"longrightarrow": "⟶",
-		"looparrowleft": "↫",
-		"looparrowright": "↬",
-		"lopar": "⦅",
-		"lopf": "𝕝",
-		"loplus": "⨭",
-		"lotimes": "⨴",
-		"lowast": "∗",
-		"lowbar": "_",
-		"loz": "◊",
-		"lozenge": "◊",
-		"lozf": "⧫",
-		"lpar": "(",
-		"lparlt": "⦓",
-		"lrarr": "⇆",
-		"lrcorner": "⌟",
-		"lrhar": "⇋",
-		"lrhard": "⥭",
-		"lrm": "‎",
-		"lrtri": "⊿",
-		"lsaquo": "‹",
-		"lscr": "𝓁",
-		"lsh": "↰",
-		"lsim": "≲",
-		"lsime": "⪍",
-		"lsimg": "⪏",
-		"lsqb": "[",
-		"lsquo": "‘",
-		"lsquor": "‚",
-		"lstrok": "ł",
-		"l": "<",
-		"lt": "<",
-		"ltcc": "⪦",
-		"ltcir": "⩹",
-		"ltdot": "⋖",
-		"lthree": "⋋",
-		"ltimes": "⋉",
-		"ltlarr": "⥶",
-		"ltquest": "⩻",
-		"ltrPar": "⦖",
-		"ltri": "◃",
-		"ltrie": "⊴",
-		"ltrif": "◂",
-		"lurdshar": "⥊",
-		"luruhar": "⥦",
-		"lvertneqq": "≨︀",
-		"lvnE": "≨︀",
-		"mDDot": "∺",
-		"mac": "¯",
-		"macr": "¯",
-		"male": "♂",
-		"malt": "✠",
-		"maltese": "✠",
-		"map": "↦",
-		"mapsto": "↦",
-		"mapstodown": "↧",
-		"mapstoleft": "↤",
-		"mapstoup": "↥",
-		"marker": "▮",
-		"mcomma": "⨩",
-		"mcy": "м",
-		"mdash": "—",
-		"measuredangle": "∡",
-		"mfr": "𝔪",
-		"mho": "℧",
-		"micr": "µ",
-		"micro": "µ",
-		"mid": "∣",
-		"midast": "*",
-		"midcir": "⫰",
-		"middo": "·",
-		"middot": "·",
-		"minus": "−",
-		"minusb": "⊟",
-		"minusd": "∸",
-		"minusdu": "⨪",
-		"mlcp": "⫛",
-		"mldr": "…",
-		"mnplus": "∓",
-		"models": "⊧",
-		"mopf": "𝕞",
-		"mp": "∓",
-		"mscr": "𝓂",
-		"mstpos": "∾",
-		"mu": "μ",
-		"multimap": "⊸",
-		"mumap": "⊸",
-		"nGg": "⋙̸",
-		"nGt": "≫⃒",
-		"nGtv": "≫̸",
-		"nLeftarrow": "⇍",
-		"nLeftrightarrow": "⇎",
-		"nLl": "⋘̸",
-		"nLt": "≪⃒",
-		"nLtv": "≪̸",
-		"nRightarrow": "⇏",
-		"nVDash": "⊯",
-		"nVdash": "⊮",
-		"nabla": "∇",
-		"nacute": "ń",
-		"nang": "∠⃒",
-		"nap": "≉",
-		"napE": "⩰̸",
-		"napid": "≋̸",
-		"napos": "ŉ",
-		"napprox": "≉",
-		"natur": "♮",
-		"natural": "♮",
-		"naturals": "ℕ",
-		"nbs": "\xA0",
-		"nbsp": "\xA0",
-		"nbump": "≎̸",
-		"nbumpe": "≏̸",
-		"ncap": "⩃",
-		"ncaron": "ň",
-		"ncedil": "ņ",
-		"ncong": "≇",
-		"ncongdot": "⩭̸",
-		"ncup": "⩂",
-		"ncy": "н",
-		"ndash": "–",
-		"ne": "≠",
-		"neArr": "⇗",
-		"nearhk": "⤤",
-		"nearr": "↗",
-		"nearrow": "↗",
-		"nedot": "≐̸",
-		"nequiv": "≢",
-		"nesear": "⤨",
-		"nesim": "≂̸",
-		"nexist": "∄",
-		"nexists": "∄",
-		"nfr": "𝔫",
-		"ngE": "≧̸",
-		"nge": "≱",
-		"ngeq": "≱",
-		"ngeqq": "≧̸",
-		"ngeqslant": "⩾̸",
-		"nges": "⩾̸",
-		"ngsim": "≵",
-		"ngt": "≯",
-		"ngtr": "≯",
-		"nhArr": "⇎",
-		"nharr": "↮",
-		"nhpar": "⫲",
-		"ni": "∋",
-		"nis": "⋼",
-		"nisd": "⋺",
-		"niv": "∋",
-		"njcy": "њ",
-		"nlArr": "⇍",
-		"nlE": "≦̸",
-		"nlarr": "↚",
-		"nldr": "‥",
-		"nle": "≰",
-		"nleftarrow": "↚",
-		"nleftrightarrow": "↮",
-		"nleq": "≰",
-		"nleqq": "≦̸",
-		"nleqslant": "⩽̸",
-		"nles": "⩽̸",
-		"nless": "≮",
-		"nlsim": "≴",
-		"nlt": "≮",
-		"nltri": "⋪",
-		"nltrie": "⋬",
-		"nmid": "∤",
-		"nopf": "𝕟",
-		"no": "¬",
-		"not": "¬",
-		"notin": "∉",
-		"notinE": "⋹̸",
-		"notindot": "⋵̸",
-		"notinva": "∉",
-		"notinvb": "⋷",
-		"notinvc": "⋶",
-		"notni": "∌",
-		"notniva": "∌",
-		"notnivb": "⋾",
-		"notnivc": "⋽",
-		"npar": "∦",
-		"nparallel": "∦",
-		"nparsl": "⫽⃥",
-		"npart": "∂̸",
-		"npolint": "⨔",
-		"npr": "⊀",
-		"nprcue": "⋠",
-		"npre": "⪯̸",
-		"nprec": "⊀",
-		"npreceq": "⪯̸",
-		"nrArr": "⇏",
-		"nrarr": "↛",
-		"nrarrc": "⤳̸",
-		"nrarrw": "↝̸",
-		"nrightarrow": "↛",
-		"nrtri": "⋫",
-		"nrtrie": "⋭",
-		"nsc": "⊁",
-		"nsccue": "⋡",
-		"nsce": "⪰̸",
-		"nscr": "𝓃",
-		"nshortmid": "∤",
-		"nshortparallel": "∦",
-		"nsim": "≁",
-		"nsime": "≄",
-		"nsimeq": "≄",
-		"nsmid": "∤",
-		"nspar": "∦",
-		"nsqsube": "⋢",
-		"nsqsupe": "⋣",
-		"nsub": "⊄",
-		"nsubE": "⫅̸",
-		"nsube": "⊈",
-		"nsubset": "⊂⃒",
-		"nsubseteq": "⊈",
-		"nsubseteqq": "⫅̸",
-		"nsucc": "⊁",
-		"nsucceq": "⪰̸",
-		"nsup": "⊅",
-		"nsupE": "⫆̸",
-		"nsupe": "⊉",
-		"nsupset": "⊃⃒",
-		"nsupseteq": "⊉",
-		"nsupseteqq": "⫆̸",
-		"ntgl": "≹",
-		"ntild": "ñ",
-		"ntilde": "ñ",
-		"ntlg": "≸",
-		"ntriangleleft": "⋪",
-		"ntrianglelefteq": "⋬",
-		"ntriangleright": "⋫",
-		"ntrianglerighteq": "⋭",
-		"nu": "ν",
-		"num": "#",
-		"numero": "№",
-		"numsp": " ",
-		"nvDash": "⊭",
-		"nvHarr": "⤄",
-		"nvap": "≍⃒",
-		"nvdash": "⊬",
-		"nvge": "≥⃒",
-		"nvgt": ">⃒",
-		"nvinfin": "⧞",
-		"nvlArr": "⤂",
-		"nvle": "≤⃒",
-		"nvlt": "<⃒",
-		"nvltrie": "⊴⃒",
-		"nvrArr": "⤃",
-		"nvrtrie": "⊵⃒",
-		"nvsim": "∼⃒",
-		"nwArr": "⇖",
-		"nwarhk": "⤣",
-		"nwarr": "↖",
-		"nwarrow": "↖",
-		"nwnear": "⤧",
-		"oS": "Ⓢ",
-		"oacut": "ó",
-		"oacute": "ó",
-		"oast": "⊛",
-		"ocir": "ô",
-		"ocirc": "ô",
-		"ocy": "о",
-		"odash": "⊝",
-		"odblac": "ő",
-		"odiv": "⨸",
-		"odot": "⊙",
-		"odsold": "⦼",
-		"oelig": "œ",
-		"ofcir": "⦿",
-		"ofr": "𝔬",
-		"ogon": "˛",
-		"ograv": "ò",
-		"ograve": "ò",
-		"ogt": "⧁",
-		"ohbar": "⦵",
-		"ohm": "Ω",
-		"oint": "∮",
-		"olarr": "↺",
-		"olcir": "⦾",
-		"olcross": "⦻",
-		"oline": "‾",
-		"olt": "⧀",
-		"omacr": "ō",
-		"omega": "ω",
-		"omicron": "ο",
-		"omid": "⦶",
-		"ominus": "⊖",
-		"oopf": "𝕠",
-		"opar": "⦷",
-		"operp": "⦹",
-		"oplus": "⊕",
-		"or": "∨",
-		"orarr": "↻",
-		"ord": "º",
-		"order": "ℴ",
-		"orderof": "ℴ",
-		"ordf": "ª",
-		"ordm": "º",
-		"origof": "⊶",
-		"oror": "⩖",
-		"orslope": "⩗",
-		"orv": "⩛",
-		"oscr": "ℴ",
-		"oslas": "ø",
-		"oslash": "ø",
-		"osol": "⊘",
-		"otild": "õ",
-		"otilde": "õ",
-		"otimes": "⊗",
-		"otimesas": "⨶",
-		"oum": "ö",
-		"ouml": "ö",
-		"ovbar": "⌽",
-		"par": "¶",
-		"para": "¶",
-		"parallel": "∥",
-		"parsim": "⫳",
-		"parsl": "⫽",
-		"part": "∂",
-		"pcy": "п",
-		"percnt": "%",
-		"period": ".",
-		"permil": "‰",
-		"perp": "⊥",
-		"pertenk": "‱",
-		"pfr": "𝔭",
-		"phi": "φ",
-		"phiv": "ϕ",
-		"phmmat": "ℳ",
-		"phone": "☎",
-		"pi": "π",
-		"pitchfork": "⋔",
-		"piv": "ϖ",
-		"planck": "ℏ",
-		"planckh": "ℎ",
-		"plankv": "ℏ",
-		"plus": "+",
-		"plusacir": "⨣",
-		"plusb": "⊞",
-		"pluscir": "⨢",
-		"plusdo": "∔",
-		"plusdu": "⨥",
-		"pluse": "⩲",
-		"plusm": "±",
-		"plusmn": "±",
-		"plussim": "⨦",
-		"plustwo": "⨧",
-		"pm": "±",
-		"pointint": "⨕",
-		"popf": "𝕡",
-		"poun": "£",
-		"pound": "£",
-		"pr": "≺",
-		"prE": "⪳",
-		"prap": "⪷",
-		"prcue": "≼",
-		"pre": "⪯",
-		"prec": "≺",
-		"precapprox": "⪷",
-		"preccurlyeq": "≼",
-		"preceq": "⪯",
-		"precnapprox": "⪹",
-		"precneqq": "⪵",
-		"precnsim": "⋨",
-		"precsim": "≾",
-		"prime": "′",
-		"primes": "ℙ",
-		"prnE": "⪵",
-		"prnap": "⪹",
-		"prnsim": "⋨",
-		"prod": "∏",
-		"profalar": "⌮",
-		"profline": "⌒",
-		"profsurf": "⌓",
-		"prop": "∝",
-		"propto": "∝",
-		"prsim": "≾",
-		"prurel": "⊰",
-		"pscr": "𝓅",
-		"psi": "ψ",
-		"puncsp": " ",
-		"qfr": "𝔮",
-		"qint": "⨌",
-		"qopf": "𝕢",
-		"qprime": "⁗",
-		"qscr": "𝓆",
-		"quaternions": "ℍ",
-		"quatint": "⨖",
-		"quest": "?",
-		"questeq": "≟",
-		"quo": "\"",
-		"quot": "\"",
-		"rAarr": "⇛",
-		"rArr": "⇒",
-		"rAtail": "⤜",
-		"rBarr": "⤏",
-		"rHar": "⥤",
-		"race": "∽̱",
-		"racute": "ŕ",
-		"radic": "√",
-		"raemptyv": "⦳",
-		"rang": "⟩",
-		"rangd": "⦒",
-		"range": "⦥",
-		"rangle": "⟩",
-		"raqu": "»",
-		"raquo": "»",
-		"rarr": "→",
-		"rarrap": "⥵",
-		"rarrb": "⇥",
-		"rarrbfs": "⤠",
-		"rarrc": "⤳",
-		"rarrfs": "⤞",
-		"rarrhk": "↪",
-		"rarrlp": "↬",
-		"rarrpl": "⥅",
-		"rarrsim": "⥴",
-		"rarrtl": "↣",
-		"rarrw": "↝",
-		"ratail": "⤚",
-		"ratio": "∶",
-		"rationals": "ℚ",
-		"rbarr": "⤍",
-		"rbbrk": "❳",
-		"rbrace": "}",
-		"rbrack": "]",
-		"rbrke": "⦌",
-		"rbrksld": "⦎",
-		"rbrkslu": "⦐",
-		"rcaron": "ř",
-		"rcedil": "ŗ",
-		"rceil": "⌉",
-		"rcub": "}",
-		"rcy": "р",
-		"rdca": "⤷",
-		"rdldhar": "⥩",
-		"rdquo": "”",
-		"rdquor": "”",
-		"rdsh": "↳",
-		"real": "ℜ",
-		"realine": "ℛ",
-		"realpart": "ℜ",
-		"reals": "ℝ",
-		"rect": "▭",
-		"re": "®",
-		"reg": "®",
-		"rfisht": "⥽",
-		"rfloor": "⌋",
-		"rfr": "𝔯",
-		"rhard": "⇁",
-		"rharu": "⇀",
-		"rharul": "⥬",
-		"rho": "ρ",
-		"rhov": "ϱ",
-		"rightarrow": "→",
-		"rightarrowtail": "↣",
-		"rightharpoondown": "⇁",
-		"rightharpoonup": "⇀",
-		"rightleftarrows": "⇄",
-		"rightleftharpoons": "⇌",
-		"rightrightarrows": "⇉",
-		"rightsquigarrow": "↝",
-		"rightthreetimes": "⋌",
-		"ring": "˚",
-		"risingdotseq": "≓",
-		"rlarr": "⇄",
-		"rlhar": "⇌",
-		"rlm": "‏",
-		"rmoust": "⎱",
-		"rmoustache": "⎱",
-		"rnmid": "⫮",
-		"roang": "⟭",
-		"roarr": "⇾",
-		"robrk": "⟧",
-		"ropar": "⦆",
-		"ropf": "𝕣",
-		"roplus": "⨮",
-		"rotimes": "⨵",
-		"rpar": ")",
-		"rpargt": "⦔",
-		"rppolint": "⨒",
-		"rrarr": "⇉",
-		"rsaquo": "›",
-		"rscr": "𝓇",
-		"rsh": "↱",
-		"rsqb": "]",
-		"rsquo": "’",
-		"rsquor": "’",
-		"rthree": "⋌",
-		"rtimes": "⋊",
-		"rtri": "▹",
-		"rtrie": "⊵",
-		"rtrif": "▸",
-		"rtriltri": "⧎",
-		"ruluhar": "⥨",
-		"rx": "℞",
-		"sacute": "ś",
-		"sbquo": "‚",
-		"sc": "≻",
-		"scE": "⪴",
-		"scap": "⪸",
-		"scaron": "š",
-		"sccue": "≽",
-		"sce": "⪰",
-		"scedil": "ş",
-		"scirc": "ŝ",
-		"scnE": "⪶",
-		"scnap": "⪺",
-		"scnsim": "⋩",
-		"scpolint": "⨓",
-		"scsim": "≿",
-		"scy": "с",
-		"sdot": "⋅",
-		"sdotb": "⊡",
-		"sdote": "⩦",
-		"seArr": "⇘",
-		"searhk": "⤥",
-		"searr": "↘",
-		"searrow": "↘",
-		"sec": "§",
-		"sect": "§",
-		"semi": ";",
-		"seswar": "⤩",
-		"setminus": "∖",
-		"setmn": "∖",
-		"sext": "✶",
-		"sfr": "𝔰",
-		"sfrown": "⌢",
-		"sharp": "♯",
-		"shchcy": "щ",
-		"shcy": "ш",
-		"shortmid": "∣",
-		"shortparallel": "∥",
-		"sh": "­",
-		"shy": "­",
-		"sigma": "σ",
-		"sigmaf": "ς",
-		"sigmav": "ς",
-		"sim": "∼",
-		"simdot": "⩪",
-		"sime": "≃",
-		"simeq": "≃",
-		"simg": "⪞",
-		"simgE": "⪠",
-		"siml": "⪝",
-		"simlE": "⪟",
-		"simne": "≆",
-		"simplus": "⨤",
-		"simrarr": "⥲",
-		"slarr": "←",
-		"smallsetminus": "∖",
-		"smashp": "⨳",
-		"smeparsl": "⧤",
-		"smid": "∣",
-		"smile": "⌣",
-		"smt": "⪪",
-		"smte": "⪬",
-		"smtes": "⪬︀",
-		"softcy": "ь",
-		"sol": "/",
-		"solb": "⧄",
-		"solbar": "⌿",
-		"sopf": "𝕤",
-		"spades": "♠",
-		"spadesuit": "♠",
-		"spar": "∥",
-		"sqcap": "⊓",
-		"sqcaps": "⊓︀",
-		"sqcup": "⊔",
-		"sqcups": "⊔︀",
-		"sqsub": "⊏",
-		"sqsube": "⊑",
-		"sqsubset": "⊏",
-		"sqsubseteq": "⊑",
-		"sqsup": "⊐",
-		"sqsupe": "⊒",
-		"sqsupset": "⊐",
-		"sqsupseteq": "⊒",
-		"squ": "□",
-		"square": "□",
-		"squarf": "▪",
-		"squf": "▪",
-		"srarr": "→",
-		"sscr": "𝓈",
-		"ssetmn": "∖",
-		"ssmile": "⌣",
-		"sstarf": "⋆",
-		"star": "☆",
-		"starf": "★",
-		"straightepsilon": "ϵ",
-		"straightphi": "ϕ",
-		"strns": "¯",
-		"sub": "⊂",
-		"subE": "⫅",
-		"subdot": "⪽",
-		"sube": "⊆",
-		"subedot": "⫃",
-		"submult": "⫁",
-		"subnE": "⫋",
-		"subne": "⊊",
-		"subplus": "⪿",
-		"subrarr": "⥹",
-		"subset": "⊂",
-		"subseteq": "⊆",
-		"subseteqq": "⫅",
-		"subsetneq": "⊊",
-		"subsetneqq": "⫋",
-		"subsim": "⫇",
-		"subsub": "⫕",
-		"subsup": "⫓",
-		"succ": "≻",
-		"succapprox": "⪸",
-		"succcurlyeq": "≽",
-		"succeq": "⪰",
-		"succnapprox": "⪺",
-		"succneqq": "⪶",
-		"succnsim": "⋩",
-		"succsim": "≿",
-		"sum": "∑",
-		"sung": "♪",
-		"sup": "⊃",
-		"sup1": "¹",
-		"sup2": "²",
-		"sup3": "³",
-		"supE": "⫆",
-		"supdot": "⪾",
-		"supdsub": "⫘",
-		"supe": "⊇",
-		"supedot": "⫄",
-		"suphsol": "⟉",
-		"suphsub": "⫗",
-		"suplarr": "⥻",
-		"supmult": "⫂",
-		"supnE": "⫌",
-		"supne": "⊋",
-		"supplus": "⫀",
-		"supset": "⊃",
-		"supseteq": "⊇",
-		"supseteqq": "⫆",
-		"supsetneq": "⊋",
-		"supsetneqq": "⫌",
-		"supsim": "⫈",
-		"supsub": "⫔",
-		"supsup": "⫖",
-		"swArr": "⇙",
-		"swarhk": "⤦",
-		"swarr": "↙",
-		"swarrow": "↙",
-		"swnwar": "⤪",
-		"szli": "ß",
-		"szlig": "ß",
-		"target": "⌖",
-		"tau": "τ",
-		"tbrk": "⎴",
-		"tcaron": "ť",
-		"tcedil": "ţ",
-		"tcy": "т",
-		"tdot": "⃛",
-		"telrec": "⌕",
-		"tfr": "𝔱",
-		"there4": "∴",
-		"therefore": "∴",
-		"theta": "θ",
-		"thetasym": "ϑ",
-		"thetav": "ϑ",
-		"thickapprox": "≈",
-		"thicksim": "∼",
-		"thinsp": " ",
-		"thkap": "≈",
-		"thksim": "∼",
-		"thor": "þ",
-		"thorn": "þ",
-		"tilde": "˜",
-		"time": "×",
-		"times": "×",
-		"timesb": "⊠",
-		"timesbar": "⨱",
-		"timesd": "⨰",
-		"tint": "∭",
-		"toea": "⤨",
-		"top": "⊤",
-		"topbot": "⌶",
-		"topcir": "⫱",
-		"topf": "𝕥",
-		"topfork": "⫚",
-		"tosa": "⤩",
-		"tprime": "‴",
-		"trade": "™",
-		"triangle": "▵",
-		"triangledown": "▿",
-		"triangleleft": "◃",
-		"trianglelefteq": "⊴",
-		"triangleq": "≜",
-		"triangleright": "▹",
-		"trianglerighteq": "⊵",
-		"tridot": "◬",
-		"trie": "≜",
-		"triminus": "⨺",
-		"triplus": "⨹",
-		"trisb": "⧍",
-		"tritime": "⨻",
-		"trpezium": "⏢",
-		"tscr": "𝓉",
-		"tscy": "ц",
-		"tshcy": "ћ",
-		"tstrok": "ŧ",
-		"twixt": "≬",
-		"twoheadleftarrow": "↞",
-		"twoheadrightarrow": "↠",
-		"uArr": "⇑",
-		"uHar": "⥣",
-		"uacut": "ú",
-		"uacute": "ú",
-		"uarr": "↑",
-		"ubrcy": "ў",
-		"ubreve": "ŭ",
-		"ucir": "û",
-		"ucirc": "û",
-		"ucy": "у",
-		"udarr": "⇅",
-		"udblac": "ű",
-		"udhar": "⥮",
-		"ufisht": "⥾",
-		"ufr": "𝔲",
-		"ugrav": "ù",
-		"ugrave": "ù",
-		"uharl": "↿",
-		"uharr": "↾",
-		"uhblk": "▀",
-		"ulcorn": "⌜",
-		"ulcorner": "⌜",
-		"ulcrop": "⌏",
-		"ultri": "◸",
-		"umacr": "ū",
-		"um": "¨",
-		"uml": "¨",
-		"uogon": "ų",
-		"uopf": "𝕦",
-		"uparrow": "↑",
-		"updownarrow": "↕",
-		"upharpoonleft": "↿",
-		"upharpoonright": "↾",
-		"uplus": "⊎",
-		"upsi": "υ",
-		"upsih": "ϒ",
-		"upsilon": "υ",
-		"upuparrows": "⇈",
-		"urcorn": "⌝",
-		"urcorner": "⌝",
-		"urcrop": "⌎",
-		"uring": "ů",
-		"urtri": "◹",
-		"uscr": "𝓊",
-		"utdot": "⋰",
-		"utilde": "ũ",
-		"utri": "▵",
-		"utrif": "▴",
-		"uuarr": "⇈",
-		"uum": "ü",
-		"uuml": "ü",
-		"uwangle": "⦧",
-		"vArr": "⇕",
-		"vBar": "⫨",
-		"vBarv": "⫩",
-		"vDash": "⊨",
-		"vangrt": "⦜",
-		"varepsilon": "ϵ",
-		"varkappa": "ϰ",
-		"varnothing": "∅",
-		"varphi": "ϕ",
-		"varpi": "ϖ",
-		"varpropto": "∝",
-		"varr": "↕",
-		"varrho": "ϱ",
-		"varsigma": "ς",
-		"varsubsetneq": "⊊︀",
-		"varsubsetneqq": "⫋︀",
-		"varsupsetneq": "⊋︀",
-		"varsupsetneqq": "⫌︀",
-		"vartheta": "ϑ",
-		"vartriangleleft": "⊲",
-		"vartriangleright": "⊳",
-		"vcy": "в",
-		"vdash": "⊢",
-		"vee": "∨",
-		"veebar": "⊻",
-		"veeeq": "≚",
-		"vellip": "⋮",
-		"verbar": "|",
-		"vert": "|",
-		"vfr": "𝔳",
-		"vltri": "⊲",
-		"vnsub": "⊂⃒",
-		"vnsup": "⊃⃒",
-		"vopf": "𝕧",
-		"vprop": "∝",
-		"vrtri": "⊳",
-		"vscr": "𝓋",
-		"vsubnE": "⫋︀",
-		"vsubne": "⊊︀",
-		"vsupnE": "⫌︀",
-		"vsupne": "⊋︀",
-		"vzigzag": "⦚",
-		"wcirc": "ŵ",
-		"wedbar": "⩟",
-		"wedge": "∧",
-		"wedgeq": "≙",
-		"weierp": "℘",
-		"wfr": "𝔴",
-		"wopf": "𝕨",
-		"wp": "℘",
-		"wr": "≀",
-		"wreath": "≀",
-		"wscr": "𝓌",
-		"xcap": "⋂",
-		"xcirc": "◯",
-		"xcup": "⋃",
-		"xdtri": "▽",
-		"xfr": "𝔵",
-		"xhArr": "⟺",
-		"xharr": "⟷",
-		"xi": "ξ",
-		"xlArr": "⟸",
-		"xlarr": "⟵",
-		"xmap": "⟼",
-		"xnis": "⋻",
-		"xodot": "⨀",
-		"xopf": "𝕩",
-		"xoplus": "⨁",
-		"xotime": "⨂",
-		"xrArr": "⟹",
-		"xrarr": "⟶",
-		"xscr": "𝓍",
-		"xsqcup": "⨆",
-		"xuplus": "⨄",
-		"xutri": "△",
-		"xvee": "⋁",
-		"xwedge": "⋀",
-		"yacut": "ý",
-		"yacute": "ý",
-		"yacy": "я",
-		"ycirc": "ŷ",
-		"ycy": "ы",
-		"ye": "¥",
-		"yen": "¥",
-		"yfr": "𝔶",
-		"yicy": "ї",
-		"yopf": "𝕪",
-		"yscr": "𝓎",
-		"yucy": "ю",
-		"yum": "ÿ",
-		"yuml": "ÿ",
-		"zacute": "ź",
-		"zcaron": "ž",
-		"zcy": "з",
-		"zdot": "ż",
-		"zeetrf": "ℨ",
-		"zeta": "ζ",
-		"zfr": "𝔷",
-		"zhcy": "ж",
-		"zigrarr": "⇝",
-		"zopf": "𝕫",
-		"zscr": "𝓏",
-		"zwj": "‍",
-		"zwnj": "‌"
-	};
-}));
-//#endregion
-//#region node_modules/parse-entities/decode-entity.js
-var require_decode_entity = /* @__PURE__ */ __commonJSMin(((exports, module) => {
-	var characterEntities = require_character_entities();
-	module.exports = decodeEntity;
-	var own = {}.hasOwnProperty;
-	function decodeEntity(characters) {
-		return own.call(characterEntities, characters) ? characterEntities[characters] : false;
-	}
-}));
-//#endregion
-//#region node_modules/micromark/dist/character/ascii-digit.js
-var require_ascii_digit = /* @__PURE__ */ __commonJSMin(((exports, module) => {
-	module.exports = require_regex_check()(/\d/);
-}));
-//#endregion
-//#region node_modules/micromark/dist/character/ascii-hex-digit.js
-var require_ascii_hex_digit = /* @__PURE__ */ __commonJSMin(((exports, module) => {
-	module.exports = require_regex_check()(/[\dA-Fa-f]/);
-}));
-//#endregion
-//#region node_modules/micromark/dist/tokenize/character-reference.js
-var require_character_reference = /* @__PURE__ */ __commonJSMin(((exports, module) => {
-	var decodeEntity = require_decode_entity();
-	var asciiAlphanumeric = require_ascii_alphanumeric();
-	var asciiDigit = require_ascii_digit();
-	var asciiHexDigit = require_ascii_hex_digit();
-	function _interopDefaultLegacy(e) {
-		return e && typeof e === "object" && "default" in e ? e : { default: e };
-	}
-	var decodeEntity__default = /* @__PURE__ */ _interopDefaultLegacy(decodeEntity);
-	var characterReference = {
-		name: "characterReference",
-		tokenize: tokenizeCharacterReference
-	};
-	function tokenizeCharacterReference(effects, ok, nok) {
-		var self = this;
-		var size = 0;
-		var max;
-		var test;
-		return start;
-		function start(code) {
-			effects.enter("characterReference");
-			effects.enter("characterReferenceMarker");
-			effects.consume(code);
-			effects.exit("characterReferenceMarker");
-			return open;
-		}
-		function open(code) {
-			if (code === 35) {
-				effects.enter("characterReferenceMarkerNumeric");
-				effects.consume(code);
-				effects.exit("characterReferenceMarkerNumeric");
-				return numeric;
-			}
-			effects.enter("characterReferenceValue");
-			max = 31;
-			test = asciiAlphanumeric;
-			return value(code);
-		}
-		function numeric(code) {
-			if (code === 88 || code === 120) {
-				effects.enter("characterReferenceMarkerHexadecimal");
-				effects.consume(code);
-				effects.exit("characterReferenceMarkerHexadecimal");
-				effects.enter("characterReferenceValue");
-				max = 6;
-				test = asciiHexDigit;
-				return value;
-			}
-			effects.enter("characterReferenceValue");
-			max = 7;
-			test = asciiDigit;
-			return value(code);
-		}
-		function value(code) {
-			var token;
-			if (code === 59 && size) {
-				token = effects.exit("characterReferenceValue");
-				if (test === asciiAlphanumeric && !decodeEntity__default["default"](self.sliceSerialize(token))) return nok(code);
-				effects.enter("characterReferenceMarker");
-				effects.consume(code);
-				effects.exit("characterReferenceMarker");
-				effects.exit("characterReference");
-				return ok;
-			}
-			if (test(code) && size++ < max) {
-				effects.consume(code);
-				return value;
-			}
-			return nok(code);
-		}
-	}
-	module.exports = characterReference;
-}));
-//#endregion
-//#region node_modules/micromark/dist/tokenize/code-fenced.js
-var require_code_fenced = /* @__PURE__ */ __commonJSMin(((exports, module) => {
-	var markdownLineEnding = require_markdown_line_ending();
-	var markdownLineEndingOrSpace = require_markdown_line_ending_or_space();
-	var prefixSize = require_prefix_size();
-	var factorySpace = require_factory_space();
-	var codeFenced = {
-		name: "codeFenced",
-		tokenize: tokenizeCodeFenced,
-		concrete: true
-	};
-	function tokenizeCodeFenced(effects, ok, nok) {
-		var self = this;
-		var closingFenceConstruct = {
-			tokenize: tokenizeClosingFence,
-			partial: true
-		};
-		var initialPrefix = prefixSize(this.events, "linePrefix");
-		var sizeOpen = 0;
-		var marker;
-		return start;
-		function start(code) {
-			effects.enter("codeFenced");
-			effects.enter("codeFencedFence");
-			effects.enter("codeFencedFenceSequence");
-			marker = code;
-			return sequenceOpen(code);
-		}
-		function sequenceOpen(code) {
-			if (code === marker) {
-				effects.consume(code);
-				sizeOpen++;
-				return sequenceOpen;
-			}
-			effects.exit("codeFencedFenceSequence");
-			return sizeOpen < 3 ? nok(code) : factorySpace(effects, infoOpen, "whitespace")(code);
-		}
-		function infoOpen(code) {
-			if (code === null || markdownLineEnding(code)) return openAfter(code);
-			effects.enter("codeFencedFenceInfo");
-			effects.enter("chunkString", { contentType: "string" });
-			return info(code);
-		}
-		function info(code) {
-			if (code === null || markdownLineEndingOrSpace(code)) {
-				effects.exit("chunkString");
-				effects.exit("codeFencedFenceInfo");
-				return factorySpace(effects, infoAfter, "whitespace")(code);
-			}
-			if (code === 96 && code === marker) return nok(code);
-			effects.consume(code);
-			return info;
-		}
-		function infoAfter(code) {
-			if (code === null || markdownLineEnding(code)) return openAfter(code);
-			effects.enter("codeFencedFenceMeta");
-			effects.enter("chunkString", { contentType: "string" });
-			return meta(code);
-		}
-		function meta(code) {
-			if (code === null || markdownLineEnding(code)) {
-				effects.exit("chunkString");
-				effects.exit("codeFencedFenceMeta");
-				return openAfter(code);
-			}
-			if (code === 96 && code === marker) return nok(code);
-			effects.consume(code);
-			return meta;
-		}
-		function openAfter(code) {
-			effects.exit("codeFencedFence");
-			return self.interrupt ? ok(code) : content(code);
-		}
-		function content(code) {
-			if (code === null) return after(code);
-			if (markdownLineEnding(code)) {
-				effects.enter("lineEnding");
-				effects.consume(code);
-				effects.exit("lineEnding");
-				return effects.attempt(closingFenceConstruct, after, initialPrefix ? factorySpace(effects, content, "linePrefix", initialPrefix + 1) : content);
-			}
-			effects.enter("codeFlowValue");
-			return contentContinue(code);
-		}
-		function contentContinue(code) {
-			if (code === null || markdownLineEnding(code)) {
-				effects.exit("codeFlowValue");
-				return content(code);
-			}
-			effects.consume(code);
-			return contentContinue;
-		}
-		function after(code) {
-			effects.exit("codeFenced");
-			return ok(code);
-		}
-		function tokenizeClosingFence(effects, ok, nok) {
-			var size = 0;
-			return factorySpace(effects, closingSequenceStart, "linePrefix", this.parser.constructs.disable.null.indexOf("codeIndented") > -1 ? void 0 : 4);
-			function closingSequenceStart(code) {
-				effects.enter("codeFencedFence");
-				effects.enter("codeFencedFenceSequence");
-				return closingSequence(code);
-			}
-			function closingSequence(code) {
-				if (code === marker) {
-					effects.consume(code);
-					size++;
-					return closingSequence;
-				}
-				if (size < sizeOpen) return nok(code);
-				effects.exit("codeFencedFenceSequence");
-				return factorySpace(effects, closingSequenceEnd, "whitespace")(code);
-			}
-			function closingSequenceEnd(code) {
-				if (code === null || markdownLineEnding(code)) {
-					effects.exit("codeFencedFence");
-					return ok(code);
-				}
-				return nok(code);
-			}
-		}
-	}
-	module.exports = codeFenced;
-}));
-//#endregion
-//#region node_modules/micromark/dist/tokenize/code-indented.js
-var require_code_indented = /* @__PURE__ */ __commonJSMin(((exports, module) => {
-	var markdownLineEnding = require_markdown_line_ending();
-	var chunkedSplice = require_chunked_splice();
-	var prefixSize = require_prefix_size();
-	var factorySpace = require_factory_space();
-	var codeIndented = {
-		name: "codeIndented",
-		tokenize: tokenizeCodeIndented,
-		resolve: resolveCodeIndented
-	};
-	var indentedContentConstruct = {
-		tokenize: tokenizeIndentedContent,
-		partial: true
-	};
-	function resolveCodeIndented(events, context) {
-		var code = {
-			type: "codeIndented",
-			start: events[0][1].start,
-			end: events[events.length - 1][1].end
-		};
-		chunkedSplice(events, 0, 0, [[
-			"enter",
-			code,
-			context
-		]]);
-		chunkedSplice(events, events.length, 0, [[
-			"exit",
-			code,
-			context
-		]]);
-		return events;
-	}
-	function tokenizeCodeIndented(effects, ok, nok) {
-		return effects.attempt(indentedContentConstruct, afterPrefix, nok);
-		function afterPrefix(code) {
-			if (code === null) return ok(code);
-			if (markdownLineEnding(code)) return effects.attempt(indentedContentConstruct, afterPrefix, ok)(code);
-			effects.enter("codeFlowValue");
-			return content(code);
-		}
-		function content(code) {
-			if (code === null || markdownLineEnding(code)) {
-				effects.exit("codeFlowValue");
-				return afterPrefix(code);
-			}
-			effects.consume(code);
-			return content;
-		}
-	}
-	function tokenizeIndentedContent(effects, ok, nok) {
-		var self = this;
-		return factorySpace(effects, afterPrefix, "linePrefix", 5);
-		function afterPrefix(code) {
-			if (markdownLineEnding(code)) {
-				effects.enter("lineEnding");
-				effects.consume(code);
-				effects.exit("lineEnding");
-				return factorySpace(effects, afterPrefix, "linePrefix", 5);
-			}
-			return prefixSize(self.events, "linePrefix") < 4 ? nok(code) : ok(code);
-		}
-	}
-	module.exports = codeIndented;
-}));
-//#endregion
-//#region node_modules/micromark/dist/tokenize/code-text.js
-var require_code_text = /* @__PURE__ */ __commonJSMin(((exports, module) => {
-	var markdownLineEnding = require_markdown_line_ending();
-	var codeText = {
-		name: "codeText",
-		tokenize: tokenizeCodeText,
-		resolve: resolveCodeText,
-		previous
-	};
-	function resolveCodeText(events) {
-		var tailExitIndex = events.length - 4;
-		var headEnterIndex = 3;
-		var index;
-		var enter;
-		if ((events[headEnterIndex][1].type === "lineEnding" || events[headEnterIndex][1].type === "space") && (events[tailExitIndex][1].type === "lineEnding" || events[tailExitIndex][1].type === "space")) {
-			index = headEnterIndex;
-			while (++index < tailExitIndex) if (events[index][1].type === "codeTextData") {
-				events[tailExitIndex][1].type = events[headEnterIndex][1].type = "codeTextPadding";
-				headEnterIndex += 2;
-				tailExitIndex -= 2;
-				break;
-			}
-		}
-		index = headEnterIndex - 1;
-		tailExitIndex++;
-		while (++index <= tailExitIndex) if (enter === void 0) {
-			if (index !== tailExitIndex && events[index][1].type !== "lineEnding") enter = index;
-		} else if (index === tailExitIndex || events[index][1].type === "lineEnding") {
-			events[enter][1].type = "codeTextData";
-			if (index !== enter + 2) {
-				events[enter][1].end = events[index - 1][1].end;
-				events.splice(enter + 2, index - enter - 2);
-				tailExitIndex -= index - enter - 2;
-				index = enter + 2;
-			}
-			enter = void 0;
-		}
-		return events;
-	}
-	function previous(code) {
-		return code !== 96 || this.events[this.events.length - 1][1].type === "characterEscape";
-	}
-	function tokenizeCodeText(effects, ok, nok) {
-		var sizeOpen = 0;
-		var size;
-		var token;
-		return start;
-		function start(code) {
-			effects.enter("codeText");
-			effects.enter("codeTextSequence");
-			return openingSequence(code);
-		}
-		function openingSequence(code) {
-			if (code === 96) {
-				effects.consume(code);
-				sizeOpen++;
-				return openingSequence;
-			}
-			effects.exit("codeTextSequence");
-			return gap(code);
-		}
-		function gap(code) {
-			if (code === null) return nok(code);
-			if (code === 96) {
-				token = effects.enter("codeTextSequence");
-				size = 0;
-				return closingSequence(code);
-			}
-			if (code === 32) {
-				effects.enter("space");
-				effects.consume(code);
-				effects.exit("space");
-				return gap;
-			}
-			if (markdownLineEnding(code)) {
-				effects.enter("lineEnding");
-				effects.consume(code);
-				effects.exit("lineEnding");
-				return gap;
-			}
-			effects.enter("codeTextData");
-			return data(code);
-		}
-		function data(code) {
-			if (code === null || code === 32 || code === 96 || markdownLineEnding(code)) {
-				effects.exit("codeTextData");
-				return gap(code);
-			}
-			effects.consume(code);
-			return data;
-		}
-		function closingSequence(code) {
-			if (code === 96) {
-				effects.consume(code);
-				size++;
-				return closingSequence;
-			}
-			if (size === sizeOpen) {
-				effects.exit("codeTextSequence");
-				effects.exit("codeText");
-				return ok(code);
-			}
-			token.type = "codeTextData";
-			return data(code);
-		}
-	}
-	module.exports = codeText;
-}));
-//#endregion
-//#region node_modules/micromark/dist/tokenize/factory-destination.js
-var require_factory_destination = /* @__PURE__ */ __commonJSMin(((exports, module) => {
-	var asciiControl = require_ascii_control();
-	var markdownLineEndingOrSpace = require_markdown_line_ending_or_space();
-	var markdownLineEnding = require_markdown_line_ending();
-	function destinationFactory(effects, ok, nok, type, literalType, literalMarkerType, rawType, stringType, max) {
-		var limit = max || Infinity;
-		var balance = 0;
-		return start;
-		function start(code) {
-			if (code === 60) {
-				effects.enter(type);
-				effects.enter(literalType);
-				effects.enter(literalMarkerType);
-				effects.consume(code);
-				effects.exit(literalMarkerType);
-				return destinationEnclosedBefore;
-			}
-			if (asciiControl(code) || code === 41) return nok(code);
-			effects.enter(type);
-			effects.enter(rawType);
-			effects.enter(stringType);
-			effects.enter("chunkString", { contentType: "string" });
-			return destinationRaw(code);
-		}
-		function destinationEnclosedBefore(code) {
-			if (code === 62) {
-				effects.enter(literalMarkerType);
-				effects.consume(code);
-				effects.exit(literalMarkerType);
-				effects.exit(literalType);
-				effects.exit(type);
-				return ok;
-			}
-			effects.enter(stringType);
-			effects.enter("chunkString", { contentType: "string" });
-			return destinationEnclosed(code);
-		}
-		function destinationEnclosed(code) {
-			if (code === 62) {
-				effects.exit("chunkString");
-				effects.exit(stringType);
-				return destinationEnclosedBefore(code);
-			}
-			if (code === null || code === 60 || markdownLineEnding(code)) return nok(code);
-			effects.consume(code);
-			return code === 92 ? destinationEnclosedEscape : destinationEnclosed;
-		}
-		function destinationEnclosedEscape(code) {
-			if (code === 60 || code === 62 || code === 92) {
-				effects.consume(code);
-				return destinationEnclosed;
-			}
-			return destinationEnclosed(code);
-		}
-		function destinationRaw(code) {
-			if (code === 40) {
-				if (++balance > limit) return nok(code);
-				effects.consume(code);
-				return destinationRaw;
-			}
-			if (code === 41) {
-				if (!balance--) {
-					effects.exit("chunkString");
-					effects.exit(stringType);
-					effects.exit(rawType);
-					effects.exit(type);
-					return ok(code);
-				}
-				effects.consume(code);
-				return destinationRaw;
-			}
-			if (code === null || markdownLineEndingOrSpace(code)) {
-				if (balance) return nok(code);
-				effects.exit("chunkString");
-				effects.exit(stringType);
-				effects.exit(rawType);
-				effects.exit(type);
-				return ok(code);
-			}
-			if (asciiControl(code)) return nok(code);
-			effects.consume(code);
-			return code === 92 ? destinationRawEscape : destinationRaw;
-		}
-		function destinationRawEscape(code) {
-			if (code === 40 || code === 41 || code === 92) {
-				effects.consume(code);
-				return destinationRaw;
-			}
-			return destinationRaw(code);
-		}
-	}
-	module.exports = destinationFactory;
-}));
-//#endregion
-//#region node_modules/micromark/dist/tokenize/factory-label.js
-var require_factory_label = /* @__PURE__ */ __commonJSMin(((exports, module) => {
-	var markdownLineEnding = require_markdown_line_ending();
-	var markdownSpace = require_markdown_space();
-	function labelFactory(effects, ok, nok, type, markerType, stringType) {
-		var self = this;
-		var size = 0;
-		var data;
-		return start;
-		function start(code) {
-			effects.enter(type);
-			effects.enter(markerType);
-			effects.consume(code);
-			effects.exit(markerType);
-			effects.enter(stringType);
-			return atBreak;
-		}
-		function atBreak(code) {
-			if (code === null || code === 91 || code === 93 && !data || code === 94 && !size && "_hiddenFootnoteSupport" in self.parser.constructs || size > 999) return nok(code);
-			if (code === 93) {
-				effects.exit(stringType);
-				effects.enter(markerType);
-				effects.consume(code);
-				effects.exit(markerType);
-				effects.exit(type);
-				return ok;
-			}
-			if (markdownLineEnding(code)) {
-				effects.enter("lineEnding");
-				effects.consume(code);
-				effects.exit("lineEnding");
-				return atBreak;
-			}
-			effects.enter("chunkString", { contentType: "string" });
-			return label(code);
-		}
-		function label(code) {
-			if (code === null || code === 91 || code === 93 || markdownLineEnding(code) || size++ > 999) {
-				effects.exit("chunkString");
-				return atBreak(code);
-			}
-			effects.consume(code);
-			data = data || !markdownSpace(code);
-			return code === 92 ? labelEscape : label;
-		}
-		function labelEscape(code) {
-			if (code === 91 || code === 92 || code === 93) {
-				effects.consume(code);
-				size++;
-				return label;
-			}
-			return label(code);
-		}
-	}
-	module.exports = labelFactory;
-}));
-//#endregion
-//#region node_modules/micromark/dist/tokenize/factory-whitespace.js
-var require_factory_whitespace = /* @__PURE__ */ __commonJSMin(((exports, module) => {
-	var markdownLineEnding = require_markdown_line_ending();
-	var markdownSpace = require_markdown_space();
-	var factorySpace = require_factory_space();
-	function whitespaceFactory(effects, ok) {
-		var seen;
-		return start;
-		function start(code) {
-			if (markdownLineEnding(code)) {
-				effects.enter("lineEnding");
-				effects.consume(code);
-				effects.exit("lineEnding");
-				seen = true;
-				return start;
-			}
-			if (markdownSpace(code)) return factorySpace(effects, start, seen ? "linePrefix" : "lineSuffix")(code);
-			return ok(code);
-		}
-	}
-	module.exports = whitespaceFactory;
-}));
-//#endregion
-//#region node_modules/micromark/dist/tokenize/factory-title.js
-var require_factory_title = /* @__PURE__ */ __commonJSMin(((exports, module) => {
-	var markdownLineEnding = require_markdown_line_ending();
-	var factorySpace = require_factory_space();
-	function titleFactory(effects, ok, nok, type, markerType, stringType) {
-		var marker;
-		return start;
-		function start(code) {
-			effects.enter(type);
-			effects.enter(markerType);
-			effects.consume(code);
-			effects.exit(markerType);
-			marker = code === 40 ? 41 : code;
-			return atFirstTitleBreak;
-		}
-		function atFirstTitleBreak(code) {
-			if (code === marker) {
-				effects.enter(markerType);
-				effects.consume(code);
-				effects.exit(markerType);
-				effects.exit(type);
-				return ok;
-			}
-			effects.enter(stringType);
-			return atTitleBreak(code);
-		}
-		function atTitleBreak(code) {
-			if (code === marker) {
-				effects.exit(stringType);
-				return atFirstTitleBreak(marker);
-			}
-			if (code === null) return nok(code);
-			if (markdownLineEnding(code)) {
-				effects.enter("lineEnding");
-				effects.consume(code);
-				effects.exit("lineEnding");
-				return factorySpace(effects, atTitleBreak, "linePrefix");
-			}
-			effects.enter("chunkString", { contentType: "string" });
-			return title(code);
-		}
-		function title(code) {
-			if (code === marker || code === null || markdownLineEnding(code)) {
-				effects.exit("chunkString");
-				return atTitleBreak(code);
-			}
-			effects.consume(code);
-			return code === 92 ? titleEscape : title;
-		}
-		function titleEscape(code) {
-			if (code === marker || code === 92) {
-				effects.consume(code);
-				return title;
-			}
-			return title(code);
-		}
-	}
-	module.exports = titleFactory;
-}));
-//#endregion
-//#region node_modules/micromark/dist/tokenize/definition.js
-var require_definition$1 = /* @__PURE__ */ __commonJSMin(((exports, module) => {
-	var markdownLineEnding = require_markdown_line_ending();
-	var markdownLineEndingOrSpace = require_markdown_line_ending_or_space();
-	var normalizeIdentifier = require_normalize_identifier();
-	var factoryDestination = require_factory_destination();
-	var factoryLabel = require_factory_label();
-	var factorySpace = require_factory_space();
-	var factoryWhitespace = require_factory_whitespace();
-	var factoryTitle = require_factory_title();
-	var definition = {
-		name: "definition",
-		tokenize: tokenizeDefinition
-	};
-	var titleConstruct = {
-		tokenize: tokenizeTitle,
-		partial: true
-	};
-	function tokenizeDefinition(effects, ok, nok) {
-		var self = this;
-		var identifier;
-		return start;
-		function start(code) {
-			effects.enter("definition");
-			return factoryLabel.call(self, effects, labelAfter, nok, "definitionLabel", "definitionLabelMarker", "definitionLabelString")(code);
-		}
-		function labelAfter(code) {
-			identifier = normalizeIdentifier(self.sliceSerialize(self.events[self.events.length - 1][1]).slice(1, -1));
-			if (code === 58) {
-				effects.enter("definitionMarker");
-				effects.consume(code);
-				effects.exit("definitionMarker");
-				return factoryWhitespace(effects, factoryDestination(effects, effects.attempt(titleConstruct, factorySpace(effects, after, "whitespace"), factorySpace(effects, after, "whitespace")), nok, "definitionDestination", "definitionDestinationLiteral", "definitionDestinationLiteralMarker", "definitionDestinationRaw", "definitionDestinationString"));
-			}
-			return nok(code);
-		}
-		function after(code) {
-			if (code === null || markdownLineEnding(code)) {
-				effects.exit("definition");
-				if (self.parser.defined.indexOf(identifier) < 0) self.parser.defined.push(identifier);
-				return ok(code);
-			}
-			return nok(code);
-		}
-	}
-	function tokenizeTitle(effects, ok, nok) {
-		return start;
-		function start(code) {
-			return markdownLineEndingOrSpace(code) ? factoryWhitespace(effects, before)(code) : nok(code);
-		}
-		function before(code) {
-			if (code === 34 || code === 39 || code === 40) return factoryTitle(effects, factorySpace(effects, after, "whitespace"), nok, "definitionTitle", "definitionTitleMarker", "definitionTitleString")(code);
-			return nok(code);
-		}
-		function after(code) {
-			return code === null || markdownLineEnding(code) ? ok(code) : nok(code);
-		}
-	}
-	module.exports = definition;
-}));
-//#endregion
-//#region node_modules/micromark/dist/tokenize/hard-break-escape.js
-var require_hard_break_escape = /* @__PURE__ */ __commonJSMin(((exports, module) => {
-	var markdownLineEnding = require_markdown_line_ending();
-	var hardBreakEscape = {
-		name: "hardBreakEscape",
-		tokenize: tokenizeHardBreakEscape
-	};
-	function tokenizeHardBreakEscape(effects, ok, nok) {
-		return start;
-		function start(code) {
-			effects.enter("hardBreakEscape");
-			effects.enter("escapeMarker");
-			effects.consume(code);
-			return open;
-		}
-		function open(code) {
-			if (markdownLineEnding(code)) {
-				effects.exit("escapeMarker");
-				effects.exit("hardBreakEscape");
-				return ok(code);
-			}
-			return nok(code);
-		}
-	}
-	module.exports = hardBreakEscape;
-}));
-//#endregion
-//#region node_modules/micromark/dist/tokenize/heading-atx.js
-var require_heading_atx = /* @__PURE__ */ __commonJSMin(((exports, module) => {
-	var markdownLineEnding = require_markdown_line_ending();
-	var markdownLineEndingOrSpace = require_markdown_line_ending_or_space();
-	var markdownSpace = require_markdown_space();
-	var chunkedSplice = require_chunked_splice();
-	var factorySpace = require_factory_space();
-	var headingAtx = {
-		name: "headingAtx",
-		tokenize: tokenizeHeadingAtx,
-		resolve: resolveHeadingAtx
-	};
-	function resolveHeadingAtx(events, context) {
-		var contentEnd = events.length - 2;
-		var contentStart = 3;
-		var content;
-		var text;
-		if (events[contentStart][1].type === "whitespace") contentStart += 2;
-		if (contentEnd - 2 > contentStart && events[contentEnd][1].type === "whitespace") contentEnd -= 2;
-		if (events[contentEnd][1].type === "atxHeadingSequence" && (contentStart === contentEnd - 1 || contentEnd - 4 > contentStart && events[contentEnd - 2][1].type === "whitespace")) contentEnd -= contentStart + 1 === contentEnd ? 2 : 4;
-		if (contentEnd > contentStart) {
-			content = {
-				type: "atxHeadingText",
-				start: events[contentStart][1].start,
-				end: events[contentEnd][1].end
-			};
-			text = {
-				type: "chunkText",
-				start: events[contentStart][1].start,
-				end: events[contentEnd][1].end,
-				contentType: "text"
-			};
-			chunkedSplice(events, contentStart, contentEnd - contentStart + 1, [
-				[
-					"enter",
-					content,
-					context
-				],
-				[
-					"enter",
-					text,
-					context
-				],
-				[
-					"exit",
-					text,
-					context
-				],
-				[
-					"exit",
-					content,
-					context
-				]
-			]);
-		}
-		return events;
-	}
-	function tokenizeHeadingAtx(effects, ok, nok) {
-		var self = this;
-		var size = 0;
-		return start;
-		function start(code) {
-			effects.enter("atxHeading");
-			effects.enter("atxHeadingSequence");
-			return fenceOpenInside(code);
-		}
-		function fenceOpenInside(code) {
-			if (code === 35 && size++ < 6) {
-				effects.consume(code);
-				return fenceOpenInside;
-			}
-			if (code === null || markdownLineEndingOrSpace(code)) {
-				effects.exit("atxHeadingSequence");
-				return self.interrupt ? ok(code) : headingBreak(code);
-			}
-			return nok(code);
-		}
-		function headingBreak(code) {
-			if (code === 35) {
-				effects.enter("atxHeadingSequence");
-				return sequence(code);
-			}
-			if (code === null || markdownLineEnding(code)) {
-				effects.exit("atxHeading");
-				return ok(code);
-			}
-			if (markdownSpace(code)) return factorySpace(effects, headingBreak, "whitespace")(code);
-			effects.enter("atxHeadingText");
-			return data(code);
-		}
-		function sequence(code) {
-			if (code === 35) {
-				effects.consume(code);
-				return sequence;
-			}
-			effects.exit("atxHeadingSequence");
-			return headingBreak(code);
-		}
-		function data(code) {
-			if (code === null || code === 35 || markdownLineEndingOrSpace(code)) {
-				effects.exit("atxHeadingText");
-				return headingBreak(code);
-			}
-			effects.consume(code);
-			return data;
-		}
-	}
-	module.exports = headingAtx;
-}));
-//#endregion
-//#region node_modules/micromark/dist/constant/html-block-names.js
-var require_html_block_names = /* @__PURE__ */ __commonJSMin(((exports, module) => {
-	module.exports = [
-		"address",
-		"article",
-		"aside",
-		"base",
-		"basefont",
-		"blockquote",
-		"body",
-		"caption",
-		"center",
-		"col",
-		"colgroup",
-		"dd",
-		"details",
-		"dialog",
-		"dir",
-		"div",
-		"dl",
-		"dt",
-		"fieldset",
-		"figcaption",
-		"figure",
-		"footer",
-		"form",
-		"frame",
-		"frameset",
-		"h1",
-		"h2",
-		"h3",
-		"h4",
-		"h5",
-		"h6",
-		"head",
-		"header",
-		"hr",
-		"html",
-		"iframe",
-		"legend",
-		"li",
-		"link",
-		"main",
-		"menu",
-		"menuitem",
-		"nav",
-		"noframes",
-		"ol",
-		"optgroup",
-		"option",
-		"p",
-		"param",
-		"section",
-		"source",
-		"summary",
-		"table",
-		"tbody",
-		"td",
-		"tfoot",
-		"th",
-		"thead",
-		"title",
-		"tr",
-		"track",
-		"ul"
-	];
-}));
-//#endregion
-//#region node_modules/micromark/dist/constant/html-raw-names.js
-var require_html_raw_names = /* @__PURE__ */ __commonJSMin(((exports, module) => {
-	module.exports = [
-		"pre",
-		"script",
-		"style",
-		"textarea"
-	];
-}));
-//#endregion
-//#region node_modules/micromark/dist/tokenize/html-flow.js
-var require_html_flow = /* @__PURE__ */ __commonJSMin(((exports, module) => {
-	var asciiAlpha = require_ascii_alpha();
-	var asciiAlphanumeric = require_ascii_alphanumeric();
-	var markdownLineEnding = require_markdown_line_ending();
-	var markdownLineEndingOrSpace = require_markdown_line_ending_or_space();
-	var markdownSpace = require_markdown_space();
-	var fromCharCode = require_from_char_code();
-	var htmlBlockNames = require_html_block_names();
-	var htmlRawNames = require_html_raw_names();
-	var partialBlankLine = require_partial_blank_line();
-	var htmlFlow = {
-		name: "htmlFlow",
-		tokenize: tokenizeHtmlFlow,
-		resolveTo: resolveToHtmlFlow,
-		concrete: true
-	};
-	var nextBlankConstruct = {
-		tokenize: tokenizeNextBlank,
-		partial: true
-	};
-	function resolveToHtmlFlow(events) {
-		var index = events.length;
-		while (index--) if (events[index][0] === "enter" && events[index][1].type === "htmlFlow") break;
-		if (index > 1 && events[index - 2][1].type === "linePrefix") {
-			events[index][1].start = events[index - 2][1].start;
-			events[index + 1][1].start = events[index - 2][1].start;
-			events.splice(index - 2, 2);
-		}
-		return events;
-	}
-	function tokenizeHtmlFlow(effects, ok, nok) {
-		var self = this;
-		var kind;
-		var startTag;
-		var buffer;
-		var index;
-		var marker;
-		return start;
-		function start(code) {
-			effects.enter("htmlFlow");
-			effects.enter("htmlFlowData");
-			effects.consume(code);
-			return open;
-		}
-		function open(code) {
-			if (code === 33) {
-				effects.consume(code);
-				return declarationStart;
-			}
-			if (code === 47) {
-				effects.consume(code);
-				return tagCloseStart;
-			}
-			if (code === 63) {
-				effects.consume(code);
-				kind = 3;
-				return self.interrupt ? ok : continuationDeclarationInside;
-			}
-			if (asciiAlpha(code)) {
-				effects.consume(code);
-				buffer = fromCharCode(code);
-				startTag = true;
-				return tagName;
-			}
-			return nok(code);
-		}
-		function declarationStart(code) {
-			if (code === 45) {
-				effects.consume(code);
-				kind = 2;
-				return commentOpenInside;
-			}
-			if (code === 91) {
-				effects.consume(code);
-				kind = 5;
-				buffer = "CDATA[";
-				index = 0;
-				return cdataOpenInside;
-			}
-			if (asciiAlpha(code)) {
-				effects.consume(code);
-				kind = 4;
-				return self.interrupt ? ok : continuationDeclarationInside;
-			}
-			return nok(code);
-		}
-		function commentOpenInside(code) {
-			if (code === 45) {
-				effects.consume(code);
-				return self.interrupt ? ok : continuationDeclarationInside;
-			}
-			return nok(code);
-		}
-		function cdataOpenInside(code) {
-			if (code === buffer.charCodeAt(index++)) {
-				effects.consume(code);
-				return index === buffer.length ? self.interrupt ? ok : continuation : cdataOpenInside;
-			}
-			return nok(code);
-		}
-		function tagCloseStart(code) {
-			if (asciiAlpha(code)) {
-				effects.consume(code);
-				buffer = fromCharCode(code);
-				return tagName;
-			}
-			return nok(code);
-		}
-		function tagName(code) {
-			if (code === null || code === 47 || code === 62 || markdownLineEndingOrSpace(code)) {
-				if (code !== 47 && startTag && htmlRawNames.indexOf(buffer.toLowerCase()) > -1) {
-					kind = 1;
-					return self.interrupt ? ok(code) : continuation(code);
-				}
-				if (htmlBlockNames.indexOf(buffer.toLowerCase()) > -1) {
-					kind = 6;
-					if (code === 47) {
-						effects.consume(code);
-						return basicSelfClosing;
-					}
-					return self.interrupt ? ok(code) : continuation(code);
-				}
-				kind = 7;
-				return self.interrupt ? nok(code) : startTag ? completeAttributeNameBefore(code) : completeClosingTagAfter(code);
-			}
-			if (code === 45 || asciiAlphanumeric(code)) {
-				effects.consume(code);
-				buffer += fromCharCode(code);
-				return tagName;
-			}
-			return nok(code);
-		}
-		function basicSelfClosing(code) {
-			if (code === 62) {
-				effects.consume(code);
-				return self.interrupt ? ok : continuation;
-			}
-			return nok(code);
-		}
-		function completeClosingTagAfter(code) {
-			if (markdownSpace(code)) {
-				effects.consume(code);
-				return completeClosingTagAfter;
-			}
-			return completeEnd(code);
-		}
-		function completeAttributeNameBefore(code) {
-			if (code === 47) {
-				effects.consume(code);
-				return completeEnd;
-			}
-			if (code === 58 || code === 95 || asciiAlpha(code)) {
-				effects.consume(code);
-				return completeAttributeName;
-			}
-			if (markdownSpace(code)) {
-				effects.consume(code);
-				return completeAttributeNameBefore;
-			}
-			return completeEnd(code);
-		}
-		function completeAttributeName(code) {
-			if (code === 45 || code === 46 || code === 58 || code === 95 || asciiAlphanumeric(code)) {
-				effects.consume(code);
-				return completeAttributeName;
-			}
-			return completeAttributeNameAfter(code);
-		}
-		function completeAttributeNameAfter(code) {
-			if (code === 61) {
-				effects.consume(code);
-				return completeAttributeValueBefore;
-			}
-			if (markdownSpace(code)) {
-				effects.consume(code);
-				return completeAttributeNameAfter;
-			}
-			return completeAttributeNameBefore(code);
-		}
-		function completeAttributeValueBefore(code) {
-			if (code === null || code === 60 || code === 61 || code === 62 || code === 96) return nok(code);
-			if (code === 34 || code === 39) {
-				effects.consume(code);
-				marker = code;
-				return completeAttributeValueQuoted;
-			}
-			if (markdownSpace(code)) {
-				effects.consume(code);
-				return completeAttributeValueBefore;
-			}
-			marker = void 0;
-			return completeAttributeValueUnquoted(code);
-		}
-		function completeAttributeValueQuoted(code) {
-			if (code === marker) {
-				effects.consume(code);
-				return completeAttributeValueQuotedAfter;
-			}
-			if (code === null || markdownLineEnding(code)) return nok(code);
-			effects.consume(code);
-			return completeAttributeValueQuoted;
-		}
-		function completeAttributeValueUnquoted(code) {
-			if (code === null || code === 34 || code === 39 || code === 60 || code === 61 || code === 62 || code === 96 || markdownLineEndingOrSpace(code)) return completeAttributeNameAfter(code);
-			effects.consume(code);
-			return completeAttributeValueUnquoted;
-		}
-		function completeAttributeValueQuotedAfter(code) {
-			if (code === 47 || code === 62 || markdownSpace(code)) return completeAttributeNameBefore(code);
-			return nok(code);
-		}
-		function completeEnd(code) {
-			if (code === 62) {
-				effects.consume(code);
-				return completeAfter;
-			}
-			return nok(code);
-		}
-		function completeAfter(code) {
-			if (markdownSpace(code)) {
-				effects.consume(code);
-				return completeAfter;
-			}
-			return code === null || markdownLineEnding(code) ? continuation(code) : nok(code);
-		}
-		function continuation(code) {
-			if (code === 45 && kind === 2) {
-				effects.consume(code);
-				return continuationCommentInside;
-			}
-			if (code === 60 && kind === 1) {
-				effects.consume(code);
-				return continuationRawTagOpen;
-			}
-			if (code === 62 && kind === 4) {
-				effects.consume(code);
-				return continuationClose;
-			}
-			if (code === 63 && kind === 3) {
-				effects.consume(code);
-				return continuationDeclarationInside;
-			}
-			if (code === 93 && kind === 5) {
-				effects.consume(code);
-				return continuationCharacterDataInside;
-			}
-			if (markdownLineEnding(code) && (kind === 6 || kind === 7)) return effects.check(nextBlankConstruct, continuationClose, continuationAtLineEnding)(code);
-			if (code === null || markdownLineEnding(code)) return continuationAtLineEnding(code);
-			effects.consume(code);
-			return continuation;
-		}
-		function continuationAtLineEnding(code) {
-			effects.exit("htmlFlowData");
-			return htmlContinueStart(code);
-		}
-		function htmlContinueStart(code) {
-			if (code === null) return done(code);
-			if (markdownLineEnding(code)) {
-				effects.enter("lineEnding");
-				effects.consume(code);
-				effects.exit("lineEnding");
-				return htmlContinueStart;
-			}
-			effects.enter("htmlFlowData");
-			return continuation(code);
-		}
-		function continuationCommentInside(code) {
-			if (code === 45) {
-				effects.consume(code);
-				return continuationDeclarationInside;
-			}
-			return continuation(code);
-		}
-		function continuationRawTagOpen(code) {
-			if (code === 47) {
-				effects.consume(code);
-				buffer = "";
-				return continuationRawEndTag;
-			}
-			return continuation(code);
-		}
-		function continuationRawEndTag(code) {
-			if (code === 62 && htmlRawNames.indexOf(buffer.toLowerCase()) > -1) {
-				effects.consume(code);
-				return continuationClose;
-			}
-			if (asciiAlpha(code) && buffer.length < 8) {
-				effects.consume(code);
-				buffer += fromCharCode(code);
-				return continuationRawEndTag;
-			}
-			return continuation(code);
-		}
-		function continuationCharacterDataInside(code) {
-			if (code === 93) {
-				effects.consume(code);
-				return continuationDeclarationInside;
-			}
-			return continuation(code);
-		}
-		function continuationDeclarationInside(code) {
-			if (code === 62) {
-				effects.consume(code);
-				return continuationClose;
-			}
-			return continuation(code);
-		}
-		function continuationClose(code) {
-			if (code === null || markdownLineEnding(code)) {
-				effects.exit("htmlFlowData");
-				return done(code);
-			}
-			effects.consume(code);
-			return continuationClose;
-		}
-		function done(code) {
-			effects.exit("htmlFlow");
-			return ok(code);
-		}
-	}
-	function tokenizeNextBlank(effects, ok, nok) {
-		return start;
-		function start(code) {
-			effects.exit("htmlFlowData");
-			effects.enter("lineEndingBlank");
-			effects.consume(code);
-			effects.exit("lineEndingBlank");
-			return effects.attempt(partialBlankLine, ok, nok);
-		}
-	}
-	module.exports = htmlFlow;
-}));
-//#endregion
-//#region node_modules/micromark/dist/tokenize/html-text.js
-var require_html_text = /* @__PURE__ */ __commonJSMin(((exports, module) => {
-	var asciiAlpha = require_ascii_alpha();
-	var asciiAlphanumeric = require_ascii_alphanumeric();
-	var markdownLineEnding = require_markdown_line_ending();
-	var markdownLineEndingOrSpace = require_markdown_line_ending_or_space();
-	var markdownSpace = require_markdown_space();
-	var factorySpace = require_factory_space();
-	var htmlText = {
-		name: "htmlText",
-		tokenize: tokenizeHtmlText
-	};
-	function tokenizeHtmlText(effects, ok, nok) {
-		var self = this;
-		var marker;
-		var buffer;
-		var index;
-		var returnState;
-		return start;
-		function start(code) {
-			effects.enter("htmlText");
-			effects.enter("htmlTextData");
-			effects.consume(code);
-			return open;
-		}
-		function open(code) {
-			if (code === 33) {
-				effects.consume(code);
-				return declarationOpen;
-			}
-			if (code === 47) {
-				effects.consume(code);
-				return tagCloseStart;
-			}
-			if (code === 63) {
-				effects.consume(code);
-				return instruction;
-			}
-			if (asciiAlpha(code)) {
-				effects.consume(code);
-				return tagOpen;
-			}
-			return nok(code);
-		}
-		function declarationOpen(code) {
-			if (code === 45) {
-				effects.consume(code);
-				return commentOpen;
-			}
-			if (code === 91) {
-				effects.consume(code);
-				buffer = "CDATA[";
-				index = 0;
-				return cdataOpen;
-			}
-			if (asciiAlpha(code)) {
-				effects.consume(code);
-				return declaration;
-			}
-			return nok(code);
-		}
-		function commentOpen(code) {
-			if (code === 45) {
-				effects.consume(code);
-				return commentStart;
-			}
-			return nok(code);
-		}
-		function commentStart(code) {
-			if (code === null || code === 62) return nok(code);
-			if (code === 45) {
-				effects.consume(code);
-				return commentStartDash;
-			}
-			return comment(code);
-		}
-		function commentStartDash(code) {
-			if (code === null || code === 62) return nok(code);
-			return comment(code);
-		}
-		function comment(code) {
-			if (code === null) return nok(code);
-			if (code === 45) {
-				effects.consume(code);
-				return commentClose;
-			}
-			if (markdownLineEnding(code)) {
-				returnState = comment;
-				return atLineEnding(code);
-			}
-			effects.consume(code);
-			return comment;
-		}
-		function commentClose(code) {
-			if (code === 45) {
-				effects.consume(code);
-				return end;
-			}
-			return comment(code);
-		}
-		function cdataOpen(code) {
-			if (code === buffer.charCodeAt(index++)) {
-				effects.consume(code);
-				return index === buffer.length ? cdata : cdataOpen;
-			}
-			return nok(code);
-		}
-		function cdata(code) {
-			if (code === null) return nok(code);
-			if (code === 93) {
-				effects.consume(code);
-				return cdataClose;
-			}
-			if (markdownLineEnding(code)) {
-				returnState = cdata;
-				return atLineEnding(code);
-			}
-			effects.consume(code);
-			return cdata;
-		}
-		function cdataClose(code) {
-			if (code === 93) {
-				effects.consume(code);
-				return cdataEnd;
-			}
-			return cdata(code);
-		}
-		function cdataEnd(code) {
-			if (code === 62) return end(code);
-			if (code === 93) {
-				effects.consume(code);
-				return cdataEnd;
-			}
-			return cdata(code);
-		}
-		function declaration(code) {
-			if (code === null || code === 62) return end(code);
-			if (markdownLineEnding(code)) {
-				returnState = declaration;
-				return atLineEnding(code);
-			}
-			effects.consume(code);
-			return declaration;
-		}
-		function instruction(code) {
-			if (code === null) return nok(code);
-			if (code === 63) {
-				effects.consume(code);
-				return instructionClose;
-			}
-			if (markdownLineEnding(code)) {
-				returnState = instruction;
-				return atLineEnding(code);
-			}
-			effects.consume(code);
-			return instruction;
-		}
-		function instructionClose(code) {
-			return code === 62 ? end(code) : instruction(code);
-		}
-		function tagCloseStart(code) {
-			if (asciiAlpha(code)) {
-				effects.consume(code);
-				return tagClose;
-			}
-			return nok(code);
-		}
-		function tagClose(code) {
-			if (code === 45 || asciiAlphanumeric(code)) {
-				effects.consume(code);
-				return tagClose;
-			}
-			return tagCloseBetween(code);
-		}
-		function tagCloseBetween(code) {
-			if (markdownLineEnding(code)) {
-				returnState = tagCloseBetween;
-				return atLineEnding(code);
-			}
-			if (markdownSpace(code)) {
-				effects.consume(code);
-				return tagCloseBetween;
-			}
-			return end(code);
-		}
-		function tagOpen(code) {
-			if (code === 45 || asciiAlphanumeric(code)) {
-				effects.consume(code);
-				return tagOpen;
-			}
-			if (code === 47 || code === 62 || markdownLineEndingOrSpace(code)) return tagOpenBetween(code);
-			return nok(code);
-		}
-		function tagOpenBetween(code) {
-			if (code === 47) {
-				effects.consume(code);
-				return end;
-			}
-			if (code === 58 || code === 95 || asciiAlpha(code)) {
-				effects.consume(code);
-				return tagOpenAttributeName;
-			}
-			if (markdownLineEnding(code)) {
-				returnState = tagOpenBetween;
-				return atLineEnding(code);
-			}
-			if (markdownSpace(code)) {
-				effects.consume(code);
-				return tagOpenBetween;
-			}
-			return end(code);
-		}
-		function tagOpenAttributeName(code) {
-			if (code === 45 || code === 46 || code === 58 || code === 95 || asciiAlphanumeric(code)) {
-				effects.consume(code);
-				return tagOpenAttributeName;
-			}
-			return tagOpenAttributeNameAfter(code);
-		}
-		function tagOpenAttributeNameAfter(code) {
-			if (code === 61) {
-				effects.consume(code);
-				return tagOpenAttributeValueBefore;
-			}
-			if (markdownLineEnding(code)) {
-				returnState = tagOpenAttributeNameAfter;
-				return atLineEnding(code);
-			}
-			if (markdownSpace(code)) {
-				effects.consume(code);
-				return tagOpenAttributeNameAfter;
-			}
-			return tagOpenBetween(code);
-		}
-		function tagOpenAttributeValueBefore(code) {
-			if (code === null || code === 60 || code === 61 || code === 62 || code === 96) return nok(code);
-			if (code === 34 || code === 39) {
-				effects.consume(code);
-				marker = code;
-				return tagOpenAttributeValueQuoted;
-			}
-			if (markdownLineEnding(code)) {
-				returnState = tagOpenAttributeValueBefore;
-				return atLineEnding(code);
-			}
-			if (markdownSpace(code)) {
-				effects.consume(code);
-				return tagOpenAttributeValueBefore;
-			}
-			effects.consume(code);
-			marker = void 0;
-			return tagOpenAttributeValueUnquoted;
-		}
-		function tagOpenAttributeValueQuoted(code) {
-			if (code === marker) {
-				effects.consume(code);
-				return tagOpenAttributeValueQuotedAfter;
-			}
-			if (code === null) return nok(code);
-			if (markdownLineEnding(code)) {
-				returnState = tagOpenAttributeValueQuoted;
-				return atLineEnding(code);
-			}
-			effects.consume(code);
-			return tagOpenAttributeValueQuoted;
-		}
-		function tagOpenAttributeValueQuotedAfter(code) {
-			if (code === 62 || code === 47 || markdownLineEndingOrSpace(code)) return tagOpenBetween(code);
-			return nok(code);
-		}
-		function tagOpenAttributeValueUnquoted(code) {
-			if (code === null || code === 34 || code === 39 || code === 60 || code === 61 || code === 96) return nok(code);
-			if (code === 62 || markdownLineEndingOrSpace(code)) return tagOpenBetween(code);
-			effects.consume(code);
-			return tagOpenAttributeValueUnquoted;
-		}
-		function atLineEnding(code) {
-			effects.exit("htmlTextData");
-			effects.enter("lineEnding");
-			effects.consume(code);
-			effects.exit("lineEnding");
-			return factorySpace(effects, afterPrefix, "linePrefix", self.parser.constructs.disable.null.indexOf("codeIndented") > -1 ? void 0 : 4);
-		}
-		function afterPrefix(code) {
-			effects.enter("htmlTextData");
-			return returnState(code);
-		}
-		function end(code) {
-			if (code === 62) {
-				effects.consume(code);
-				effects.exit("htmlTextData");
-				effects.exit("htmlText");
-				return ok;
-			}
-			return nok(code);
-		}
-	}
-	module.exports = htmlText;
-}));
-//#endregion
-//#region node_modules/micromark/dist/tokenize/label-end.js
-var require_label_end = /* @__PURE__ */ __commonJSMin(((exports, module) => {
-	var markdownLineEndingOrSpace = require_markdown_line_ending_or_space();
-	var chunkedPush = require_chunked_push();
-	var chunkedSplice = require_chunked_splice();
-	var normalizeIdentifier = require_normalize_identifier();
-	var resolveAll = require_resolve_all();
-	var shallow = require_shallow();
-	var factoryDestination = require_factory_destination();
-	var factoryLabel = require_factory_label();
-	var factoryTitle = require_factory_title();
-	var factoryWhitespace = require_factory_whitespace();
-	var labelEnd = {
-		name: "labelEnd",
-		tokenize: tokenizeLabelEnd,
-		resolveTo: resolveToLabelEnd,
-		resolveAll: resolveAllLabelEnd
-	};
-	var resourceConstruct = { tokenize: tokenizeResource };
-	var fullReferenceConstruct = { tokenize: tokenizeFullReference };
-	var collapsedReferenceConstruct = { tokenize: tokenizeCollapsedReference };
-	function resolveAllLabelEnd(events) {
-		var index = -1;
-		var token;
-		while (++index < events.length) {
-			token = events[index][1];
-			if (!token._used && (token.type === "labelImage" || token.type === "labelLink" || token.type === "labelEnd")) {
-				events.splice(index + 1, token.type === "labelImage" ? 4 : 2);
-				token.type = "data";
-				index++;
-			}
-		}
-		return events;
-	}
-	function resolveToLabelEnd(events, context) {
-		var index = events.length;
-		var offset = 0;
-		var group;
-		var label;
-		var text;
-		var token;
-		var open;
-		var close;
-		var media;
-		while (index--) {
-			token = events[index][1];
-			if (open) {
-				if (token.type === "link" || token.type === "labelLink" && token._inactive) break;
-				if (events[index][0] === "enter" && token.type === "labelLink") token._inactive = true;
-			} else if (close) {
-				if (events[index][0] === "enter" && (token.type === "labelImage" || token.type === "labelLink") && !token._balanced) {
-					open = index;
-					if (token.type !== "labelLink") {
-						offset = 2;
-						break;
-					}
-				}
-			} else if (token.type === "labelEnd") close = index;
-		}
-		group = {
-			type: events[open][1].type === "labelLink" ? "link" : "image",
-			start: shallow(events[open][1].start),
-			end: shallow(events[events.length - 1][1].end)
-		};
-		label = {
-			type: "label",
-			start: shallow(events[open][1].start),
-			end: shallow(events[close][1].end)
-		};
-		text = {
-			type: "labelText",
-			start: shallow(events[open + offset + 2][1].end),
-			end: shallow(events[close - 2][1].start)
-		};
-		media = [[
-			"enter",
-			group,
-			context
-		], [
-			"enter",
-			label,
-			context
-		]];
-		media = chunkedPush(media, events.slice(open + 1, open + offset + 3));
-		media = chunkedPush(media, [[
-			"enter",
-			text,
-			context
-		]]);
-		media = chunkedPush(media, resolveAll(context.parser.constructs.insideSpan.null, events.slice(open + offset + 4, close - 3), context));
-		media = chunkedPush(media, [
-			[
-				"exit",
-				text,
-				context
-			],
-			events[close - 2],
-			events[close - 1],
-			[
-				"exit",
-				label,
-				context
-			]
-		]);
-		media = chunkedPush(media, events.slice(close + 1));
-		media = chunkedPush(media, [[
-			"exit",
-			group,
-			context
-		]]);
-		chunkedSplice(events, open, events.length, media);
-		return events;
-	}
-	function tokenizeLabelEnd(effects, ok, nok) {
-		var self = this;
-		var index = self.events.length;
-		var labelStart;
-		var defined;
-		while (index--) if ((self.events[index][1].type === "labelImage" || self.events[index][1].type === "labelLink") && !self.events[index][1]._balanced) {
-			labelStart = self.events[index][1];
-			break;
-		}
-		return start;
-		function start(code) {
-			if (!labelStart) return nok(code);
-			if (labelStart._inactive) return balanced(code);
-			defined = self.parser.defined.indexOf(normalizeIdentifier(self.sliceSerialize({
-				start: labelStart.end,
-				end: self.now()
-			}))) > -1;
-			effects.enter("labelEnd");
-			effects.enter("labelMarker");
-			effects.consume(code);
-			effects.exit("labelMarker");
-			effects.exit("labelEnd");
-			return afterLabelEnd;
-		}
-		function afterLabelEnd(code) {
-			if (code === 40) return effects.attempt(resourceConstruct, ok, defined ? ok : balanced)(code);
-			if (code === 91) return effects.attempt(fullReferenceConstruct, ok, defined ? effects.attempt(collapsedReferenceConstruct, ok, balanced) : balanced)(code);
-			return defined ? ok(code) : balanced(code);
-		}
-		function balanced(code) {
-			labelStart._balanced = true;
-			return nok(code);
-		}
-	}
-	function tokenizeResource(effects, ok, nok) {
-		return start;
-		function start(code) {
-			effects.enter("resource");
-			effects.enter("resourceMarker");
-			effects.consume(code);
-			effects.exit("resourceMarker");
-			return factoryWhitespace(effects, open);
-		}
-		function open(code) {
-			if (code === 41) return end(code);
-			return factoryDestination(effects, destinationAfter, nok, "resourceDestination", "resourceDestinationLiteral", "resourceDestinationLiteralMarker", "resourceDestinationRaw", "resourceDestinationString", 3)(code);
-		}
-		function destinationAfter(code) {
-			return markdownLineEndingOrSpace(code) ? factoryWhitespace(effects, between)(code) : end(code);
-		}
-		function between(code) {
-			if (code === 34 || code === 39 || code === 40) return factoryTitle(effects, factoryWhitespace(effects, end), nok, "resourceTitle", "resourceTitleMarker", "resourceTitleString")(code);
-			return end(code);
-		}
-		function end(code) {
-			if (code === 41) {
-				effects.enter("resourceMarker");
-				effects.consume(code);
-				effects.exit("resourceMarker");
-				effects.exit("resource");
-				return ok;
-			}
-			return nok(code);
-		}
-	}
-	function tokenizeFullReference(effects, ok, nok) {
-		var self = this;
-		return start;
-		function start(code) {
-			return factoryLabel.call(self, effects, afterLabel, nok, "reference", "referenceMarker", "referenceString")(code);
-		}
-		function afterLabel(code) {
-			return self.parser.defined.indexOf(normalizeIdentifier(self.sliceSerialize(self.events[self.events.length - 1][1]).slice(1, -1))) < 0 ? nok(code) : ok(code);
-		}
-	}
-	function tokenizeCollapsedReference(effects, ok, nok) {
-		return start;
-		function start(code) {
-			effects.enter("reference");
-			effects.enter("referenceMarker");
-			effects.consume(code);
-			effects.exit("referenceMarker");
-			return open;
-		}
-		function open(code) {
-			if (code === 93) {
-				effects.enter("referenceMarker");
-				effects.consume(code);
-				effects.exit("referenceMarker");
-				effects.exit("reference");
-				return ok;
-			}
-			return nok(code);
-		}
-	}
-	module.exports = labelEnd;
-}));
-//#endregion
-//#region node_modules/micromark/dist/tokenize/label-start-image.js
-var require_label_start_image = /* @__PURE__ */ __commonJSMin(((exports, module) => {
-	var labelStartImage = {
-		name: "labelStartImage",
-		tokenize: tokenizeLabelStartImage,
-		resolveAll: require_label_end().resolveAll
-	};
-	function tokenizeLabelStartImage(effects, ok, nok) {
-		var self = this;
-		return start;
-		function start(code) {
-			effects.enter("labelImage");
-			effects.enter("labelImageMarker");
-			effects.consume(code);
-			effects.exit("labelImageMarker");
-			return open;
-		}
-		function open(code) {
-			if (code === 91) {
-				effects.enter("labelMarker");
-				effects.consume(code);
-				effects.exit("labelMarker");
-				effects.exit("labelImage");
-				return after;
-			}
-			return nok(code);
-		}
-		function after(code) {
-			/* c8 ignore next */
-			return code === 94 && "_hiddenFootnoteSupport" in self.parser.constructs ? nok(code) : ok(code);
-		}
-	}
-	module.exports = labelStartImage;
-}));
-//#endregion
-//#region node_modules/micromark/dist/tokenize/label-start-link.js
-var require_label_start_link = /* @__PURE__ */ __commonJSMin(((exports, module) => {
-	var labelStartLink = {
-		name: "labelStartLink",
-		tokenize: tokenizeLabelStartLink,
-		resolveAll: require_label_end().resolveAll
-	};
-	function tokenizeLabelStartLink(effects, ok, nok) {
-		var self = this;
-		return start;
-		function start(code) {
-			effects.enter("labelLink");
-			effects.enter("labelMarker");
-			effects.consume(code);
-			effects.exit("labelMarker");
-			effects.exit("labelLink");
-			return after;
-		}
-		function after(code) {
-			/* c8 ignore next */
-			return code === 94 && "_hiddenFootnoteSupport" in self.parser.constructs ? nok(code) : ok(code);
-		}
-	}
-	module.exports = labelStartLink;
-}));
-//#endregion
-//#region node_modules/micromark/dist/tokenize/line-ending.js
-var require_line_ending = /* @__PURE__ */ __commonJSMin(((exports, module) => {
-	var factorySpace = require_factory_space();
-	var lineEnding = {
-		name: "lineEnding",
-		tokenize: tokenizeLineEnding
-	};
-	function tokenizeLineEnding(effects, ok) {
-		return start;
-		function start(code) {
-			effects.enter("lineEnding");
-			effects.consume(code);
-			effects.exit("lineEnding");
-			return factorySpace(effects, ok, "linePrefix");
-		}
-	}
-	module.exports = lineEnding;
-}));
-//#endregion
-//#region node_modules/micromark/dist/tokenize/thematic-break.js
-var require_thematic_break$1 = /* @__PURE__ */ __commonJSMin(((exports, module) => {
-	var markdownLineEnding = require_markdown_line_ending();
-	var markdownSpace = require_markdown_space();
-	var factorySpace = require_factory_space();
-	var thematicBreak = {
-		name: "thematicBreak",
-		tokenize: tokenizeThematicBreak
-	};
-	function tokenizeThematicBreak(effects, ok, nok) {
-		var size = 0;
-		var marker;
-		return start;
-		function start(code) {
-			effects.enter("thematicBreak");
-			marker = code;
-			return atBreak(code);
-		}
-		function atBreak(code) {
-			if (code === marker) {
-				effects.enter("thematicBreakSequence");
-				return sequence(code);
-			}
-			if (markdownSpace(code)) return factorySpace(effects, atBreak, "whitespace")(code);
-			if (size < 3 || code !== null && !markdownLineEnding(code)) return nok(code);
-			effects.exit("thematicBreak");
-			return ok(code);
-		}
-		function sequence(code) {
-			if (code === marker) {
-				effects.consume(code);
-				size++;
-				return sequence;
-			}
-			effects.exit("thematicBreakSequence");
-			return atBreak(code);
-		}
-	}
-	module.exports = thematicBreak;
-}));
-//#endregion
-//#region node_modules/micromark/dist/tokenize/list.js
-var require_list$1 = /* @__PURE__ */ __commonJSMin(((exports, module) => {
-	var asciiDigit = require_ascii_digit();
-	var markdownSpace = require_markdown_space();
-	var prefixSize = require_prefix_size();
-	var sizeChunks = require_size_chunks();
-	var factorySpace = require_factory_space();
-	var partialBlankLine = require_partial_blank_line();
-	var thematicBreak = require_thematic_break$1();
-	var list = {
-		name: "list",
-		tokenize: tokenizeListStart,
-		continuation: { tokenize: tokenizeListContinuation },
-		exit: tokenizeListEnd
-	};
-	var listItemPrefixWhitespaceConstruct = {
-		tokenize: tokenizeListItemPrefixWhitespace,
-		partial: true
-	};
-	var indentConstruct = {
-		tokenize: tokenizeIndent,
-		partial: true
-	};
-	function tokenizeListStart(effects, ok, nok) {
-		var self = this;
-		var initialSize = prefixSize(self.events, "linePrefix");
-		var size = 0;
-		return start;
-		function start(code) {
-			var kind = self.containerState.type || (code === 42 || code === 43 || code === 45 ? "listUnordered" : "listOrdered");
-			if (kind === "listUnordered" ? !self.containerState.marker || code === self.containerState.marker : asciiDigit(code)) {
-				if (!self.containerState.type) {
-					self.containerState.type = kind;
-					effects.enter(kind, { _container: true });
-				}
-				if (kind === "listUnordered") {
-					effects.enter("listItemPrefix");
-					return code === 42 || code === 45 ? effects.check(thematicBreak, nok, atMarker)(code) : atMarker(code);
-				}
-				if (!self.interrupt || code === 49) {
-					effects.enter("listItemPrefix");
-					effects.enter("listItemValue");
-					return inside(code);
-				}
-			}
-			return nok(code);
-		}
-		function inside(code) {
-			if (asciiDigit(code) && ++size < 10) {
-				effects.consume(code);
-				return inside;
-			}
-			if ((!self.interrupt || size < 2) && (self.containerState.marker ? code === self.containerState.marker : code === 41 || code === 46)) {
-				effects.exit("listItemValue");
-				return atMarker(code);
-			}
-			return nok(code);
-		}
-		function atMarker(code) {
-			effects.enter("listItemMarker");
-			effects.consume(code);
-			effects.exit("listItemMarker");
-			self.containerState.marker = self.containerState.marker || code;
-			return effects.check(partialBlankLine, self.interrupt ? nok : onBlank, effects.attempt(listItemPrefixWhitespaceConstruct, endOfPrefix, otherPrefix));
-		}
-		function onBlank(code) {
-			self.containerState.initialBlankLine = true;
-			initialSize++;
-			return endOfPrefix(code);
-		}
-		function otherPrefix(code) {
-			if (markdownSpace(code)) {
-				effects.enter("listItemPrefixWhitespace");
-				effects.consume(code);
-				effects.exit("listItemPrefixWhitespace");
-				return endOfPrefix;
-			}
-			return nok(code);
-		}
-		function endOfPrefix(code) {
-			self.containerState.size = initialSize + sizeChunks(self.sliceStream(effects.exit("listItemPrefix")));
-			return ok(code);
-		}
-	}
-	function tokenizeListContinuation(effects, ok, nok) {
-		var self = this;
-		self.containerState._closeFlow = void 0;
-		return effects.check(partialBlankLine, onBlank, notBlank);
-		function onBlank(code) {
-			self.containerState.furtherBlankLines = self.containerState.furtherBlankLines || self.containerState.initialBlankLine;
-			return factorySpace(effects, ok, "listItemIndent", self.containerState.size + 1)(code);
-		}
-		function notBlank(code) {
-			if (self.containerState.furtherBlankLines || !markdownSpace(code)) {
-				self.containerState.furtherBlankLines = self.containerState.initialBlankLine = void 0;
-				return notInCurrentItem(code);
-			}
-			self.containerState.furtherBlankLines = self.containerState.initialBlankLine = void 0;
-			return effects.attempt(indentConstruct, ok, notInCurrentItem)(code);
-		}
-		function notInCurrentItem(code) {
-			self.containerState._closeFlow = true;
-			self.interrupt = void 0;
-			return factorySpace(effects, effects.attempt(list, ok, nok), "linePrefix", self.parser.constructs.disable.null.indexOf("codeIndented") > -1 ? void 0 : 4)(code);
-		}
-	}
-	function tokenizeIndent(effects, ok, nok) {
-		var self = this;
-		return factorySpace(effects, afterPrefix, "listItemIndent", self.containerState.size + 1);
-		function afterPrefix(code) {
-			return prefixSize(self.events, "listItemIndent") === self.containerState.size ? ok(code) : nok(code);
-		}
-	}
-	function tokenizeListEnd(effects) {
-		effects.exit(this.containerState.type);
-	}
-	function tokenizeListItemPrefixWhitespace(effects, ok, nok) {
-		var self = this;
-		return factorySpace(effects, afterPrefix, "listItemPrefixWhitespace", self.parser.constructs.disable.null.indexOf("codeIndented") > -1 ? void 0 : 5);
-		function afterPrefix(code) {
-			return markdownSpace(code) || !prefixSize(self.events, "listItemPrefixWhitespace") ? nok(code) : ok(code);
-		}
-	}
-	module.exports = list;
-}));
-//#endregion
-//#region node_modules/micromark/dist/tokenize/setext-underline.js
-var require_setext_underline = /* @__PURE__ */ __commonJSMin(((exports, module) => {
-	var markdownLineEnding = require_markdown_line_ending();
-	var shallow = require_shallow();
-	var factorySpace = require_factory_space();
-	var setextUnderline = {
-		name: "setextUnderline",
-		tokenize: tokenizeSetextUnderline,
-		resolveTo: resolveToSetextUnderline
-	};
-	function resolveToSetextUnderline(events, context) {
-		var index = events.length;
-		var content;
-		var text;
-		var definition;
-		var heading;
-		while (index--) if (events[index][0] === "enter") {
-			if (events[index][1].type === "content") {
-				content = index;
-				break;
-			}
-			if (events[index][1].type === "paragraph") text = index;
-		} else {
-			if (events[index][1].type === "content") events.splice(index, 1);
-			if (!definition && events[index][1].type === "definition") definition = index;
-		}
-		heading = {
-			type: "setextHeading",
-			start: shallow(events[text][1].start),
-			end: shallow(events[events.length - 1][1].end)
-		};
-		events[text][1].type = "setextHeadingText";
-		if (definition) {
-			events.splice(text, 0, [
-				"enter",
-				heading,
-				context
-			]);
-			events.splice(definition + 1, 0, [
-				"exit",
-				events[content][1],
-				context
-			]);
-			events[content][1].end = shallow(events[definition][1].end);
-		} else events[content][1] = heading;
-		events.push([
-			"exit",
-			heading,
-			context
-		]);
-		return events;
-	}
-	function tokenizeSetextUnderline(effects, ok, nok) {
-		var self = this;
-		var index = self.events.length;
-		var marker;
-		var paragraph;
-		while (index--) if (self.events[index][1].type !== "lineEnding" && self.events[index][1].type !== "linePrefix" && self.events[index][1].type !== "content") {
-			paragraph = self.events[index][1].type === "paragraph";
-			break;
-		}
-		return start;
-		function start(code) {
-			if (!self.lazy && (self.interrupt || paragraph)) {
-				effects.enter("setextHeadingLine");
-				effects.enter("setextHeadingLineSequence");
-				marker = code;
-				return closingSequence(code);
-			}
-			return nok(code);
-		}
-		function closingSequence(code) {
-			if (code === marker) {
-				effects.consume(code);
-				return closingSequence;
-			}
-			effects.exit("setextHeadingLineSequence");
-			return factorySpace(effects, closingSequenceEnd, "lineSuffix")(code);
-		}
-		function closingSequenceEnd(code) {
-			if (code === null || markdownLineEnding(code)) {
-				effects.exit("setextHeadingLine");
-				return ok(code);
-			}
-			return nok(code);
-		}
-	}
-	module.exports = setextUnderline;
-}));
-//#endregion
-//#region node_modules/micromark/dist/constructs.js
-var require_constructs = /* @__PURE__ */ __commonJSMin(((exports) => {
-	Object.defineProperty(exports, "__esModule", { value: true });
-	var text$1 = require_text$1();
-	var attention = require_attention();
-	var autolink = require_autolink();
-	var blockQuote = require_block_quote();
-	var characterEscape = require_character_escape();
-	var characterReference = require_character_reference();
-	var codeFenced = require_code_fenced();
-	var codeIndented = require_code_indented();
-	var codeText = require_code_text();
-	var definition = require_definition$1();
-	var hardBreakEscape = require_hard_break_escape();
-	var headingAtx = require_heading_atx();
-	var htmlFlow = require_html_flow();
-	var htmlText = require_html_text();
-	var labelEnd = require_label_end();
-	var labelStartImage = require_label_start_image();
-	var labelStartLink = require_label_start_link();
-	var lineEnding = require_line_ending();
-	var list = require_list$1();
-	var setextUnderline = require_setext_underline();
-	var thematicBreak = require_thematic_break$1();
-	var document = {
-		42: list,
-		43: list,
-		45: list,
-		48: list,
-		49: list,
-		50: list,
-		51: list,
-		52: list,
-		53: list,
-		54: list,
-		55: list,
-		56: list,
-		57: list,
-		62: blockQuote
-	};
-	var contentInitial = { 91: definition };
-	var flowInitial = {
-		"-2": codeIndented,
-		"-1": codeIndented,
-		32: codeIndented
-	};
-	var flow = {
-		35: headingAtx,
-		42: thematicBreak,
-		45: [setextUnderline, thematicBreak],
-		60: htmlFlow,
-		61: setextUnderline,
-		95: thematicBreak,
-		96: codeFenced,
-		126: codeFenced
-	};
-	var string = {
-		38: characterReference,
-		92: characterEscape
-	};
-	var text = {
-		"-5": lineEnding,
-		"-4": lineEnding,
-		"-3": lineEnding,
-		33: labelStartImage,
-		38: characterReference,
-		42: attention,
-		60: [autolink, htmlText],
-		91: labelStartLink,
-		92: [hardBreakEscape, characterEscape],
-		93: labelEnd,
-		95: attention,
-		96: codeText
-	};
-	var insideSpan = { null: [attention, text$1.resolver] };
-	var disable = { null: [] };
-	exports.contentInitial = contentInitial;
-	exports.disable = disable;
-	exports.document = document;
-	exports.flow = flow;
-	exports.flowInitial = flowInitial;
-	exports.insideSpan = insideSpan;
-	exports.string = string;
-	exports.text = text;
-}));
-//#endregion
-//#region node_modules/micromark/dist/parse.js
-var require_parse = /* @__PURE__ */ __commonJSMin(((exports, module) => {
-	var content = require_content$1();
-	var document = require_document();
-	var flow = require_flow();
-	var text = require_text$1();
-	var combineExtensions = require_combine_extensions();
-	var createTokenizer = require_create_tokenizer();
-	var miniflat = require_miniflat();
-	var constructs = require_constructs();
-	function parse(options) {
-		var settings = options || {};
-		var parser = {
-			defined: [],
-			constructs: combineExtensions([constructs].concat(miniflat(settings.extensions))),
-			content: create(content),
-			document: create(document),
-			flow: create(flow),
-			string: create(text.string),
-			text: create(text.text)
-		};
-		return parser;
-		function create(initializer) {
-			return creator;
-			function creator(from) {
-				return createTokenizer(parser, initializer, from);
-			}
-		}
-	}
-	module.exports = parse;
-}));
-//#endregion
-//#region node_modules/micromark/dist/preprocess.js
-var require_preprocess = /* @__PURE__ */ __commonJSMin(((exports, module) => {
-	var search = /[\0\t\n\r]/g;
-	function preprocess() {
-		var start = true;
-		var column = 1;
-		var buffer = "";
-		var atCarriageReturn;
-		return preprocessor;
-		function preprocessor(value, encoding, end) {
-			var chunks = [];
-			var match;
-			var next;
-			var startPosition;
-			var endPosition;
-			var code;
-			value = buffer + value.toString(encoding);
-			startPosition = 0;
-			buffer = "";
-			if (start) {
-				if (value.charCodeAt(0) === 65279) startPosition++;
-				start = void 0;
-			}
-			while (startPosition < value.length) {
-				search.lastIndex = startPosition;
-				match = search.exec(value);
-				endPosition = match ? match.index : value.length;
-				code = value.charCodeAt(endPosition);
-				if (!match) {
-					buffer = value.slice(startPosition);
-					break;
-				}
-				if (code === 10 && startPosition === endPosition && atCarriageReturn) {
-					chunks.push(-3);
-					atCarriageReturn = void 0;
-				} else {
-					if (atCarriageReturn) {
-						chunks.push(-5);
-						atCarriageReturn = void 0;
-					}
-					if (startPosition < endPosition) {
-						chunks.push(value.slice(startPosition, endPosition));
-						column += endPosition - startPosition;
-					}
-					if (code === 0) {
-						chunks.push(65533);
-						column++;
-					} else if (code === 9) {
-						next = Math.ceil(column / 4) * 4;
-						chunks.push(-2);
-						while (column++ < next) chunks.push(-1);
-					} else if (code === 10) {
-						chunks.push(-4);
-						column = 1;
-					} else {
-						atCarriageReturn = true;
-						column = 1;
-					}
-				}
-				startPosition = endPosition + 1;
-			}
-			if (end) {
-				if (atCarriageReturn) chunks.push(-5);
-				if (buffer) chunks.push(buffer);
-				chunks.push(null);
-			}
-			return chunks;
-		}
-	}
-	module.exports = preprocess;
-}));
-//#endregion
-//#region node_modules/micromark/dist/postprocess.js
-var require_postprocess = /* @__PURE__ */ __commonJSMin(((exports, module) => {
-	var subtokenize = require_subtokenize();
-	function postprocess(events) {
-		while (!subtokenize(events));
-		return events;
-	}
-	module.exports = postprocess;
-}));
-//#endregion
-//#region node_modules/unist-util-stringify-position/index.js
-var require_unist_util_stringify_position = /* @__PURE__ */ __commonJSMin(((exports, module) => {
-	var own = {}.hasOwnProperty;
-	module.exports = stringify;
-	function stringify(value) {
-		if (!value || typeof value !== "object") return "";
-		if (own.call(value, "position") || own.call(value, "type")) return position(value.position);
-		if (own.call(value, "start") || own.call(value, "end")) return position(value);
-		if (own.call(value, "line") || own.call(value, "column")) return point(value);
-		return "";
-	}
-	function point(point) {
-		if (!point || typeof point !== "object") point = {};
-		return index(point.line) + ":" + index(point.column);
-	}
-	function position(pos) {
-		if (!pos || typeof pos !== "object") pos = {};
-		return point(pos.start) + "-" + point(pos.end);
-	}
-	function index(value) {
-		return value && typeof value === "number" ? value : 1;
-	}
-}));
-//#endregion
-//#region node_modules/mdast-util-from-markdown/dist/index.js
-var require_dist = /* @__PURE__ */ __commonJSMin(((exports, module) => {
-	module.exports = fromMarkdown;
-	var toString = require_mdast_util_to_string();
-	var assign = require_assign();
-	var own = require_has_own_property();
-	var normalizeIdentifier = require_normalize_identifier();
-	var safeFromInt = require_safe_from_int();
-	var parser = require_parse();
-	var preprocessor = require_preprocess();
-	var postprocess = require_postprocess();
-	var decode = require_decode_entity();
-	var stringifyPosition = require_unist_util_stringify_position();
-	function fromMarkdown(value, encoding, options) {
-		if (typeof encoding !== "string") {
-			options = encoding;
-			encoding = void 0;
-		}
-		return compiler(options)(postprocess(parser(options).document().write(preprocessor()(value, encoding, true))));
-	}
-	function compiler(options) {
-		var settings = options || {};
-		var config = configure({
-			transforms: [],
-			canContainEols: [
-				"emphasis",
-				"fragment",
-				"heading",
-				"paragraph",
-				"strong"
-			],
-			enter: {
-				autolink: opener(link),
-				autolinkProtocol: onenterdata,
-				autolinkEmail: onenterdata,
-				atxHeading: opener(heading),
-				blockQuote: opener(blockQuote),
-				characterEscape: onenterdata,
-				characterReference: onenterdata,
-				codeFenced: opener(codeFlow),
-				codeFencedFenceInfo: buffer,
-				codeFencedFenceMeta: buffer,
-				codeIndented: opener(codeFlow, buffer),
-				codeText: opener(codeText, buffer),
-				codeTextData: onenterdata,
-				data: onenterdata,
-				codeFlowValue: onenterdata,
-				definition: opener(definition),
-				definitionDestinationString: buffer,
-				definitionLabelString: buffer,
-				definitionTitleString: buffer,
-				emphasis: opener(emphasis),
-				hardBreakEscape: opener(hardBreak),
-				hardBreakTrailing: opener(hardBreak),
-				htmlFlow: opener(html, buffer),
-				htmlFlowData: onenterdata,
-				htmlText: opener(html, buffer),
-				htmlTextData: onenterdata,
-				image: opener(image),
-				label: buffer,
-				link: opener(link),
-				listItem: opener(listItem),
-				listItemValue: onenterlistitemvalue,
-				listOrdered: opener(list, onenterlistordered),
-				listUnordered: opener(list),
-				paragraph: opener(paragraph),
-				reference: onenterreference,
-				referenceString: buffer,
-				resourceDestinationString: buffer,
-				resourceTitleString: buffer,
-				setextHeading: opener(heading),
-				strong: opener(strong),
-				thematicBreak: opener(thematicBreak)
-			},
-			exit: {
-				atxHeading: closer(),
-				atxHeadingSequence: onexitatxheadingsequence,
-				autolink: closer(),
-				autolinkEmail: onexitautolinkemail,
-				autolinkProtocol: onexitautolinkprotocol,
-				blockQuote: closer(),
-				characterEscapeValue: onexitdata,
-				characterReferenceMarkerHexadecimal: onexitcharacterreferencemarker,
-				characterReferenceMarkerNumeric: onexitcharacterreferencemarker,
-				characterReferenceValue: onexitcharacterreferencevalue,
-				codeFenced: closer(onexitcodefenced),
-				codeFencedFence: onexitcodefencedfence,
-				codeFencedFenceInfo: onexitcodefencedfenceinfo,
-				codeFencedFenceMeta: onexitcodefencedfencemeta,
-				codeFlowValue: onexitdata,
-				codeIndented: closer(onexitcodeindented),
-				codeText: closer(onexitcodetext),
-				codeTextData: onexitdata,
-				data: onexitdata,
-				definition: closer(),
-				definitionDestinationString: onexitdefinitiondestinationstring,
-				definitionLabelString: onexitdefinitionlabelstring,
-				definitionTitleString: onexitdefinitiontitlestring,
-				emphasis: closer(),
-				hardBreakEscape: closer(onexithardbreak),
-				hardBreakTrailing: closer(onexithardbreak),
-				htmlFlow: closer(onexithtmlflow),
-				htmlFlowData: onexitdata,
-				htmlText: closer(onexithtmltext),
-				htmlTextData: onexitdata,
-				image: closer(onexitimage),
-				label: onexitlabel,
-				labelText: onexitlabeltext,
-				lineEnding: onexitlineending,
-				link: closer(onexitlink),
-				listItem: closer(),
-				listOrdered: closer(),
-				listUnordered: closer(),
-				paragraph: closer(),
-				referenceString: onexitreferencestring,
-				resourceDestinationString: onexitresourcedestinationstring,
-				resourceTitleString: onexitresourcetitlestring,
-				resource: onexitresource,
-				setextHeading: closer(onexitsetextheading),
-				setextHeadingLineSequence: onexitsetextheadinglinesequence,
-				setextHeadingText: onexitsetextheadingtext,
-				strong: closer(),
-				thematicBreak: closer()
-			}
-		}, settings.mdastExtensions || []);
-		var data = {};
-		return compile;
-		function compile(events) {
-			var tree = {
-				type: "root",
-				children: []
-			};
-			var stack = [tree];
-			var tokenStack = [];
-			var listStack = [];
-			var index = -1;
-			var handler;
-			var listStart;
-			var context = {
-				stack,
-				tokenStack,
-				config,
-				enter,
-				exit,
-				buffer,
-				resume,
-				setData,
-				getData
-			};
-			while (++index < events.length) if (events[index][1].type === "listOrdered" || events[index][1].type === "listUnordered") if (events[index][0] === "enter") listStack.push(index);
-			else {
-				listStart = listStack.pop(index);
-				index = prepareList(events, listStart, index);
-			}
-			index = -1;
-			while (++index < events.length) {
-				handler = config[events[index][0]];
-				if (own.call(handler, events[index][1].type)) handler[events[index][1].type].call(assign({ sliceSerialize: events[index][2].sliceSerialize }, context), events[index][1]);
-			}
-			if (tokenStack.length) throw new Error("Cannot close document, a token (`" + tokenStack[tokenStack.length - 1].type + "`, " + stringifyPosition({
-				start: tokenStack[tokenStack.length - 1].start,
-				end: tokenStack[tokenStack.length - 1].end
-			}) + ") is still open");
-			tree.position = {
-				start: point(events.length ? events[0][1].start : {
-					line: 1,
-					column: 1,
-					offset: 0
-				}),
-				end: point(events.length ? events[events.length - 2][1].end : {
-					line: 1,
-					column: 1,
-					offset: 0
-				})
-			};
-			index = -1;
-			while (++index < config.transforms.length) tree = config.transforms[index](tree) || tree;
-			return tree;
-		}
-		function prepareList(events, start, length) {
-			var index = start - 1;
-			var containerBalance = -1;
-			var listSpread = false;
-			var listItem;
-			var tailIndex;
-			var lineIndex;
-			var tailEvent;
-			var event;
-			var firstBlankLineIndex;
-			var atMarker;
-			while (++index <= length) {
-				event = events[index];
-				if (event[1].type === "listUnordered" || event[1].type === "listOrdered" || event[1].type === "blockQuote") {
-					if (event[0] === "enter") containerBalance++;
-					else containerBalance--;
-					atMarker = void 0;
-				} else if (event[1].type === "lineEndingBlank") {
-					if (event[0] === "enter") {
-						if (listItem && !atMarker && !containerBalance && !firstBlankLineIndex) firstBlankLineIndex = index;
-						atMarker = void 0;
-					}
-				} else if (event[1].type === "linePrefix" || event[1].type === "listItemValue" || event[1].type === "listItemMarker" || event[1].type === "listItemPrefix" || event[1].type === "listItemPrefixWhitespace") {} else atMarker = void 0;
-				if (!containerBalance && event[0] === "enter" && event[1].type === "listItemPrefix" || containerBalance === -1 && event[0] === "exit" && (event[1].type === "listUnordered" || event[1].type === "listOrdered")) {
-					if (listItem) {
-						tailIndex = index;
-						lineIndex = void 0;
-						while (tailIndex--) {
-							tailEvent = events[tailIndex];
-							if (tailEvent[1].type === "lineEnding" || tailEvent[1].type === "lineEndingBlank") {
-								if (tailEvent[0] === "exit") continue;
-								if (lineIndex) {
-									events[lineIndex][1].type = "lineEndingBlank";
-									listSpread = true;
-								}
-								tailEvent[1].type = "lineEnding";
-								lineIndex = tailIndex;
-							} else if (tailEvent[1].type === "linePrefix" || tailEvent[1].type === "blockQuotePrefix" || tailEvent[1].type === "blockQuotePrefixWhitespace" || tailEvent[1].type === "blockQuoteMarker" || tailEvent[1].type === "listItemIndent") {} else break;
-						}
-						if (firstBlankLineIndex && (!lineIndex || firstBlankLineIndex < lineIndex)) listItem._spread = true;
-						listItem.end = point(lineIndex ? events[lineIndex][1].start : event[1].end);
-						events.splice(lineIndex || index, 0, [
-							"exit",
-							listItem,
-							event[2]
-						]);
-						index++;
-						length++;
-					}
-					if (event[1].type === "listItemPrefix") {
-						listItem = {
-							type: "listItem",
-							_spread: false,
-							start: point(event[1].start)
-						};
-						events.splice(index, 0, [
-							"enter",
-							listItem,
-							event[2]
-						]);
-						index++;
-						length++;
-						firstBlankLineIndex = void 0;
-						atMarker = true;
-					}
-				}
-			}
-			events[start][1]._spread = listSpread;
-			return length;
-		}
-		function setData(key, value) {
-			data[key] = value;
-		}
-		function getData(key) {
-			return data[key];
-		}
-		function point(d) {
-			return {
-				line: d.line,
-				column: d.column,
-				offset: d.offset
-			};
-		}
-		function opener(create, and) {
-			return open;
-			function open(token) {
-				enter.call(this, create(token), token);
-				if (and) and.call(this, token);
-			}
-		}
-		function buffer() {
-			this.stack.push({
-				type: "fragment",
-				children: []
-			});
-		}
-		function enter(node, token) {
-			this.stack[this.stack.length - 1].children.push(node);
-			this.stack.push(node);
-			this.tokenStack.push(token);
-			node.position = { start: point(token.start) };
-			return node;
-		}
-		function closer(and) {
-			return close;
-			function close(token) {
-				if (and) and.call(this, token);
-				exit.call(this, token);
-			}
-		}
-		function exit(token) {
-			var node = this.stack.pop();
-			var open = this.tokenStack.pop();
-			if (!open) throw new Error("Cannot close `" + token.type + "` (" + stringifyPosition({
-				start: token.start,
-				end: token.end
-			}) + "): it’s not open");
-			else if (open.type !== token.type) throw new Error("Cannot close `" + token.type + "` (" + stringifyPosition({
-				start: token.start,
-				end: token.end
-			}) + "): a different token (`" + open.type + "`, " + stringifyPosition({
-				start: open.start,
-				end: open.end
-			}) + ") is open");
-			node.position.end = point(token.end);
-			return node;
-		}
-		function resume() {
-			return toString(this.stack.pop());
-		}
-		function onenterlistordered() {
-			setData("expectingFirstListItemValue", true);
-		}
-		function onenterlistitemvalue(token) {
-			if (getData("expectingFirstListItemValue")) {
-				this.stack[this.stack.length - 2].start = parseInt(this.sliceSerialize(token), 10);
-				setData("expectingFirstListItemValue");
-			}
-		}
-		function onexitcodefencedfenceinfo() {
-			var data = this.resume();
-			this.stack[this.stack.length - 1].lang = data;
-		}
-		function onexitcodefencedfencemeta() {
-			var data = this.resume();
-			this.stack[this.stack.length - 1].meta = data;
-		}
-		function onexitcodefencedfence() {
-			if (getData("flowCodeInside")) return;
-			this.buffer();
-			setData("flowCodeInside", true);
-		}
-		function onexitcodefenced() {
-			var data = this.resume();
-			this.stack[this.stack.length - 1].value = data.replace(/^(\r?\n|\r)|(\r?\n|\r)$/g, "");
-			setData("flowCodeInside");
-		}
-		function onexitcodeindented() {
-			var data = this.resume();
-			this.stack[this.stack.length - 1].value = data;
-		}
-		function onexitdefinitionlabelstring(token) {
-			var label = this.resume();
-			this.stack[this.stack.length - 1].label = label;
-			this.stack[this.stack.length - 1].identifier = normalizeIdentifier(this.sliceSerialize(token)).toLowerCase();
-		}
-		function onexitdefinitiontitlestring() {
-			var data = this.resume();
-			this.stack[this.stack.length - 1].title = data;
-		}
-		function onexitdefinitiondestinationstring() {
-			var data = this.resume();
-			this.stack[this.stack.length - 1].url = data;
-		}
-		function onexitatxheadingsequence(token) {
-			if (!this.stack[this.stack.length - 1].depth) this.stack[this.stack.length - 1].depth = this.sliceSerialize(token).length;
-		}
-		function onexitsetextheadingtext() {
-			setData("setextHeadingSlurpLineEnding", true);
-		}
-		function onexitsetextheadinglinesequence(token) {
-			this.stack[this.stack.length - 1].depth = this.sliceSerialize(token).charCodeAt(0) === 61 ? 1 : 2;
-		}
-		function onexitsetextheading() {
-			setData("setextHeadingSlurpLineEnding");
-		}
-		function onenterdata(token) {
-			var siblings = this.stack[this.stack.length - 1].children;
-			var tail = siblings[siblings.length - 1];
-			if (!tail || tail.type !== "text") {
-				tail = text();
-				tail.position = { start: point(token.start) };
-				this.stack[this.stack.length - 1].children.push(tail);
-			}
-			this.stack.push(tail);
-		}
-		function onexitdata(token) {
-			var tail = this.stack.pop();
-			tail.value += this.sliceSerialize(token);
-			tail.position.end = point(token.end);
-		}
-		function onexitlineending(token) {
-			var context = this.stack[this.stack.length - 1];
-			if (getData("atHardBreak")) {
-				context.children[context.children.length - 1].position.end = point(token.end);
-				setData("atHardBreak");
-				return;
-			}
-			if (!getData("setextHeadingSlurpLineEnding") && config.canContainEols.indexOf(context.type) > -1) {
-				onenterdata.call(this, token);
-				onexitdata.call(this, token);
-			}
-		}
-		function onexithardbreak() {
-			setData("atHardBreak", true);
-		}
-		function onexithtmlflow() {
-			var data = this.resume();
-			this.stack[this.stack.length - 1].value = data;
-		}
-		function onexithtmltext() {
-			var data = this.resume();
-			this.stack[this.stack.length - 1].value = data;
-		}
-		function onexitcodetext() {
-			var data = this.resume();
-			this.stack[this.stack.length - 1].value = data;
-		}
-		function onexitlink() {
-			var context = this.stack[this.stack.length - 1];
-			if (getData("inReference")) {
-				context.type += "Reference";
-				context.referenceType = getData("referenceType") || "shortcut";
-				delete context.url;
-				delete context.title;
-			} else {
-				delete context.identifier;
-				delete context.label;
-				delete context.referenceType;
-			}
-			setData("referenceType");
-		}
-		function onexitimage() {
-			var context = this.stack[this.stack.length - 1];
-			if (getData("inReference")) {
-				context.type += "Reference";
-				context.referenceType = getData("referenceType") || "shortcut";
-				delete context.url;
-				delete context.title;
-			} else {
-				delete context.identifier;
-				delete context.label;
-				delete context.referenceType;
-			}
-			setData("referenceType");
-		}
-		function onexitlabeltext(token) {
-			this.stack[this.stack.length - 2].identifier = normalizeIdentifier(this.sliceSerialize(token)).toLowerCase();
-		}
-		function onexitlabel() {
-			var fragment = this.stack[this.stack.length - 1];
-			var value = this.resume();
-			this.stack[this.stack.length - 1].label = value;
-			setData("inReference", true);
-			if (this.stack[this.stack.length - 1].type === "link") this.stack[this.stack.length - 1].children = fragment.children;
-			else this.stack[this.stack.length - 1].alt = value;
-		}
-		function onexitresourcedestinationstring() {
-			var data = this.resume();
-			this.stack[this.stack.length - 1].url = data;
-		}
-		function onexitresourcetitlestring() {
-			var data = this.resume();
-			this.stack[this.stack.length - 1].title = data;
-		}
-		function onexitresource() {
-			setData("inReference");
-		}
-		function onenterreference() {
-			setData("referenceType", "collapsed");
-		}
-		function onexitreferencestring(token) {
-			var label = this.resume();
-			this.stack[this.stack.length - 1].label = label;
-			this.stack[this.stack.length - 1].identifier = normalizeIdentifier(this.sliceSerialize(token)).toLowerCase();
-			setData("referenceType", "full");
-		}
-		function onexitcharacterreferencemarker(token) {
-			setData("characterReferenceType", token.type);
-		}
-		function onexitcharacterreferencevalue(token) {
-			var data = this.sliceSerialize(token);
-			var type = getData("characterReferenceType");
-			var value;
-			var tail;
-			if (type) {
-				value = safeFromInt(data, type === "characterReferenceMarkerNumeric" ? 10 : 16);
-				setData("characterReferenceType");
-			} else value = decode(data);
-			tail = this.stack.pop();
-			tail.value += value;
-			tail.position.end = point(token.end);
-		}
-		function onexitautolinkprotocol(token) {
-			onexitdata.call(this, token);
-			this.stack[this.stack.length - 1].url = this.sliceSerialize(token);
-		}
-		function onexitautolinkemail(token) {
-			onexitdata.call(this, token);
-			this.stack[this.stack.length - 1].url = "mailto:" + this.sliceSerialize(token);
-		}
-		function blockQuote() {
-			return {
-				type: "blockquote",
-				children: []
-			};
-		}
-		function codeFlow() {
-			return {
-				type: "code",
-				lang: null,
-				meta: null,
-				value: ""
-			};
-		}
-		function codeText() {
-			return {
-				type: "inlineCode",
-				value: ""
-			};
-		}
-		function definition() {
-			return {
-				type: "definition",
-				identifier: "",
-				label: null,
-				title: null,
-				url: ""
-			};
-		}
-		function emphasis() {
-			return {
-				type: "emphasis",
-				children: []
-			};
-		}
-		function heading() {
-			return {
-				type: "heading",
-				depth: void 0,
-				children: []
-			};
-		}
-		function hardBreak() {
-			return { type: "break" };
-		}
-		function html() {
-			return {
-				type: "html",
-				value: ""
-			};
-		}
-		function image() {
-			return {
-				type: "image",
-				title: null,
-				url: "",
-				alt: null
-			};
-		}
-		function link() {
-			return {
-				type: "link",
-				title: null,
-				url: "",
-				children: []
-			};
-		}
-		function list(token) {
-			return {
-				type: "list",
-				ordered: token.type === "listOrdered",
-				start: null,
-				spread: token._spread,
-				children: []
-			};
-		}
-		function listItem(token) {
-			return {
-				type: "listItem",
-				spread: token._spread,
-				checked: null,
-				children: []
-			};
-		}
-		function paragraph() {
-			return {
-				type: "paragraph",
-				children: []
-			};
-		}
-		function strong() {
-			return {
-				type: "strong",
-				children: []
-			};
-		}
-		function text() {
-			return {
-				type: "text",
-				value: ""
-			};
-		}
-		function thematicBreak() {
-			return { type: "thematicBreak" };
-		}
-	}
-	function configure(config, extensions) {
-		var index = -1;
-		while (++index < extensions.length) extension(config, extensions[index]);
-		return config;
-	}
-	function extension(config, extension) {
-		var key;
-		var left;
-		for (key in extension) {
-			left = own.call(config, key) ? config[key] : config[key] = {};
-			if (key === "canContainEols" || key === "transforms") config[key] = [].concat(left, extension[key]);
-			else Object.assign(left, extension[key]);
-		}
-	}
-}));
-//#endregion
-//#region node_modules/mdast-util-from-markdown/index.js
-var require_mdast_util_from_markdown = /* @__PURE__ */ __commonJSMin(((exports, module) => {
-	module.exports = require_dist();
-}));
-//#endregion
-//#region node_modules/remark-parse/index.js
-var require_remark_parse = /* @__PURE__ */ __commonJSMin(((exports, module) => {
-	module.exports = parse;
-	var fromMarkdown = require_mdast_util_from_markdown();
-	function parse(options) {
-		var self = this;
-		this.Parser = parse;
-		function parse(doc) {
-			return fromMarkdown(doc, Object.assign({}, self.data("settings"), options, {
-				extensions: self.data("micromarkExtensions") || [],
-				mdastExtensions: self.data("fromMarkdownExtensions") || []
-			}));
-		}
-	}
-}));
-//#endregion
-//#region node_modules/zwitch/index.js
-var require_zwitch = /* @__PURE__ */ __commonJSMin(((exports, module) => {
-	module.exports = factory;
-	var noop = Function.prototype;
-	var own = {}.hasOwnProperty;
-	function factory(key, options) {
-		var settings = options || {};
-		function one(value) {
-			var fn = one.invalid;
-			var handlers = one.handlers;
-			if (value && own.call(value, key)) fn = own.call(handlers, value[key]) ? handlers[value[key]] : one.unknown;
-			return (fn || noop).apply(this, arguments);
-		}
-		one.handlers = settings.handlers || {};
-		one.invalid = settings.invalid;
-		one.unknown = settings.unknown;
-		return one;
-	}
-}));
-//#endregion
-//#region node_modules/mdast-util-to-markdown/lib/handle/blockquote.js
-var require_blockquote = /* @__PURE__ */ __commonJSMin(((exports, module) => {
-	module.exports = blockquote;
-	var flow = require_container_flow();
-	var indentLines = require_indent_lines();
-	function blockquote(node, _, context) {
-		var exit = context.enter("blockquote");
-		var value = indentLines(flow(node, context), map);
-		exit();
-		return value;
-	}
-	function map(line, index, blank) {
-		return ">" + (blank ? "" : " ") + line;
-	}
-}));
-//#endregion
-//#region node_modules/mdast-util-to-markdown/lib/util/pattern-in-scope.js
-var require_pattern_in_scope = /* @__PURE__ */ __commonJSMin(((exports, module) => {
-	module.exports = patternInScope;
-	function patternInScope(stack, pattern) {
-		return listInScope(stack, pattern.inConstruct, true) && !listInScope(stack, pattern.notInConstruct);
-	}
-	function listInScope(stack, list, none) {
-		var index;
-		if (!list) return none;
-		if (typeof list === "string") list = [list];
-		index = -1;
-		while (++index < list.length) if (stack.indexOf(list[index]) !== -1) return true;
-		return false;
-	}
-}));
-//#endregion
-//#region node_modules/mdast-util-to-markdown/lib/handle/break.js
-var require_break = /* @__PURE__ */ __commonJSMin(((exports, module) => {
-	module.exports = hardBreak;
-	var patternInScope = require_pattern_in_scope();
-	function hardBreak(node, _, context, safe) {
-		var index = -1;
-		while (++index < context.unsafe.length) if (context.unsafe[index].character === "\n" && patternInScope(context.stack, context.unsafe[index])) return /[ \t]/.test(safe.before) ? "" : " ";
-		return "\\\n";
-	}
-}));
-//#endregion
-//#region node_modules/longest-streak/index.js
-var require_longest_streak = /* @__PURE__ */ __commonJSMin(((exports, module) => {
-	module.exports = longestStreak;
-	function longestStreak(value, character) {
-		var count = 0;
-		var maximum = 0;
-		var expected;
-		var index;
-		if (typeof character !== "string" || character.length !== 1) throw new Error("Expected character");
-		value = String(value);
-		index = value.indexOf(character);
-		expected = index;
-		while (index !== -1) {
-			count++;
-			if (index === expected) {
-				if (count > maximum) maximum = count;
-			} else count = 1;
-			expected = index + 1;
-			index = value.indexOf(character, expected);
-		}
-		return maximum;
-	}
-}));
-//#endregion
-//#region node_modules/mdast-util-to-markdown/lib/util/format-code-as-indented.js
-var require_format_code_as_indented = /* @__PURE__ */ __commonJSMin(((exports, module) => {
-	module.exports = formatCodeAsIndented;
-	function formatCodeAsIndented(node, context) {
-		return !context.options.fences && node.value && !node.lang && /[^ \r\n]/.test(node.value) && !/^[\t ]*(?:[\r\n]|$)|(?:^|[\r\n])[\t ]*$/.test(node.value);
-	}
-}));
-//#endregion
-//#region node_modules/mdast-util-to-markdown/lib/util/check-fence.js
-var require_check_fence = /* @__PURE__ */ __commonJSMin(((exports, module) => {
-	module.exports = checkFence;
-	function checkFence(context) {
-		var marker = context.options.fence || "`";
-		if (marker !== "`" && marker !== "~") throw new Error("Cannot serialize code with `" + marker + "` for `options.fence`, expected `` ` `` or `~`");
-		return marker;
-	}
-}));
-//#endregion
-//#region node_modules/mdast-util-to-markdown/lib/util/safe.js
-var require_safe = /* @__PURE__ */ __commonJSMin(((exports, module) => {
-	module.exports = safe;
-	var patternCompile = require_pattern_compile();
-	var patternInScope = require_pattern_in_scope();
-	function safe(context, input, config) {
-		var value = (config.before || "") + (input || "") + (config.after || "");
-		var positions = [];
-		var result = [];
-		var infos = {};
-		var index = -1;
-		var before;
-		var after;
-		var position;
-		var pattern;
-		var expression;
-		var match;
-		var start;
-		var end;
-		while (++index < context.unsafe.length) {
-			pattern = context.unsafe[index];
-			if (!patternInScope(context.stack, pattern)) continue;
-			expression = patternCompile(pattern);
-			while (match = expression.exec(value)) {
-				before = "before" in pattern || pattern.atBreak;
-				after = "after" in pattern;
-				position = match.index + (before ? match[1].length : 0);
-				if (positions.indexOf(position) === -1) {
-					positions.push(position);
-					infos[position] = {
-						before,
-						after
-					};
-				} else {
-					if (infos[position].before && !before) infos[position].before = false;
-					if (infos[position].after && !after) infos[position].after = false;
-				}
-			}
-		}
-		positions.sort(numerical);
-		start = config.before ? config.before.length : 0;
-		end = value.length - (config.after ? config.after.length : 0);
-		index = -1;
-		while (++index < positions.length) {
-			position = positions[index];
-			if (position < start || position >= end) continue;
-			if (position + 1 < end && positions[index + 1] === position + 1 && infos[position].after && !infos[position + 1].before && !infos[position + 1].after) continue;
-			if (start !== position) result.push(escapeBackslashes(value.slice(start, position), "\\"));
-			start = position;
-			if (/[!-/:-@[-`{-~]/.test(value.charAt(position)) && (!config.encode || config.encode.indexOf(value.charAt(position)) === -1)) result.push("\\");
-			else {
-				result.push("&#x" + value.charCodeAt(position).toString(16).toUpperCase() + ";");
-				start++;
-			}
-		}
-		result.push(escapeBackslashes(value.slice(start, end), config.after));
-		return result.join("");
-	}
-	function numerical(a, b) {
-		return a - b;
-	}
-	function escapeBackslashes(value, after) {
-		var expression = /\\(?=[!-/:-@[-`{-~])/g;
-		var positions = [];
-		var results = [];
-		var index = -1;
-		var start = 0;
-		var whole = value + after;
-		var match;
-		while (match = expression.exec(whole)) positions.push(match.index);
-		while (++index < positions.length) {
-			if (start !== positions[index]) results.push(value.slice(start, positions[index]));
-			results.push("\\");
-			start = positions[index];
-		}
-		results.push(value.slice(start));
-		return results.join("");
-	}
-}));
-//#endregion
-//#region node_modules/mdast-util-to-markdown/lib/handle/code.js
-var require_code = /* @__PURE__ */ __commonJSMin(((exports, module) => {
-	module.exports = code;
-	var repeat = require_repeat_string();
-	var streak = require_longest_streak();
-	var formatCodeAsIndented = require_format_code_as_indented();
-	var checkFence = require_check_fence();
-	var indentLines = require_indent_lines();
-	var safe = require_safe();
-	function code(node, _, context) {
-		var marker = checkFence(context);
-		var raw = node.value || "";
-		var suffix = marker === "`" ? "GraveAccent" : "Tilde";
-		var value;
-		var sequence;
-		var exit;
-		var subexit;
-		if (formatCodeAsIndented(node, context)) {
-			exit = context.enter("codeIndented");
-			value = indentLines(raw, map);
-		} else {
-			sequence = repeat(marker, Math.max(streak(raw, marker) + 1, 3));
-			exit = context.enter("codeFenced");
-			value = sequence;
-			if (node.lang) {
-				subexit = context.enter("codeFencedLang" + suffix);
-				value += safe(context, node.lang, {
-					before: "`",
-					after: " ",
-					encode: ["`"]
-				});
-				subexit();
-			}
-			if (node.lang && node.meta) {
-				subexit = context.enter("codeFencedMeta" + suffix);
-				value += " " + safe(context, node.meta, {
-					before: " ",
-					after: "\n",
-					encode: ["`"]
-				});
-				subexit();
-			}
-			value += "\n";
-			if (raw) value += raw + "\n";
-			value += sequence;
-		}
-		exit();
-		return value;
-	}
-	function map(line, _, blank) {
-		return (blank ? "" : "    ") + line;
-	}
-}));
-//#endregion
-//#region node_modules/mdast-util-to-markdown/lib/util/association.js
-var require_association = /* @__PURE__ */ __commonJSMin(((exports, module) => {
-	module.exports = association;
-	var decode = require_decode_entity();
-	var characterEscape = /\\([!-/:-@[-`{-~])/g;
-	var characterReference = /&(#(\d{1,7}|x[\da-f]{1,6})|[\da-z]{1,31});/gi;
-	function association(node) {
-		if (node.label || !node.identifier) return node.label || "";
-		return node.identifier.replace(characterEscape, "$1").replace(characterReference, decodeIfPossible);
-	}
-	function decodeIfPossible($0, $1) {
-		return decode($1) || $0;
-	}
-}));
-//#endregion
-//#region node_modules/mdast-util-to-markdown/lib/util/check-quote.js
-var require_check_quote = /* @__PURE__ */ __commonJSMin(((exports, module) => {
-	module.exports = checkQuote;
-	function checkQuote(context) {
-		var marker = context.options.quote || "\"";
-		if (marker !== "\"" && marker !== "'") throw new Error("Cannot serialize title with `" + marker + "` for `options.quote`, expected `\"`, or `'`");
-		return marker;
-	}
-}));
-//#endregion
-//#region node_modules/mdast-util-to-markdown/lib/handle/definition.js
-var require_definition = /* @__PURE__ */ __commonJSMin(((exports, module) => {
-	module.exports = definition;
-	var association = require_association();
-	var checkQuote = require_check_quote();
-	var safe = require_safe();
-	function definition(node, _, context) {
-		var marker = checkQuote(context);
-		var suffix = marker === "\"" ? "Quote" : "Apostrophe";
-		var exit = context.enter("definition");
-		var subexit = context.enter("label");
-		var value = "[" + safe(context, association(node), {
-			before: "[",
-			after: "]"
-		}) + "]: ";
-		subexit();
-		if (!node.url || /[ \t\r\n]/.test(node.url)) {
-			subexit = context.enter("destinationLiteral");
-			value += "<" + safe(context, node.url, {
-				before: "<",
-				after: ">"
-			}) + ">";
-		} else {
-			subexit = context.enter("destinationRaw");
-			value += safe(context, node.url, {
-				before: " ",
-				after: " "
-			});
-		}
-		subexit();
-		if (node.title) {
-			subexit = context.enter("title" + suffix);
-			value += " " + marker + safe(context, node.title, {
-				before: marker,
-				after: marker
-			}) + marker;
-			subexit();
-		}
-		exit();
-		return value;
-	}
-}));
-//#endregion
-//#region node_modules/mdast-util-to-markdown/lib/util/check-emphasis.js
-var require_check_emphasis = /* @__PURE__ */ __commonJSMin(((exports, module) => {
-	module.exports = checkEmphasis;
-	function checkEmphasis(context) {
-		var marker = context.options.emphasis || "*";
-		if (marker !== "*" && marker !== "_") throw new Error("Cannot serialize emphasis with `" + marker + "` for `options.emphasis`, expected `*`, or `_`");
-		return marker;
-	}
-}));
-//#endregion
-//#region node_modules/mdast-util-to-markdown/lib/handle/emphasis.js
-var require_emphasis = /* @__PURE__ */ __commonJSMin(((exports, module) => {
-	module.exports = emphasis;
-	emphasis.peek = emphasisPeek;
-	var checkEmphasis = require_check_emphasis();
-	var phrasing = require_container_phrasing();
-	function emphasis(node, _, context) {
-		var marker = checkEmphasis(context);
-		var exit = context.enter("emphasis");
-		var value = phrasing(node, context, {
-			before: marker,
-			after: marker
-		});
-		exit();
-		return marker + value + marker;
-	}
-	function emphasisPeek(node, _, context) {
-		return context.options.emphasis || "*";
-	}
-}));
-//#endregion
-//#region node_modules/mdast-util-to-markdown/lib/util/format-heading-as-setext.js
-var require_format_heading_as_setext = /* @__PURE__ */ __commonJSMin(((exports, module) => {
-	module.exports = formatHeadingAsSetext;
-	var toString = require_mdast_util_to_string();
-	function formatHeadingAsSetext(node, context) {
-		return context.options.setext && (!node.depth || node.depth < 3) && toString(node);
-	}
-}));
-//#endregion
-//#region node_modules/mdast-util-to-markdown/lib/handle/heading.js
-var require_heading = /* @__PURE__ */ __commonJSMin(((exports, module) => {
-	module.exports = heading;
-	var repeat = require_repeat_string();
-	var formatHeadingAsSetext = require_format_heading_as_setext();
-	var phrasing = require_container_phrasing();
-	function heading(node, _, context) {
-		var rank = Math.max(Math.min(6, node.depth || 1), 1);
-		var exit;
-		var subexit;
-		var value;
-		var sequence;
-		if (formatHeadingAsSetext(node, context)) {
-			exit = context.enter("headingSetext");
-			subexit = context.enter("phrasing");
-			value = phrasing(node, context, {
-				before: "\n",
-				after: "\n"
-			});
-			subexit();
-			exit();
-			return value + "\n" + repeat(rank === 1 ? "=" : "-", value.length - (Math.max(value.lastIndexOf("\r"), value.lastIndexOf("\n")) + 1));
-		}
-		sequence = repeat("#", rank);
-		exit = context.enter("headingAtx");
-		subexit = context.enter("phrasing");
-		value = phrasing(node, context, {
-			before: "# ",
-			after: "\n"
-		});
-		value = value ? sequence + " " + value : sequence;
-		if (context.options.closeAtx) value += " " + sequence;
-		subexit();
-		exit();
-		return value;
-	}
-}));
-//#endregion
-//#region node_modules/mdast-util-to-markdown/lib/handle/html.js
-var require_html = /* @__PURE__ */ __commonJSMin(((exports, module) => {
-	module.exports = html;
-	html.peek = htmlPeek;
-	function html(node) {
-		return node.value || "";
-	}
-	function htmlPeek() {
-		return "<";
-	}
-}));
-//#endregion
-//#region node_modules/mdast-util-to-markdown/lib/handle/image.js
-var require_image = /* @__PURE__ */ __commonJSMin(((exports, module) => {
-	module.exports = image;
-	image.peek = imagePeek;
-	var checkQuote = require_check_quote();
-	var safe = require_safe();
-	function image(node, _, context) {
-		var quote = checkQuote(context);
-		var suffix = quote === "\"" ? "Quote" : "Apostrophe";
-		var exit = context.enter("image");
-		var subexit = context.enter("label");
-		var value = "![" + safe(context, node.alt, {
-			before: "[",
-			after: "]"
-		}) + "](";
-		subexit();
-		if (!node.url && node.title || /[ \t\r\n]/.test(node.url)) {
-			subexit = context.enter("destinationLiteral");
-			value += "<" + safe(context, node.url, {
-				before: "<",
-				after: ">"
-			}) + ">";
-		} else {
-			subexit = context.enter("destinationRaw");
-			value += safe(context, node.url, {
-				before: "(",
-				after: node.title ? " " : ")"
-			});
-		}
-		subexit();
-		if (node.title) {
-			subexit = context.enter("title" + suffix);
-			value += " " + quote + safe(context, node.title, {
-				before: quote,
-				after: quote
-			}) + quote;
-			subexit();
-		}
-		value += ")";
-		exit();
-		return value;
-	}
-	function imagePeek() {
-		return "!";
-	}
-}));
-//#endregion
-//#region node_modules/mdast-util-to-markdown/lib/handle/image-reference.js
-var require_image_reference = /* @__PURE__ */ __commonJSMin(((exports, module) => {
-	module.exports = imageReference;
-	imageReference.peek = imageReferencePeek;
-	var association = require_association();
-	var safe = require_safe();
-	function imageReference(node, _, context) {
-		var type = node.referenceType;
-		var exit = context.enter("imageReference");
-		var subexit = context.enter("label");
-		var alt = safe(context, node.alt, {
-			before: "[",
-			after: "]"
-		});
-		var value = "![" + alt + "]";
-		var reference;
-		var stack;
-		subexit();
-		stack = context.stack;
-		context.stack = [];
-		subexit = context.enter("reference");
-		reference = safe(context, association(node), {
-			before: "[",
-			after: "]"
-		});
-		subexit();
-		context.stack = stack;
-		exit();
-		if (type === "full" || !alt || alt !== reference) value += "[" + reference + "]";
-		else if (type !== "shortcut") value += "[]";
-		return value;
-	}
-	function imageReferencePeek() {
-		return "!";
-	}
-}));
-//#endregion
-//#region node_modules/mdast-util-to-markdown/lib/util/format-link-as-autolink.js
-var require_format_link_as_autolink = /* @__PURE__ */ __commonJSMin(((exports, module) => {
-	module.exports = formatLinkAsAutolink;
-	var toString = require_mdast_util_to_string();
-	function formatLinkAsAutolink(node, context) {
-		var raw = toString(node);
-		return !context.options.resourceLink && node.url && !node.title && node.children && node.children.length === 1 && node.children[0].type === "text" && (raw === node.url || "mailto:" + raw === node.url) && /^[a-z][a-z+.-]+:/i.test(node.url) && !/[\0- <>\u007F]/.test(node.url);
-	}
-}));
-//#endregion
-//#region node_modules/mdast-util-to-markdown/lib/handle/link.js
-var require_link = /* @__PURE__ */ __commonJSMin(((exports, module) => {
-	module.exports = link;
-	link.peek = linkPeek;
-	var checkQuote = require_check_quote();
-	var formatLinkAsAutolink = require_format_link_as_autolink();
-	var phrasing = require_container_phrasing();
-	var safe = require_safe();
-	function link(node, _, context) {
-		var quote = checkQuote(context);
-		var suffix = quote === "\"" ? "Quote" : "Apostrophe";
-		var exit;
-		var subexit;
-		var value;
-		var stack;
-		if (formatLinkAsAutolink(node, context)) {
-			stack = context.stack;
-			context.stack = [];
-			exit = context.enter("autolink");
-			value = "<" + phrasing(node, context, {
-				before: "<",
-				after: ">"
-			}) + ">";
-			exit();
-			context.stack = stack;
-			return value;
-		}
-		exit = context.enter("link");
-		subexit = context.enter("label");
-		value = "[" + phrasing(node, context, {
-			before: "[",
-			after: "]"
-		}) + "](";
-		subexit();
-		if (!node.url && node.title || /[ \t\r\n]/.test(node.url)) {
-			subexit = context.enter("destinationLiteral");
-			value += "<" + safe(context, node.url, {
-				before: "<",
-				after: ">"
-			}) + ">";
-		} else {
-			subexit = context.enter("destinationRaw");
-			value += safe(context, node.url, {
-				before: "(",
-				after: node.title ? " " : ")"
-			});
-		}
-		subexit();
-		if (node.title) {
-			subexit = context.enter("title" + suffix);
-			value += " " + quote + safe(context, node.title, {
-				before: quote,
-				after: quote
-			}) + quote;
-			subexit();
-		}
-		value += ")";
-		exit();
-		return value;
-	}
-	function linkPeek(node, _, context) {
-		return formatLinkAsAutolink(node, context) ? "<" : "[";
-	}
-}));
-//#endregion
-//#region node_modules/mdast-util-to-markdown/lib/handle/link-reference.js
-var require_link_reference = /* @__PURE__ */ __commonJSMin(((exports, module) => {
-	module.exports = linkReference;
-	linkReference.peek = linkReferencePeek;
-	var association = require_association();
-	var phrasing = require_container_phrasing();
-	var safe = require_safe();
-	function linkReference(node, _, context) {
-		var type = node.referenceType;
-		var exit = context.enter("linkReference");
-		var subexit = context.enter("label");
-		var text = phrasing(node, context, {
-			before: "[",
-			after: "]"
-		});
-		var value = "[" + text + "]";
-		var reference;
-		var stack;
-		subexit();
-		stack = context.stack;
-		context.stack = [];
-		subexit = context.enter("reference");
-		reference = safe(context, association(node), {
-			before: "[",
-			after: "]"
-		});
-		subexit();
-		context.stack = stack;
-		exit();
-		if (type === "full" || !text || text !== reference) value += "[" + reference + "]";
-		else if (type !== "shortcut") value += "[]";
-		return value;
-	}
-	function linkReferencePeek() {
-		return "[";
-	}
-}));
-//#endregion
-//#region node_modules/mdast-util-to-markdown/lib/handle/list.js
-var require_list = /* @__PURE__ */ __commonJSMin(((exports, module) => {
-	module.exports = list;
-	var flow = require_container_flow();
-	function list(node, _, context) {
-		var exit = context.enter("list");
-		var value = flow(node, context);
-		exit();
-		return value;
-	}
-}));
-//#endregion
-//#region node_modules/mdast-util-to-markdown/lib/handle/paragraph.js
-var require_paragraph = /* @__PURE__ */ __commonJSMin(((exports, module) => {
-	module.exports = paragraph;
-	var phrasing = require_container_phrasing();
-	function paragraph(node, _, context) {
-		var exit = context.enter("paragraph");
-		var subexit = context.enter("phrasing");
-		var value = phrasing(node, context, {
-			before: "\n",
-			after: "\n"
-		});
-		subexit();
-		exit();
-		return value;
-	}
-}));
-//#endregion
-//#region node_modules/mdast-util-to-markdown/lib/handle/root.js
-var require_root = /* @__PURE__ */ __commonJSMin(((exports, module) => {
-	module.exports = root;
-	var flow = require_container_flow();
-	function root(node, _, context) {
-		return flow(node, context);
-	}
-}));
-//#endregion
-//#region node_modules/mdast-util-to-markdown/lib/util/check-strong.js
-var require_check_strong = /* @__PURE__ */ __commonJSMin(((exports, module) => {
-	module.exports = checkStrong;
-	function checkStrong(context) {
-		var marker = context.options.strong || "*";
-		if (marker !== "*" && marker !== "_") throw new Error("Cannot serialize strong with `" + marker + "` for `options.strong`, expected `*`, or `_`");
-		return marker;
-	}
-}));
-//#endregion
-//#region node_modules/mdast-util-to-markdown/lib/handle/strong.js
-var require_strong = /* @__PURE__ */ __commonJSMin(((exports, module) => {
-	module.exports = strong;
-	strong.peek = strongPeek;
-	var checkStrong = require_check_strong();
-	var phrasing = require_container_phrasing();
-	function strong(node, _, context) {
-		var marker = checkStrong(context);
-		var exit = context.enter("strong");
-		var value = phrasing(node, context, {
-			before: marker,
-			after: marker
-		});
-		exit();
-		return marker + marker + value + marker + marker;
-	}
-	function strongPeek(node, _, context) {
-		return context.options.strong || "*";
-	}
-}));
-//#endregion
-//#region node_modules/mdast-util-to-markdown/lib/handle/text.js
-var require_text = /* @__PURE__ */ __commonJSMin(((exports, module) => {
-	module.exports = text;
-	var safe = require_safe();
-	function text(node, parent, context, safeOptions) {
-		return safe(context, node.value, safeOptions);
-	}
-}));
-//#endregion
-//#region node_modules/mdast-util-to-markdown/lib/util/check-rule-repeat.js
-var require_check_rule_repeat = /* @__PURE__ */ __commonJSMin(((exports, module) => {
-	module.exports = checkRule;
-	function checkRule(context) {
-		var repetition = context.options.ruleRepetition || 3;
-		if (repetition < 3) throw new Error("Cannot serialize rules with repetition `" + repetition + "` for `options.ruleRepetition`, expected `3` or more");
-		return repetition;
-	}
-}));
-//#endregion
-//#region node_modules/mdast-util-to-markdown/lib/util/check-rule.js
-var require_check_rule = /* @__PURE__ */ __commonJSMin(((exports, module) => {
-	module.exports = checkRule;
-	function checkRule(context) {
-		var marker = context.options.rule || "*";
-		if (marker !== "*" && marker !== "-" && marker !== "_") throw new Error("Cannot serialize rules with `" + marker + "` for `options.rule`, expected `*`, `-`, or `_`");
-		return marker;
-	}
-}));
-//#endregion
-//#region node_modules/mdast-util-to-markdown/lib/handle/thematic-break.js
-var require_thematic_break = /* @__PURE__ */ __commonJSMin(((exports, module) => {
-	module.exports = thematicBreak;
-	var repeat = require_repeat_string();
-	var checkRepeat = require_check_rule_repeat();
-	var checkRule = require_check_rule();
-	function thematicBreak(node, parent, context) {
-		var value = repeat(checkRule(context) + (context.options.ruleSpaces ? " " : ""), checkRepeat(context));
-		return context.options.ruleSpaces ? value.slice(0, -1) : value;
-	}
-}));
-//#endregion
-//#region node_modules/mdast-util-to-markdown/lib/handle/index.js
-var require_handle = /* @__PURE__ */ __commonJSMin(((exports) => {
-	exports.blockquote = require_blockquote();
-	exports.break = require_break();
-	exports.code = require_code();
-	exports.definition = require_definition();
-	exports.emphasis = require_emphasis();
-	exports.hardBreak = require_break();
-	exports.heading = require_heading();
-	exports.html = require_html();
-	exports.image = require_image();
-	exports.imageReference = require_image_reference();
-	exports.inlineCode = require_inline_code();
-	exports.link = require_link();
-	exports.linkReference = require_link_reference();
-	exports.list = require_list();
-	exports.listItem = require_list_item();
-	exports.paragraph = require_paragraph();
-	exports.root = require_root();
-	exports.strong = require_strong();
-	exports.text = require_text();
-	exports.thematicBreak = require_thematic_break();
-}));
-//#endregion
-//#region node_modules/mdast-util-to-markdown/lib/join.js
-var require_join = /* @__PURE__ */ __commonJSMin(((exports, module) => {
-	module.exports = [joinDefaults];
-	var formatCodeAsIndented = require_format_code_as_indented();
-	var formatHeadingAsSetext = require_format_heading_as_setext();
-	function joinDefaults(left, right, parent, context) {
-		if (right.type === "list" && right.type === left.type && Boolean(left.ordered) === Boolean(right.ordered) || right.type === "code" && formatCodeAsIndented(right, context) && (left.type === "list" || left.type === right.type && formatCodeAsIndented(left, context))) return false;
-		if (typeof parent.spread === "boolean") {
-			if (left.type === "paragraph" && (left.type === right.type || right.type === "definition" || right.type === "heading" && formatHeadingAsSetext(right, context))) return;
-			return parent.spread ? 1 : 0;
-		}
-	}
-}));
-//#endregion
-//#region node_modules/mdast-util-to-markdown/lib/unsafe.js
-var require_unsafe = /* @__PURE__ */ __commonJSMin(((exports, module) => {
-	module.exports = [
-		{
-			character: "	",
-			inConstruct: ["codeFencedLangGraveAccent", "codeFencedLangTilde"]
-		},
-		{
-			character: "\r",
-			inConstruct: [
-				"codeFencedLangGraveAccent",
-				"codeFencedLangTilde",
-				"codeFencedMetaGraveAccent",
-				"codeFencedMetaTilde",
-				"destinationLiteral",
-				"headingAtx"
-			]
-		},
-		{
-			character: "\n",
-			inConstruct: [
-				"codeFencedLangGraveAccent",
-				"codeFencedLangTilde",
-				"codeFencedMetaGraveAccent",
-				"codeFencedMetaTilde",
-				"destinationLiteral",
-				"headingAtx"
-			]
-		},
-		{
-			character: " ",
-			inConstruct: ["codeFencedLangGraveAccent", "codeFencedLangTilde"]
-		},
-		{
-			character: "!",
-			after: "\\[",
-			inConstruct: "phrasing"
-		},
-		{
-			character: "\"",
-			inConstruct: "titleQuote"
-		},
-		{
-			atBreak: true,
-			character: "#"
-		},
-		{
-			character: "#",
-			inConstruct: "headingAtx",
-			after: "(?:[\r\n]|$)"
-		},
-		{
-			character: "&",
-			after: "[#A-Za-z]",
-			inConstruct: "phrasing"
-		},
-		{
-			character: "'",
-			inConstruct: "titleApostrophe"
-		},
-		{
-			character: "(",
-			inConstruct: "destinationRaw"
-		},
-		{
-			before: "\\]",
-			character: "(",
-			inConstruct: "phrasing"
-		},
-		{
-			atBreak: true,
-			before: "\\d+",
-			character: ")"
-		},
-		{
-			character: ")",
-			inConstruct: "destinationRaw"
-		},
-		{
-			atBreak: true,
-			character: "*"
-		},
-		{
-			character: "*",
-			inConstruct: "phrasing"
-		},
-		{
-			atBreak: true,
-			character: "+"
-		},
-		{
-			atBreak: true,
-			character: "-"
-		},
-		{
-			atBreak: true,
-			before: "\\d+",
-			character: ".",
-			after: "(?:[ 	\r\n]|$)"
-		},
-		{
-			atBreak: true,
-			character: "<",
-			after: "[!/?A-Za-z]"
-		},
-		{
-			character: "<",
-			after: "[!/?A-Za-z]",
-			inConstruct: "phrasing"
-		},
-		{
-			character: "<",
-			inConstruct: "destinationLiteral"
-		},
-		{
-			atBreak: true,
-			character: "="
-		},
-		{
-			atBreak: true,
-			character: ">"
-		},
-		{
-			character: ">",
-			inConstruct: "destinationLiteral"
-		},
-		{
-			atBreak: true,
-			character: "["
-		},
-		{
-			character: "[",
-			inConstruct: [
-				"phrasing",
-				"label",
-				"reference"
-			]
-		},
-		{
-			character: "\\",
-			after: "[\\r\\n]",
-			inConstruct: "phrasing"
-		},
-		{
-			character: "]",
-			inConstruct: ["label", "reference"]
-		},
-		{
-			atBreak: true,
-			character: "_"
-		},
-		{
-			before: "[^A-Za-z]",
-			character: "_",
-			inConstruct: "phrasing"
-		},
-		{
-			character: "_",
-			after: "[^A-Za-z]",
-			inConstruct: "phrasing"
-		},
-		{
-			atBreak: true,
-			character: "`"
-		},
-		{
-			character: "`",
-			inConstruct: [
-				"codeFencedLangGraveAccent",
-				"codeFencedMetaGraveAccent",
-				"phrasing"
-			]
-		},
-		{
-			atBreak: true,
-			character: "~"
-		}
-	];
-}));
-//#endregion
-//#region node_modules/mdast-util-to-markdown/lib/index.js
-var require_lib$3 = /* @__PURE__ */ __commonJSMin(((exports, module) => {
-	module.exports = toMarkdown;
-	var zwitch = require_zwitch();
-	var configure = require_configure();
-	var defaultHandlers = require_handle();
-	var defaultJoin = require_join();
-	var defaultUnsafe = require_unsafe();
-	function toMarkdown(tree, options) {
-		var settings = options || {};
-		var context = {
-			enter,
-			stack: [],
-			unsafe: [],
-			join: [],
-			handlers: {},
-			options: {}
-		};
-		var result;
-		configure(context, {
-			unsafe: defaultUnsafe,
-			join: defaultJoin,
-			handlers: defaultHandlers
-		});
-		configure(context, settings);
-		if (context.options.tightDefinitions) context.join = [joinDefinition].concat(context.join);
-		context.handle = zwitch("type", {
-			invalid,
-			unknown,
-			handlers: context.handlers
-		});
-		result = context.handle(tree, null, context, {
-			before: "\n",
-			after: "\n"
-		});
-		if (result && result.charCodeAt(result.length - 1) !== 10 && result.charCodeAt(result.length - 1) !== 13) result += "\n";
-		return result;
-		function enter(name) {
-			context.stack.push(name);
-			return exit;
-			function exit() {
-				context.stack.pop();
-			}
-		}
-	}
-	function invalid(value) {
-		throw new Error("Cannot handle value `" + value + "`, expected node");
-	}
-	function unknown(node) {
-		throw new Error("Cannot handle unknown node `" + node.type + "`");
-	}
-	function joinDefinition(left, right) {
-		if (left.type === "definition" && left.type === right.type) return 0;
-	}
-}));
-//#endregion
-//#region node_modules/mdast-util-to-markdown/index.js
-var require_mdast_util_to_markdown = /* @__PURE__ */ __commonJSMin(((exports, module) => {
-	module.exports = require_lib$3();
-}));
-//#endregion
-//#region node_modules/remark-stringify/index.js
-var require_remark_stringify = /* @__PURE__ */ __commonJSMin(((exports, module) => {
-	module.exports = stringify;
-	var toMarkdown = require_mdast_util_to_markdown();
-	function stringify(options) {
-		var self = this;
-		this.Compiler = compile;
-		function compile(tree) {
-			return toMarkdown(tree, Object.assign({}, self.data("settings"), options, { extensions: self.data("toMarkdownExtensions") || [] }));
-		}
-	}
-}));
-//#endregion
-//#region node_modules/unist-util-visit/index.js
-var require_unist_util_visit = /* @__PURE__ */ __commonJSMin(((exports, module) => {
-	module.exports = visit;
-	var visitParents = require_unist_util_visit_parents();
-	var CONTINUE = visitParents.CONTINUE;
-	var SKIP = visitParents.SKIP;
-	var EXIT = visitParents.EXIT;
-	visit.CONTINUE = CONTINUE;
-	visit.SKIP = SKIP;
-	visit.EXIT = EXIT;
-	function visit(tree, test, visitor, reverse) {
-		if (typeof test === "function" && typeof visitor !== "function") {
-			reverse = visitor;
-			visitor = test;
-			test = null;
-		}
-		visitParents(tree, test, overload, reverse);
-		function overload(node, parents) {
-			var parent = parents[parents.length - 1];
-			var index = parent ? parent.children.indexOf(node) : null;
-			return visitor(node, index, parent);
-		}
-	}
-}));
-//#endregion
-//#region node_modules/html-comment-regex/index.js
-var require_html_comment_regex = /* @__PURE__ */ __commonJSMin(((exports, module) => {
-	module.exports = /<!--([\s\S]*?)-->/g;
-}));
-//#endregion
-//#region node_modules/remark-remove-comments/transformer.js
-var require_transformer = /* @__PURE__ */ __commonJSMin(((exports, module) => {
-	const visit = require_unist_util_visit();
-	const htmlCommentRegex = require_html_comment_regex();
-	const removeComments = (tree, file) => {
-		const handler = (node, index, parent) => {
-			if (node.value.match(htmlCommentRegex)) {
-				parent.children.splice(index, 1);
-				return [visit.SKIP, index];
-			}
-		};
-		visit(tree, "html", handler);
-		visit(tree, "jsx", handler);
-	};
-	module.exports = removeComments;
-}));
-//#endregion
-//#region node_modules/remark-remove-comments/index.js
-var require_remark_remove_comments = /* @__PURE__ */ __commonJSMin(((exports, module) => {
-	const transformer = require_transformer();
-	function attacher() {
-		return transformer;
-	}
-	module.exports = attacher;
-}));
-//#endregion
-//#region node_modules/bail/index.js
-var require_bail = /* @__PURE__ */ __commonJSMin(((exports, module) => {
-	module.exports = bail;
-	function bail(err) {
-		if (err) throw err;
-	}
-}));
-//#endregion
-//#region node_modules/is-buffer/index.js
-var require_is_buffer = /* @__PURE__ */ __commonJSMin(((exports, module) => {
-	/*!
-	* Determine if an object is a Buffer
-	*
-	* @author   Feross Aboukhadijeh <https://feross.org>
-	* @license  MIT
-	*/
-	module.exports = function isBuffer(obj) {
-		return obj != null && obj.constructor != null && typeof obj.constructor.isBuffer === "function" && obj.constructor.isBuffer(obj);
-	};
-}));
-//#endregion
-//#region node_modules/extend/index.js
-var require_extend = /* @__PURE__ */ __commonJSMin(((exports, module) => {
-	var hasOwn = Object.prototype.hasOwnProperty;
-	var toStr = Object.prototype.toString;
-	var defineProperty = Object.defineProperty;
-	var gOPD = Object.getOwnPropertyDescriptor;
-	var isArray = function isArray(arr) {
-		if (typeof Array.isArray === "function") return Array.isArray(arr);
-		return toStr.call(arr) === "[object Array]";
-	};
-	var isPlainObject = function isPlainObject(obj) {
-		if (!obj || toStr.call(obj) !== "[object Object]") return false;
-		var hasOwnConstructor = hasOwn.call(obj, "constructor");
-		var hasIsPrototypeOf = obj.constructor && obj.constructor.prototype && hasOwn.call(obj.constructor.prototype, "isPrototypeOf");
-		if (obj.constructor && !hasOwnConstructor && !hasIsPrototypeOf) return false;
-		var key;
-		for (key in obj);
-		return typeof key === "undefined" || hasOwn.call(obj, key);
-	};
-	var setProperty = function setProperty(target, options) {
-		if (defineProperty && options.name === "__proto__") defineProperty(target, options.name, {
-			enumerable: true,
-			configurable: true,
-			value: options.newValue,
-			writable: true
-		});
-		else target[options.name] = options.newValue;
-	};
-	var getProperty = function getProperty(obj, name) {
-		if (name === "__proto__") {
-			if (!hasOwn.call(obj, name)) return;
-			else if (gOPD) return gOPD(obj, name).value;
-		}
-		return obj[name];
-	};
-	module.exports = function extend() {
-		var options, name, src, copy, copyIsArray, clone;
-		var target = arguments[0];
-		var i = 1;
-		var length = arguments.length;
-		var deep = false;
-		if (typeof target === "boolean") {
-			deep = target;
-			target = arguments[1] || {};
-			i = 2;
-		}
-		if (target == null || typeof target !== "object" && typeof target !== "function") target = {};
-		for (; i < length; ++i) {
-			options = arguments[i];
-			if (options != null) for (name in options) {
-				src = getProperty(target, name);
-				copy = getProperty(options, name);
-				if (target !== copy) {
-					if (deep && copy && (isPlainObject(copy) || (copyIsArray = isArray(copy)))) {
-						if (copyIsArray) {
-							copyIsArray = false;
-							clone = src && isArray(src) ? src : [];
-						} else clone = src && isPlainObject(src) ? src : {};
-						setProperty(target, {
-							name,
-							newValue: extend(deep, clone, copy)
-						});
-					} else if (typeof copy !== "undefined") setProperty(target, {
-						name,
-						newValue: copy
-					});
-				}
-			}
-		}
-		return target;
-	};
-}));
-//#endregion
-//#region node_modules/is-plain-obj/index.js
-var require_is_plain_obj = /* @__PURE__ */ __commonJSMin(((exports, module) => {
-	module.exports = (value) => {
-		if (Object.prototype.toString.call(value) !== "[object Object]") return false;
-		const prototype = Object.getPrototypeOf(value);
-		return prototype === null || prototype === Object.prototype;
-	};
-}));
-//#endregion
-//#region node_modules/trough/wrap.js
-var require_wrap = /* @__PURE__ */ __commonJSMin(((exports, module) => {
-	var slice = [].slice;
-	module.exports = wrap;
-	function wrap(fn, callback) {
-		var invoked;
-		return wrapped;
-		function wrapped() {
-			var params = slice.call(arguments, 0);
-			var callback = fn.length > params.length;
-			var result;
-			if (callback) params.push(done);
-			try {
-				result = fn.apply(null, params);
-			} catch (error) {
-				if (callback && invoked) throw error;
-				return done(error);
-			}
-			if (!callback) if (result && typeof result.then === "function") result.then(then, done);
-			else if (result instanceof Error) done(result);
-			else then(result);
-		}
-		function done() {
-			if (!invoked) {
-				invoked = true;
-				callback.apply(null, arguments);
-			}
-		}
-		function then(value) {
-			done(null, value);
-		}
-	}
-}));
-//#endregion
-//#region node_modules/trough/index.js
-var require_trough = /* @__PURE__ */ __commonJSMin(((exports, module) => {
-	var wrap = require_wrap();
-	module.exports = trough;
-	trough.wrap = wrap;
-	var slice = [].slice;
-	function trough() {
-		var fns = [];
-		var middleware = {};
-		middleware.run = run;
-		middleware.use = use;
-		return middleware;
-		function run() {
-			var index = -1;
-			var input = slice.call(arguments, 0, -1);
-			var done = arguments[arguments.length - 1];
-			if (typeof done !== "function") throw new Error("Expected function as last argument, not " + done);
-			next.apply(null, [null].concat(input));
-			function next(err) {
-				var fn = fns[++index];
-				var values = slice.call(arguments, 0).slice(1);
-				var length = input.length;
-				var pos = -1;
-				if (err) {
-					done(err);
-					return;
-				}
-				while (++pos < length) if (values[pos] === null || values[pos] === void 0) values[pos] = input[pos];
-				input = values;
-				if (fn) wrap(fn, next).apply(null, input);
-				else done.apply(null, [null].concat(input));
-			}
-		}
-		function use(fn) {
-			if (typeof fn !== "function") throw new Error("Expected `fn` to be a function, not " + fn);
-			fns.push(fn);
-			return middleware;
-		}
-	}
-}));
-//#endregion
-//#region node_modules/vfile-message/index.js
-var require_vfile_message = /* @__PURE__ */ __commonJSMin(((exports, module) => {
-	var stringify = require_unist_util_stringify_position();
-	module.exports = VMessage;
-	function VMessagePrototype() {}
-	VMessagePrototype.prototype = Error.prototype;
-	VMessage.prototype = new VMessagePrototype();
-	var proto = VMessage.prototype;
-	proto.file = "";
-	proto.name = "";
-	proto.reason = "";
-	proto.message = "";
-	proto.stack = "";
-	proto.fatal = null;
-	proto.column = null;
-	proto.line = null;
-	function VMessage(reason, position, origin) {
-		var parts;
-		var range;
-		var location;
-		if (typeof position === "string") {
-			origin = position;
-			position = null;
-		}
-		parts = parseOrigin(origin);
-		range = stringify(position) || "1:1";
-		location = {
-			start: {
-				line: null,
-				column: null
-			},
-			end: {
-				line: null,
-				column: null
-			}
-		};
-		if (position && position.position) position = position.position;
-		if (position) if (position.start) {
-			location = position;
-			position = position.start;
-		} else location.start = position;
-		if (reason.stack) {
-			this.stack = reason.stack;
-			reason = reason.message;
-		}
-		this.message = reason;
-		this.name = range;
-		this.reason = reason;
-		this.line = position ? position.line : null;
-		this.column = position ? position.column : null;
-		this.location = location;
-		this.source = parts[0];
-		this.ruleId = parts[1];
-	}
-	function parseOrigin(origin) {
-		var result = [null, null];
-		var index;
-		if (typeof origin === "string") {
-			index = origin.indexOf(":");
-			if (index === -1) result[1] = origin;
-			else {
-				result[0] = origin.slice(0, index);
-				result[1] = origin.slice(index + 1);
-			}
-		}
-		return result;
-	}
-}));
-//#endregion
-//#region node_modules/vfile/lib/minpath.js
-var require_minpath = /* @__PURE__ */ __commonJSMin(((exports, module) => {
-	module.exports = __require("path");
-}));
-//#endregion
-//#region node_modules/vfile/lib/minproc.js
-var require_minproc = /* @__PURE__ */ __commonJSMin(((exports, module) => {
-	module.exports = process;
-}));
-//#endregion
-//#region node_modules/vfile/lib/core.js
-var require_core = /* @__PURE__ */ __commonJSMin(((exports, module) => {
-	var p = require_minpath();
-	var proc = require_minproc();
-	var buffer = require_is_buffer();
-	module.exports = VFile;
-	var own = {}.hasOwnProperty;
-	var order = [
-		"history",
-		"path",
-		"basename",
-		"stem",
-		"extname",
-		"dirname"
-	];
-	VFile.prototype.toString = toString;
-	Object.defineProperty(VFile.prototype, "path", {
-		get: getPath,
-		set: setPath
-	});
-	Object.defineProperty(VFile.prototype, "dirname", {
-		get: getDirname,
-		set: setDirname
-	});
-	Object.defineProperty(VFile.prototype, "basename", {
-		get: getBasename,
-		set: setBasename
-	});
-	Object.defineProperty(VFile.prototype, "extname", {
-		get: getExtname,
-		set: setExtname
-	});
-	Object.defineProperty(VFile.prototype, "stem", {
-		get: getStem,
-		set: setStem
-	});
-	function VFile(options) {
-		var prop;
-		var index;
-		if (!options) options = {};
-		else if (typeof options === "string" || buffer(options)) options = { contents: options };
-		else if ("message" in options && "messages" in options) return options;
-		if (!(this instanceof VFile)) return new VFile(options);
-		this.data = {};
-		this.messages = [];
-		this.history = [];
-		this.cwd = proc.cwd();
-		index = -1;
-		while (++index < order.length) {
-			prop = order[index];
-			if (own.call(options, prop)) this[prop] = options[prop];
-		}
-		for (prop in options) if (order.indexOf(prop) < 0) this[prop] = options[prop];
-	}
-	function getPath() {
-		return this.history[this.history.length - 1];
-	}
-	function setPath(path) {
-		assertNonEmpty(path, "path");
-		if (this.path !== path) this.history.push(path);
-	}
-	function getDirname() {
-		return typeof this.path === "string" ? p.dirname(this.path) : void 0;
-	}
-	function setDirname(dirname) {
-		assertPath(this.path, "dirname");
-		this.path = p.join(dirname || "", this.basename);
-	}
-	function getBasename() {
-		return typeof this.path === "string" ? p.basename(this.path) : void 0;
-	}
-	function setBasename(basename) {
-		assertNonEmpty(basename, "basename");
-		assertPart(basename, "basename");
-		this.path = p.join(this.dirname || "", basename);
-	}
-	function getExtname() {
-		return typeof this.path === "string" ? p.extname(this.path) : void 0;
-	}
-	function setExtname(extname) {
-		assertPart(extname, "extname");
-		assertPath(this.path, "extname");
-		if (extname) {
-			if (extname.charCodeAt(0) !== 46) throw new Error("`extname` must start with `.`");
-			if (extname.indexOf(".", 1) > -1) throw new Error("`extname` cannot contain multiple dots");
-		}
-		this.path = p.join(this.dirname, this.stem + (extname || ""));
-	}
-	function getStem() {
-		return typeof this.path === "string" ? p.basename(this.path, this.extname) : void 0;
-	}
-	function setStem(stem) {
-		assertNonEmpty(stem, "stem");
-		assertPart(stem, "stem");
-		this.path = p.join(this.dirname || "", stem + (this.extname || ""));
-	}
-	function toString(encoding) {
-		return (this.contents || "").toString(encoding);
-	}
-	function assertPart(part, name) {
-		if (part && part.indexOf(p.sep) > -1) throw new Error("`" + name + "` cannot be a path: did not expect `" + p.sep + "`");
-	}
-	function assertNonEmpty(part, name) {
-		if (!part) throw new Error("`" + name + "` cannot be empty");
-	}
-	function assertPath(path, name) {
-		if (!path) throw new Error("Setting `" + name + "` requires `path` to be set too");
-	}
-}));
-//#endregion
-//#region node_modules/vfile/lib/index.js
-var require_lib$2 = /* @__PURE__ */ __commonJSMin(((exports, module) => {
-	var VMessage = require_vfile_message();
-	var VFile = require_core();
-	module.exports = VFile;
-	VFile.prototype.message = message;
-	VFile.prototype.info = info;
-	VFile.prototype.fail = fail;
-	function message(reason, position, origin) {
-		var message = new VMessage(reason, position, origin);
-		if (this.path) {
-			message.name = this.path + ":" + message.name;
-			message.file = this.path;
-		}
-		message.fatal = false;
-		this.messages.push(message);
-		return message;
-	}
-	function fail() {
-		var message = this.message.apply(this, arguments);
-		message.fatal = true;
-		throw message;
-	}
-	function info() {
-		var message = this.message.apply(this, arguments);
-		message.fatal = null;
-		return message;
-	}
-}));
-//#endregion
-//#region node_modules/vfile/index.js
-var require_vfile = /* @__PURE__ */ __commonJSMin(((exports, module) => {
-	module.exports = require_lib$2();
-}));
-//#endregion
-//#region node_modules/unified/index.js
-var require_unified = /* @__PURE__ */ __commonJSMin(((exports, module) => {
-	var bail = require_bail();
-	var buffer = require_is_buffer();
-	var extend = require_extend();
-	var plain = require_is_plain_obj();
-	var trough = require_trough();
-	var vfile = require_vfile();
-	module.exports = unified().freeze();
-	var slice = [].slice;
-	var own = {}.hasOwnProperty;
-	var pipeline = trough().use(pipelineParse).use(pipelineRun).use(pipelineStringify);
-	function pipelineParse(p, ctx) {
-		ctx.tree = p.parse(ctx.file);
-	}
-	function pipelineRun(p, ctx, next) {
-		p.run(ctx.tree, ctx.file, done);
-		function done(error, tree, file) {
-			if (error) next(error);
-			else {
-				ctx.tree = tree;
-				ctx.file = file;
-				next();
-			}
-		}
-	}
-	function pipelineStringify(p, ctx) {
-		var result = p.stringify(ctx.tree, ctx.file);
-		if (result === void 0 || result === null) {} else if (typeof result === "string" || buffer(result)) {
-			if ("value" in ctx.file) ctx.file.value = result;
-			ctx.file.contents = result;
-		} else ctx.file.result = result;
-	}
-	function unified() {
-		var attachers = [];
-		var transformers = trough();
-		var namespace = {};
-		var freezeIndex = -1;
-		var frozen;
-		processor.data = data;
-		processor.freeze = freeze;
-		processor.attachers = attachers;
-		processor.use = use;
-		processor.parse = parse;
-		processor.stringify = stringify;
-		processor.run = run;
-		processor.runSync = runSync;
-		processor.process = process;
-		processor.processSync = processSync;
-		return processor;
-		function processor() {
-			var destination = unified();
-			var index = -1;
-			while (++index < attachers.length) destination.use.apply(null, attachers[index]);
-			destination.data(extend(true, {}, namespace));
-			return destination;
-		}
-		function freeze() {
-			var values;
-			var transformer;
-			if (frozen) return processor;
-			while (++freezeIndex < attachers.length) {
-				values = attachers[freezeIndex];
-				if (values[1] === false) continue;
-				if (values[1] === true) values[1] = void 0;
-				transformer = values[0].apply(processor, values.slice(1));
-				if (typeof transformer === "function") transformers.use(transformer);
-			}
-			frozen = true;
-			freezeIndex = Infinity;
-			return processor;
-		}
-		function data(key, value) {
-			if (typeof key === "string") {
-				if (arguments.length === 2) {
-					assertUnfrozen("data", frozen);
-					namespace[key] = value;
-					return processor;
-				}
-				return own.call(namespace, key) && namespace[key] || null;
-			}
-			if (key) {
-				assertUnfrozen("data", frozen);
-				namespace = key;
-				return processor;
-			}
-			return namespace;
-		}
-		function use(value) {
-			var settings;
-			assertUnfrozen("use", frozen);
-			if (value === null || value === void 0) {} else if (typeof value === "function") addPlugin.apply(null, arguments);
-			else if (typeof value === "object") if ("length" in value) addList(value);
-			else addPreset(value);
-			else throw new Error("Expected usable value, not `" + value + "`");
-			if (settings) namespace.settings = extend(namespace.settings || {}, settings);
-			return processor;
-			function addPreset(result) {
-				addList(result.plugins);
-				if (result.settings) settings = extend(settings || {}, result.settings);
-			}
-			function add(value) {
-				if (typeof value === "function") addPlugin(value);
-				else if (typeof value === "object") if ("length" in value) addPlugin.apply(null, value);
-				else addPreset(value);
-				else throw new Error("Expected usable value, not `" + value + "`");
-			}
-			function addList(plugins) {
-				var index = -1;
-				if (plugins === null || plugins === void 0) {} else if (typeof plugins === "object" && "length" in plugins) while (++index < plugins.length) add(plugins[index]);
-				else throw new Error("Expected a list of plugins, not `" + plugins + "`");
-			}
-			function addPlugin(plugin, value) {
-				var entry = find(plugin);
-				if (entry) {
-					if (plain(entry[1]) && plain(value)) value = extend(true, entry[1], value);
-					entry[1] = value;
-				} else attachers.push(slice.call(arguments));
-			}
-		}
-		function find(plugin) {
-			var index = -1;
-			while (++index < attachers.length) if (attachers[index][0] === plugin) return attachers[index];
-		}
-		function parse(doc) {
-			var file = vfile(doc);
-			var Parser;
-			freeze();
-			Parser = processor.Parser;
-			assertParser("parse", Parser);
-			if (newable(Parser, "parse")) return new Parser(String(file), file).parse();
-			return Parser(String(file), file);
-		}
-		function run(node, file, cb) {
-			assertNode(node);
-			freeze();
-			if (!cb && typeof file === "function") {
-				cb = file;
-				file = null;
-			}
-			if (!cb) return new Promise(executor);
-			executor(null, cb);
-			function executor(resolve, reject) {
-				transformers.run(node, vfile(file), done);
-				function done(error, tree, file) {
-					tree = tree || node;
-					if (error) reject(error);
-					else if (resolve) resolve(tree);
-					else cb(null, tree, file);
-				}
-			}
-		}
-		function runSync(node, file) {
-			var result;
-			var complete;
-			run(node, file, done);
-			assertDone("runSync", "run", complete);
-			return result;
-			function done(error, tree) {
-				complete = true;
-				result = tree;
-				bail(error);
-			}
-		}
-		function stringify(node, doc) {
-			var file = vfile(doc);
-			var Compiler;
-			freeze();
-			Compiler = processor.Compiler;
-			assertCompiler("stringify", Compiler);
-			assertNode(node);
-			if (newable(Compiler, "compile")) return new Compiler(node, file).compile();
-			return Compiler(node, file);
-		}
-		function process(doc, cb) {
-			freeze();
-			assertParser("process", processor.Parser);
-			assertCompiler("process", processor.Compiler);
-			if (!cb) return new Promise(executor);
-			executor(null, cb);
-			function executor(resolve, reject) {
-				var file = vfile(doc);
-				pipeline.run(processor, { file }, done);
-				function done(error) {
-					if (error) reject(error);
-					else if (resolve) resolve(file);
-					else cb(null, file);
-				}
-			}
-		}
-		function processSync(doc) {
-			var file;
-			var complete;
-			freeze();
-			assertParser("processSync", processor.Parser);
-			assertCompiler("processSync", processor.Compiler);
-			file = vfile(doc);
-			process(file, done);
-			assertDone("processSync", "process", complete);
-			return file;
-			function done(error) {
-				complete = true;
-				bail(error);
-			}
-		}
-	}
-	function newable(value, name) {
-		return typeof value === "function" && value.prototype && (keys(value.prototype) || name in value.prototype);
-	}
-	function keys(value) {
-		var key;
-		for (key in value) return true;
-		return false;
-	}
-	function assertParser(name, Parser) {
-		if (typeof Parser !== "function") throw new Error("Cannot `" + name + "` without `Parser`");
-	}
-	function assertCompiler(name, Compiler) {
-		if (typeof Compiler !== "function") throw new Error("Cannot `" + name + "` without `Compiler`");
-	}
-	function assertUnfrozen(name, frozen) {
-		if (frozen) throw new Error("Cannot invoke `" + name + "` on a frozen processor.\nCreate a new processor first, by invoking it: use `processor()` instead of `processor`.");
-	}
-	function assertNode(node) {
-		if (!node || typeof node.type !== "string") throw new Error("Expected node, got `" + node + "`");
-	}
-	function assertDone(name, asyncName, complete) {
-		if (!complete) throw new Error("`" + name + "` finished async. Use `" + asyncName + "` instead");
-	}
-}));
-//#endregion
-//#region node_modules/unist-util-remove/index.js
-var require_unist_util_remove = /* @__PURE__ */ __commonJSMin(((exports, module) => {
-	var convert = require_convert$1();
-	module.exports = remove;
-	function remove(tree, options, test) {
-		var is = convert(test || options);
-		var cascade = options.cascade == null ? true : options.cascade;
-		return preorder(tree, null, null);
-		function preorder(node, index, parent) {
-			var children = node.children;
-			var childIndex = -1;
-			var position = 0;
-			if (is(node, index, parent)) return null;
-			if (children && children.length) {
-				while (++childIndex < children.length) if (preorder(children[childIndex], childIndex, node)) children[position++] = children[childIndex];
-				if (cascade && !position) return null;
-				children.length = position;
-			}
-			return node;
-		}
-	}
-}));
-//#endregion
-//#region node_modules/telegramify-markdown/lib/definitions.js
-var require_definitions = /* @__PURE__ */ __commonJSMin(((exports, module) => {
-	const remove = require_unist_util_remove();
-	const visit = require_unist_util_visit();
-	/**
-	* Fills the provided record with `Definition`s contained in the mdast.
-	* They are keyed by identifier for subsequent `Reference` lookups.
-	*
-	* @param {Record<string, { title: null | string, url: string }>} definitions
-	*/
-	const collectDefinitions = (definitions) => (tree) => {
-		visit(tree, "definition", (node) => {
-			definitions[node.identifier] = {
-				title: node.title,
-				url: node.url
-			};
-		});
-	};
-	/**
-	* Removes `Definition`s and their parent `Paragraph`s from the mdast.
-	* This avoids unwanted negative space in stringified output.
-	*/
-	const removeDefinitions = () => (tree) => {
-		remove(tree, { cascade: true }, "definition");
-	};
-	module.exports = {
-		collectDefinitions,
-		removeDefinitions
-	};
-}));
-//#endregion
-//#region node_modules/mdast-util-gfm-table/index.js
-var require_mdast_util_gfm_table = /* @__PURE__ */ __commonJSMin(((exports) => {
-	exports.fromMarkdown = require_from_markdown$2();
-	exports.toMarkdown = require_to_markdown$2();
-}));
-//#endregion
-//#region node_modules/telegramify-markdown/lib/utils.js
-var require_utils$1 = /* @__PURE__ */ __commonJSMin(((exports, module) => {
-	const { URL: URL$1 } = __require("url");
-	function wrap(string, ...wrappers) {
-		return [
-			...wrappers,
-			string,
-			...wrappers.reverse()
-		].join("");
-	}
-	function isURL(string) {
-		try {
-			return Boolean(new URL$1(string));
-		} catch (error) {
-			return false;
-		}
-	}
-	function escapeSymbols(text, textType = "text") {
-		if (!text) return text;
-		switch (textType) {
-			case "code": return text.replace(/\\/g, "\\\\").replace(/`/g, "\\`");
-			case "link": return text.replace(/\\/g, "\\\\").replace(/\(/g, "\\(").replace(/\)/g, "\\)");
-			default: return text.replace(/_/g, "\\_").replace(/\*/g, "\\*").replace(/\[/g, "\\[").replace(/]/g, "\\]").replace(/\(/g, "\\(").replace(/\)/g, "\\)").replace(/~/g, "\\~").replace(/`/g, "\\`").replace(/>/g, "\\>").replace(/#/g, "\\#").replace(/\+/g, "\\+").replace(/-/g, "\\-").replace(/=/g, "\\=").replace(/\|/g, "\\|").replace(/{/g, "\\{").replace(/}/g, "\\}").replace(/\./g, "\\.").replace(/!/g, "\\!");
-		}
-	}
-	function processUnsupportedTags(content, strategy) {
-		switch (strategy) {
-			case "escape": return escapeSymbols(content);
-			case "remove": return "";
-			default: return content;
-		}
-	}
-	module.exports = {
-		wrap,
-		isURL,
-		escapeSymbols,
-		processUnsupportedTags
-	};
-}));
-//#endregion
-//#region node_modules/telegramify-markdown/lib/telegramify.js
-var require_telegramify = /* @__PURE__ */ __commonJSMin(((exports, module) => {
-	const defaultHandlers = require_handle();
-	const phrasing = require_container_phrasing();
-	const { toMarkdown: gfmTableToMarkdown } = require_mdast_util_gfm_table();
-	const { wrap, isURL, escapeSymbols, processUnsupportedTags } = require_utils$1();
-	/**
-	* Creates custom `mdast-util-to-markdown` handlers that tailor the output for
-	* Telegram Markdown.
-	*
-	* @param {Readonly<Record<string, { title: null | string, url: string }>>} definitions
-	* Record of `Definition`s in the Markdown document, keyed by identifier.
-	*
-	* @returns {import('mdast-util-to-markdown').Handlers}
-	*/
-	const createHandlers = (definitions, unsupportedTagsStrategy) => ({
-		heading: (node, _parent, context) => {
-			const marker = "*";
-			const exit = context.enter("heading");
-			const value = phrasing(node, context, {
-				before: marker,
-				after: marker
-			});
-			exit();
-			return wrap(value, marker);
-		},
-		strong: (node, _parent, context) => {
-			const marker = "*";
-			const exit = context.enter("strong");
-			const value = phrasing(node, context, {
-				before: marker,
-				after: marker
-			});
-			exit();
-			return wrap(value, marker);
-		},
-		delete(node, _parent, context) {
-			const marker = "~";
-			const exit = context.enter("delete");
-			const value = phrasing(node, context, {
-				before: marker,
-				after: marker
-			});
-			exit();
-			return wrap(value, marker);
-		},
-		emphasis: (node, _parent, context) => {
-			const marker = "_";
-			const exit = context.enter("emphasis");
-			const value = phrasing(node, context, {
-				before: marker,
-				after: marker
-			});
-			exit();
-			return wrap(value, marker);
-		},
-		list: (...args) => defaultHandlers.list(...args).replace(/^(\d+)./gm, "$1\\."),
-		listItem: (...args) => defaultHandlers.listItem(...args).replace(/^\*/, "•"),
-		code(node, _parent, context) {
-			const exit = context.enter("code");
-			const content = node.value.replace(/^#![a-z]+\n/, "");
-			exit();
-			return wrap(escapeSymbols(content, "code"), "```", "\n");
-		},
-		link: (node, _parent, context) => {
-			const exit = context.enter("link");
-			const text = phrasing(node, context, {
-				before: "|",
-				after: ">"
-			}) || escapeSymbols(node.title);
-			const url = decodeURI(node.url) !== node.url ? node.url : encodeURI(node.url);
-			exit();
-			if (!isURL(url)) return escapeSymbols(text) || escapeSymbols(url);
-			return text ? `[${text}](${escapeSymbols(url, "link")})` : `[${escapeSymbols(url)}](${escapeSymbols(url, "link")})`;
-		},
-		linkReference: (node, _parent, context) => {
-			const exit = context.enter("linkReference");
-			const definition = definitions[node.identifier];
-			const text = phrasing(node, context, {
-				before: "|",
-				after: ">"
-			}) || (definition ? definition.title : null);
-			exit();
-			if (!definition || !isURL(definition.url)) return escapeSymbols(text);
-			return text ? `[${text}](${escapeSymbols(definition.url, "link")})` : `[${escapeSymbols(definition.url)}](${escapeSymbols(definition.url, "link")})`;
-		},
-		image: (node, _parent, context) => {
-			const exit = context.enter("image");
-			const text = node.alt || node.title;
-			const url = node.url;
-			exit();
-			if (!isURL(url)) return escapeSymbols(text) || escapeSymbols(url);
-			return text ? `[${escapeSymbols(text)}](${escapeSymbols(url, "link")})` : `[${escapeSymbols(url)}](${escapeSymbols(url, "link")})`;
-		},
-		imageReference: (node, _parent, context) => {
-			const exit = context.enter("imageReference");
-			const definition = definitions[node.identifier];
-			const text = node.alt || (definition ? definition.title : null);
-			exit();
-			if (!definition || !isURL(definition.url)) return escapeSymbols(text);
-			return text ? `[${escapeSymbols(text)}](${escapeSymbols(definition.url, "link")})` : `[${escapeSymbols(definition.url)}](${escapeSymbols(definition.url, "link")})`;
-		},
-		text: (node, _parent, context) => {
-			const exit = context.enter("text");
-			const text = node.value;
-			exit();
-			return escapeSymbols(text);
-		},
-		blockquote: (node, _parent, context) => processUnsupportedTags(defaultHandlers.blockquote(node, _parent, context), unsupportedTagsStrategy),
-		html: (node, _parent, context) => processUnsupportedTags(defaultHandlers.html(node, _parent, context), unsupportedTagsStrategy),
-		table: (node, _parent, context) => processUnsupportedTags(gfmTableToMarkdown().handlers.table(node, _parent, context), unsupportedTagsStrategy),
-		thematicBreak: (_node, _parent, _context) => processUnsupportedTags("---", unsupportedTagsStrategy)
-	});
-	/**
-	* Creates options to be passed into a `remark-stringify` processor that tailor
-	* the output for Telegram Markdown.
-	*
-	* @param {Readonly<Record<string, { title: null | string, url: string }>>} definitions
-	* Record of `Definition`s in the Markdown document, keyed by identifier.
-	*
-	* @returns {import('remark-stringify').RemarkStringifyOptions}
-	*/
-	const createOptions = (definitions, unsupportedTagsStrategy) => ({
-		bullet: "*",
-		tightDefinitions: true,
-		handlers: createHandlers(definitions, unsupportedTagsStrategy)
-	});
-	module.exports = createOptions;
-}));
-//#endregion
-//#region node_modules/telegramify-markdown/lib/convert.js
-var require_convert = /* @__PURE__ */ __commonJSMin(((exports, module) => {
-	const gfm = require_remark_gfm();
-	const parse = require_remark_parse();
-	const stringify = require_remark_stringify();
-	const removeComments = require_remark_remove_comments();
-	const unified = require_unified();
-	const { collectDefinitions, removeDefinitions } = require_definitions();
-	const createTelegramifyOptions = require_telegramify();
-	module.exports = (markdown, unsupportedTagsStrategy) => {
-		const definitions = {};
-		const telegramifyOptions = createTelegramifyOptions(definitions, unsupportedTagsStrategy);
-		return unified().use(parse).use(gfm).use(removeComments).use(collectDefinitions, definitions).use(removeDefinitions).use(stringify, telegramifyOptions).processSync(markdown).toString().replace(/<!---->\n/gi, "");
-	};
-}));
-//#endregion
-//#region node_modules/telegramify-markdown/index.js
-var require_telegramify_markdown = /* @__PURE__ */ __commonJSMin(((exports, module) => {
-	module.exports = require_convert();
-}));
-//#endregion
 //#region node_modules/grammy/out/filter.js
 var require_filter = /* @__PURE__ */ __commonJSMin(((exports) => {
 	Object.defineProperty(exports, "__esModule", { value: true });
@@ -31027,7 +20377,7 @@ var require_error = /* @__PURE__ */ __commonJSMin(((exports) => {
 }));
 //#endregion
 //#region node_modules/webidl-conversions/lib/index.js
-var require_lib$1 = /* @__PURE__ */ __commonJSMin(((exports, module) => {
+var require_lib$3 = /* @__PURE__ */ __commonJSMin(((exports, module) => {
 	var conversions = {};
 	module.exports = conversions;
 	function sign(x) {
@@ -31143,7 +20493,7 @@ var require_lib$1 = /* @__PURE__ */ __commonJSMin(((exports, module) => {
 }));
 //#endregion
 //#region node_modules/whatwg-url/lib/utils.js
-var require_utils = /* @__PURE__ */ __commonJSMin(((exports, module) => {
+var require_utils$1 = /* @__PURE__ */ __commonJSMin(((exports, module) => {
 	module.exports.mixin = function mixin(target, source) {
 		const keys = Object.getOwnPropertyNames(source);
 		for (let i = 0; i < keys.length; ++i) Object.defineProperty(target, keys[i], Object.getOwnPropertyDescriptor(source, keys[i]));
@@ -67864,8 +57214,8 @@ var require_URL_impl = /* @__PURE__ */ __commonJSMin(((exports) => {
 //#endregion
 //#region node_modules/whatwg-url/lib/URL.js
 var require_URL = /* @__PURE__ */ __commonJSMin(((exports, module) => {
-	const conversions = require_lib$1();
-	const utils = require_utils();
+	const conversions = require_lib$3();
+	const utils = require_utils$1();
 	const Impl = require_URL_impl();
 	const impl = utils.implSymbol;
 	function URL(url) {
@@ -68041,7 +57391,7 @@ var require_public_api = /* @__PURE__ */ __commonJSMin(((exports) => {
 }));
 //#endregion
 //#region node_modules/node-fetch/lib/index.js
-var require_lib = /* @__PURE__ */ __commonJSMin(((exports, module) => {
+var require_lib$2 = /* @__PURE__ */ __commonJSMin(((exports, module) => {
 	Object.defineProperty(exports, "__esModule", { value: true });
 	function _interopDefault(ex) {
 		return ex && typeof ex === "object" && "default" in ex ? ex["default"] : ex;
@@ -69231,7 +58581,7 @@ var require_types_node = /* @__PURE__ */ __commonJSMin(((exports) => {
 	Object.defineProperty(exports, "__esModule", { value: true });
 	exports.InputFile = void 0;
 	const fs_1 = __require("fs");
-	const node_fetch_1 = require_lib();
+	const node_fetch_1 = require_lib$2();
 	const path_1 = __require("path");
 	const debug = (0, require_platform_node().debug)("grammy:warn");
 	__exportStar(require_types$1(), exports);
@@ -70122,7 +59472,7 @@ var require_shim_node = /* @__PURE__ */ __commonJSMin(((exports) => {
 			return abort_controller_1.AbortController;
 		}
 	});
-	var node_fetch_1 = require_lib();
+	var node_fetch_1 = require_lib$2();
 	Object.defineProperty(exports, "fetch", {
 		enumerable: true,
 		get: function() {
@@ -76104,8 +65454,8 @@ var require_webhook = /* @__PURE__ */ __commonJSMin(((exports) => {
 	}
 }));
 //#endregion
-//#region node_modules/grammy/out/mod.js
-var require_out = /* @__PURE__ */ __commonJSMin(((exports) => {
+//#region src/source-utils.ts
+var import_out = (/* @__PURE__ */ __commonJSMin(((exports) => {
 	var __createBinding = exports && exports.__createBinding || (Object.create ? (function(o, m, k, k2) {
 		if (k2 === void 0) k2 = k;
 		var desc = Object.getOwnPropertyDescriptor(m, k);
@@ -76192,26 +65542,27 @@ var require_out = /* @__PURE__ */ __commonJSMin(((exports) => {
 			return error_js_1.HttpError;
 		}
 	});
-}));
-//#endregion
-//#region src/attachments.ts
-var import_telegramify_markdown = /* @__PURE__ */ __toESM(require_telegramify_markdown(), 1);
-var import_out = require_out();
+})))();
 /**
-* Distinguish path-like inputs from Telegram file ids.
-*
-* Repository-relative fixture paths often do not start with `./`, so a simple
-* prefix check would incorrectly treat missing local files as Telegram file ids.
+* Distinguish path-like inputs from opaque identifiers such as Telegram file ids.
 */
 function looksLikeLocalPath(input) {
 	return input.startsWith("./") || input.startsWith("../") || input.startsWith("/") || input.includes("/") || input.includes("\\");
 }
 /**
-* Preserve remote attachment URLs so Telegram can fetch them directly.
+* Detect HTTP(S) URLs that should be fetched or handed off remotely.
 */
 function isRemoteUrl(input) {
 	return /^https?:\/\//.test(input);
 }
+/**
+* Resolve a repository-relative path against the current workspace root.
+*/
+function resolveWorkspacePath(input) {
+	return resolve(process.cwd(), input);
+}
+//#endregion
+//#region src/attachments.ts
 /**
 * Resolve local attachments eagerly and reject missing path-like values.
 *
@@ -76219,7 +65570,7 @@ function isRemoteUrl(input) {
 * paths such as `scripts/fixtures/sample-photo.webp` work as expected.
 */
 function resolveAttachmentSource(input, filename) {
-	const resolvedPath = resolve(process.cwd(), input);
+	const resolvedPath = resolveWorkspacePath(input);
 	if (existsSync(resolvedPath)) return {
 		value: new import_out.InputFile(readFileSync(resolvedPath), filename || basename(resolvedPath)),
 		isLocalFile: true
@@ -76277,6 +65628,15 @@ const ATTACHMENT_SENDERS = {
 	animation: (bot, chatId, source, options) => bot.api.sendAnimation(chatId, source, options),
 	document: (bot, chatId, source, options) => bot.api.sendDocument(chatId, source, options)
 };
+/**
+* Build typed media-group entries for the supported Telegram album payloads.
+*/
+const MEDIA_GROUP_BUILDERS = {
+	photo: (source, options) => import_out.InputMediaBuilder.photo(source, options),
+	video: (source, options) => import_out.InputMediaBuilder.video(source, options),
+	audio: (source, options) => import_out.InputMediaBuilder.audio(source, options),
+	document: (source, options) => import_out.InputMediaBuilder.document(source, options)
+};
 //#endregion
 //#region src/env.ts
 /**
@@ -76294,6 +65654,10747 @@ function getOptionalEnv(name) {
 	return process.env[name]?.trim() ?? "";
 }
 //#endregion
+//#region node_modules/micromark/dist/constant/has-own-property.js
+var require_has_own_property = /* @__PURE__ */ __commonJSMin(((exports, module) => {
+	module.exports = {}.hasOwnProperty;
+}));
+//#endregion
+//#region node_modules/micromark/dist/constant/splice.js
+var require_splice = /* @__PURE__ */ __commonJSMin(((exports, module) => {
+	module.exports = [].splice;
+}));
+//#endregion
+//#region node_modules/micromark/dist/util/chunked-splice.js
+var require_chunked_splice = /* @__PURE__ */ __commonJSMin(((exports, module) => {
+	var splice = require_splice();
+	function chunkedSplice(list, start, remove, items) {
+		var end = list.length;
+		var chunkStart = 0;
+		var parameters;
+		if (start < 0) start = -start > end ? 0 : end + start;
+		else start = start > end ? end : start;
+		remove = remove > 0 ? remove : 0;
+		if (items.length < 1e4) {
+			parameters = Array.from(items);
+			parameters.unshift(start, remove);
+			splice.apply(list, parameters);
+		} else {
+			if (remove) splice.apply(list, [start, remove]);
+			while (chunkStart < items.length) {
+				parameters = items.slice(chunkStart, chunkStart + 1e4);
+				parameters.unshift(start, 0);
+				splice.apply(list, parameters);
+				chunkStart += 1e4;
+				start += 1e4;
+			}
+		}
+	}
+	module.exports = chunkedSplice;
+}));
+//#endregion
+//#region node_modules/micromark/dist/util/miniflat.js
+var require_miniflat = /* @__PURE__ */ __commonJSMin(((exports, module) => {
+	function miniflat(value) {
+		return value === null || value === void 0 ? [] : "length" in value ? value : [value];
+	}
+	module.exports = miniflat;
+}));
+//#endregion
+//#region node_modules/micromark/dist/util/combine-extensions.js
+var require_combine_extensions = /* @__PURE__ */ __commonJSMin(((exports, module) => {
+	var hasOwnProperty = require_has_own_property();
+	var chunkedSplice = require_chunked_splice();
+	var miniflat = require_miniflat();
+	function combineExtensions(extensions) {
+		var all = {};
+		var index = -1;
+		while (++index < extensions.length) extension(all, extensions[index]);
+		return all;
+	}
+	function extension(all, extension) {
+		var hook;
+		var left;
+		var right;
+		var code;
+		for (hook in extension) {
+			left = hasOwnProperty.call(all, hook) ? all[hook] : all[hook] = {};
+			right = extension[hook];
+			for (code in right) left[code] = constructs(miniflat(right[code]), hasOwnProperty.call(left, code) ? left[code] : []);
+		}
+	}
+	function constructs(list, existing) {
+		var index = -1;
+		var before = [];
+		while (++index < list.length) (list[index].add === "after" ? existing : before).push(list[index]);
+		chunkedSplice(existing, 0, 0, before);
+		return existing;
+	}
+	module.exports = combineExtensions;
+}));
+//#endregion
+//#region node_modules/micromark/dist/constant/from-char-code.js
+var require_from_char_code = /* @__PURE__ */ __commonJSMin(((exports, module) => {
+	module.exports = String.fromCharCode;
+}));
+//#endregion
+//#region node_modules/micromark/dist/util/regex-check.js
+var require_regex_check = /* @__PURE__ */ __commonJSMin(((exports, module) => {
+	var fromCharCode = require_from_char_code();
+	function regexCheck(regex) {
+		return check;
+		function check(code) {
+			return regex.test(fromCharCode(code));
+		}
+	}
+	module.exports = regexCheck;
+}));
+//#endregion
+//#region node_modules/micromark/dist/character/ascii-alpha.js
+var require_ascii_alpha = /* @__PURE__ */ __commonJSMin(((exports, module) => {
+	module.exports = require_regex_check()(/[A-Za-z]/);
+}));
+//#endregion
+//#region node_modules/micromark/dist/character/ascii-alphanumeric.js
+var require_ascii_alphanumeric = /* @__PURE__ */ __commonJSMin(((exports, module) => {
+	module.exports = require_regex_check()(/[\dA-Za-z]/);
+}));
+//#endregion
+//#region node_modules/micromark/dist/character/ascii-control.js
+var require_ascii_control = /* @__PURE__ */ __commonJSMin(((exports, module) => {
+	function asciiControl(code) {
+		return code < 32 || code === 127;
+	}
+	module.exports = asciiControl;
+}));
+//#endregion
+//#region node_modules/micromark/dist/character/markdown-line-ending.js
+var require_markdown_line_ending = /* @__PURE__ */ __commonJSMin(((exports, module) => {
+	function markdownLineEnding(code) {
+		return code < -2;
+	}
+	module.exports = markdownLineEnding;
+}));
+//#endregion
+//#region node_modules/micromark/dist/constant/unicode-punctuation-regex.js
+var require_unicode_punctuation_regex = /* @__PURE__ */ __commonJSMin(((exports, module) => {
+	module.exports = /[!-\/:-@\[-`\{-~\xA1\xA7\xAB\xB6\xB7\xBB\xBF\u037E\u0387\u055A-\u055F\u0589\u058A\u05BE\u05C0\u05C3\u05C6\u05F3\u05F4\u0609\u060A\u060C\u060D\u061B\u061E\u061F\u066A-\u066D\u06D4\u0700-\u070D\u07F7-\u07F9\u0830-\u083E\u085E\u0964\u0965\u0970\u09FD\u0A76\u0AF0\u0C77\u0C84\u0DF4\u0E4F\u0E5A\u0E5B\u0F04-\u0F12\u0F14\u0F3A-\u0F3D\u0F85\u0FD0-\u0FD4\u0FD9\u0FDA\u104A-\u104F\u10FB\u1360-\u1368\u1400\u166E\u169B\u169C\u16EB-\u16ED\u1735\u1736\u17D4-\u17D6\u17D8-\u17DA\u1800-\u180A\u1944\u1945\u1A1E\u1A1F\u1AA0-\u1AA6\u1AA8-\u1AAD\u1B5A-\u1B60\u1BFC-\u1BFF\u1C3B-\u1C3F\u1C7E\u1C7F\u1CC0-\u1CC7\u1CD3\u2010-\u2027\u2030-\u2043\u2045-\u2051\u2053-\u205E\u207D\u207E\u208D\u208E\u2308-\u230B\u2329\u232A\u2768-\u2775\u27C5\u27C6\u27E6-\u27EF\u2983-\u2998\u29D8-\u29DB\u29FC\u29FD\u2CF9-\u2CFC\u2CFE\u2CFF\u2D70\u2E00-\u2E2E\u2E30-\u2E4F\u2E52\u3001-\u3003\u3008-\u3011\u3014-\u301F\u3030\u303D\u30A0\u30FB\uA4FE\uA4FF\uA60D-\uA60F\uA673\uA67E\uA6F2-\uA6F7\uA874-\uA877\uA8CE\uA8CF\uA8F8-\uA8FA\uA8FC\uA92E\uA92F\uA95F\uA9C1-\uA9CD\uA9DE\uA9DF\uAA5C-\uAA5F\uAADE\uAADF\uAAF0\uAAF1\uABEB\uFD3E\uFD3F\uFE10-\uFE19\uFE30-\uFE52\uFE54-\uFE61\uFE63\uFE68\uFE6A\uFE6B\uFF01-\uFF03\uFF05-\uFF0A\uFF0C-\uFF0F\uFF1A\uFF1B\uFF1F\uFF20\uFF3B-\uFF3D\uFF3F\uFF5B\uFF5D\uFF5F-\uFF65]/;
+}));
+//#endregion
+//#region node_modules/micromark/dist/character/unicode-punctuation.js
+var require_unicode_punctuation = /* @__PURE__ */ __commonJSMin(((exports, module) => {
+	var unicodePunctuationRegex = require_unicode_punctuation_regex();
+	module.exports = require_regex_check()(unicodePunctuationRegex);
+}));
+//#endregion
+//#region node_modules/micromark/dist/character/unicode-whitespace.js
+var require_unicode_whitespace = /* @__PURE__ */ __commonJSMin(((exports, module) => {
+	module.exports = require_regex_check()(/\s/);
+}));
+//#endregion
+//#region node_modules/micromark-extension-gfm-autolink-literal/syntax.js
+var require_syntax$3 = /* @__PURE__ */ __commonJSMin(((exports) => {
+	var asciiAlpha = require_ascii_alpha();
+	var asciiAlphanumeric = require_ascii_alphanumeric();
+	var asciiControl = require_ascii_control();
+	var markdownLineEnding = require_markdown_line_ending();
+	var unicodePunctuation = require_unicode_punctuation();
+	var unicodeWhitespace = require_unicode_whitespace();
+	var www = {
+		tokenize: tokenizeWww,
+		partial: true
+	};
+	var domain = {
+		tokenize: tokenizeDomain,
+		partial: true
+	};
+	var path = {
+		tokenize: tokenizePath,
+		partial: true
+	};
+	var punctuation = {
+		tokenize: tokenizePunctuation,
+		partial: true
+	};
+	var namedCharacterReference = {
+		tokenize: tokenizeNamedCharacterReference,
+		partial: true
+	};
+	var wwwAutolink = {
+		tokenize: tokenizeWwwAutolink,
+		previous: previousWww
+	};
+	var httpAutolink = {
+		tokenize: tokenizeHttpAutolink,
+		previous: previousHttp
+	};
+	var emailAutolink = {
+		tokenize: tokenizeEmailAutolink,
+		previous: previousEmail
+	};
+	var text = {};
+	exports.text = text;
+	var code = 48;
+	while (code < 123) {
+		text[code] = emailAutolink;
+		code++;
+		if (code === 58) code = 65;
+		else if (code === 91) code = 97;
+	}
+	text[43] = emailAutolink;
+	text[45] = emailAutolink;
+	text[46] = emailAutolink;
+	text[95] = emailAutolink;
+	text[72] = [emailAutolink, httpAutolink];
+	text[104] = [emailAutolink, httpAutolink];
+	text[87] = [emailAutolink, wwwAutolink];
+	text[119] = [emailAutolink, wwwAutolink];
+	function tokenizeEmailAutolink(effects, ok, nok) {
+		var self = this;
+		var hasDot;
+		return start;
+		function start(code) {
+			/* istanbul ignore next - hooks. */
+			if (!gfmAtext(code) || !previousEmail(self.previous) || previous(self.events)) return nok(code);
+			effects.enter("literalAutolink");
+			effects.enter("literalAutolinkEmail");
+			return atext(code);
+		}
+		function atext(code) {
+			if (gfmAtext(code)) {
+				effects.consume(code);
+				return atext;
+			}
+			if (code === 64) {
+				effects.consume(code);
+				return label;
+			}
+			return nok(code);
+		}
+		function label(code) {
+			if (code === 46) return effects.check(punctuation, done, dotContinuation)(code);
+			if (code === 45 || code === 95) return effects.check(punctuation, nok, dashOrUnderscoreContinuation)(code);
+			if (asciiAlphanumeric(code)) {
+				effects.consume(code);
+				return label;
+			}
+			return done(code);
+		}
+		function dotContinuation(code) {
+			effects.consume(code);
+			hasDot = true;
+			return label;
+		}
+		function dashOrUnderscoreContinuation(code) {
+			effects.consume(code);
+			return afterDashOrUnderscore;
+		}
+		function afterDashOrUnderscore(code) {
+			if (code === 46) return effects.check(punctuation, nok, dotContinuation)(code);
+			return label(code);
+		}
+		function done(code) {
+			if (hasDot) {
+				effects.exit("literalAutolinkEmail");
+				effects.exit("literalAutolink");
+				return ok(code);
+			}
+			return nok(code);
+		}
+	}
+	function tokenizeWwwAutolink(effects, ok, nok) {
+		var self = this;
+		return start;
+		function start(code) {
+			/* istanbul ignore next - hooks. */
+			if (code !== 87 && code - 32 !== 87 || !previousWww(self.previous) || previous(self.events)) return nok(code);
+			effects.enter("literalAutolink");
+			effects.enter("literalAutolinkWww");
+			return effects.check(www, effects.attempt(domain, effects.attempt(path, done), nok), nok)(code);
+		}
+		function done(code) {
+			effects.exit("literalAutolinkWww");
+			effects.exit("literalAutolink");
+			return ok(code);
+		}
+	}
+	function tokenizeHttpAutolink(effects, ok, nok) {
+		var self = this;
+		return start;
+		function start(code) {
+			/* istanbul ignore next - hooks. */
+			if (code !== 72 && code - 32 !== 72 || !previousHttp(self.previous) || previous(self.events)) return nok(code);
+			effects.enter("literalAutolink");
+			effects.enter("literalAutolinkHttp");
+			effects.consume(code);
+			return t1;
+		}
+		function t1(code) {
+			if (code === 84 || code - 32 === 84) {
+				effects.consume(code);
+				return t2;
+			}
+			return nok(code);
+		}
+		function t2(code) {
+			if (code === 84 || code - 32 === 84) {
+				effects.consume(code);
+				return p;
+			}
+			return nok(code);
+		}
+		function p(code) {
+			if (code === 80 || code - 32 === 80) {
+				effects.consume(code);
+				return s;
+			}
+			return nok(code);
+		}
+		function s(code) {
+			if (code === 83 || code - 32 === 83) {
+				effects.consume(code);
+				return colon;
+			}
+			return colon(code);
+		}
+		function colon(code) {
+			if (code === 58) {
+				effects.consume(code);
+				return slash1;
+			}
+			return nok(code);
+		}
+		function slash1(code) {
+			if (code === 47) {
+				effects.consume(code);
+				return slash2;
+			}
+			return nok(code);
+		}
+		function slash2(code) {
+			if (code === 47) {
+				effects.consume(code);
+				return after;
+			}
+			return nok(code);
+		}
+		function after(code) {
+			return asciiControl(code) || unicodeWhitespace(code) || unicodePunctuation(code) ? nok(code) : effects.attempt(domain, effects.attempt(path, done), nok)(code);
+		}
+		function done(code) {
+			effects.exit("literalAutolinkHttp");
+			effects.exit("literalAutolink");
+			return ok(code);
+		}
+	}
+	function tokenizeWww(effects, ok, nok) {
+		return start;
+		function start(code) {
+			effects.consume(code);
+			return w2;
+		}
+		function w2(code) {
+			if (code === 87 || code - 32 === 87) {
+				effects.consume(code);
+				return w3;
+			}
+			return nok(code);
+		}
+		function w3(code) {
+			if (code === 87 || code - 32 === 87) {
+				effects.consume(code);
+				return dot;
+			}
+			return nok(code);
+		}
+		function dot(code) {
+			if (code === 46) {
+				effects.consume(code);
+				return after;
+			}
+			return nok(code);
+		}
+		function after(code) {
+			return code === null || markdownLineEnding(code) ? nok(code) : ok(code);
+		}
+	}
+	function tokenizeDomain(effects, ok, nok) {
+		var hasUnderscoreInLastSegment;
+		var hasUnderscoreInLastLastSegment;
+		return domain;
+		function domain(code) {
+			if (code === 38) return effects.check(namedCharacterReference, done, punctuationContinuation)(code);
+			if (code === 46 || code === 95) return effects.check(punctuation, done, punctuationContinuation)(code);
+			if (asciiControl(code) || unicodeWhitespace(code) || code !== 45 && unicodePunctuation(code)) return done(code);
+			effects.consume(code);
+			return domain;
+		}
+		function punctuationContinuation(code) {
+			if (code === 46) {
+				hasUnderscoreInLastLastSegment = hasUnderscoreInLastSegment;
+				hasUnderscoreInLastSegment = void 0;
+				effects.consume(code);
+				return domain;
+			}
+			if (code === 95) hasUnderscoreInLastSegment = true;
+			effects.consume(code);
+			return domain;
+		}
+		function done(code) {
+			if (!hasUnderscoreInLastLastSegment && !hasUnderscoreInLastSegment) return ok(code);
+			return nok(code);
+		}
+	}
+	function tokenizePath(effects, ok) {
+		var balance = 0;
+		return inPath;
+		function inPath(code) {
+			if (code === 38) return effects.check(namedCharacterReference, ok, continuedPunctuation)(code);
+			if (code === 40) balance++;
+			if (code === 41) return effects.check(punctuation, parenAtPathEnd, continuedPunctuation)(code);
+			if (pathEnd(code)) return ok(code);
+			if (trailingPunctuation(code)) return effects.check(punctuation, ok, continuedPunctuation)(code);
+			effects.consume(code);
+			return inPath;
+		}
+		function continuedPunctuation(code) {
+			effects.consume(code);
+			return inPath;
+		}
+		function parenAtPathEnd(code) {
+			balance--;
+			return balance < 0 ? ok(code) : continuedPunctuation(code);
+		}
+	}
+	function tokenizeNamedCharacterReference(effects, ok, nok) {
+		return start;
+		function start(code) {
+			effects.consume(code);
+			return inside;
+		}
+		function inside(code) {
+			if (asciiAlpha(code)) {
+				effects.consume(code);
+				return inside;
+			}
+			if (code === 59) {
+				effects.consume(code);
+				return after;
+			}
+			return nok(code);
+		}
+		function after(code) {
+			return pathEnd(code) ? ok(code) : nok(code);
+		}
+	}
+	function tokenizePunctuation(effects, ok, nok) {
+		return start;
+		function start(code) {
+			effects.consume(code);
+			return after;
+		}
+		function after(code) {
+			if (trailingPunctuation(code)) {
+				effects.consume(code);
+				return after;
+			}
+			return pathEnd(code) ? ok(code) : nok(code);
+		}
+	}
+	function trailingPunctuation(code) {
+		return code === 33 || code === 34 || code === 39 || code === 41 || code === 42 || code === 44 || code === 46 || code === 58 || code === 59 || code === 60 || code === 63 || code === 95 || code === 126;
+	}
+	function pathEnd(code) {
+		return code === null || code < 0 || code === 32 || code === 60;
+	}
+	function gfmAtext(code) {
+		return code === 43 || code === 45 || code === 46 || code === 95 || asciiAlphanumeric(code);
+	}
+	function previousWww(code) {
+		return code === null || code < 0 || code === 32 || code === 40 || code === 42 || code === 95 || code === 126;
+	}
+	function previousHttp(code) {
+		return code === null || !asciiAlpha(code);
+	}
+	function previousEmail(code) {
+		return code !== 47 && previousHttp(code);
+	}
+	function previous(events) {
+		var index = events.length;
+		while (index--) if ((events[index][1].type === "labelLink" || events[index][1].type === "labelImage") && !events[index][1]._balanced) return true;
+	}
+}));
+//#endregion
+//#region node_modules/micromark-extension-gfm-autolink-literal/index.js
+var require_micromark_extension_gfm_autolink_literal = /* @__PURE__ */ __commonJSMin(((exports, module) => {
+	module.exports = require_syntax$3();
+}));
+//#endregion
+//#region node_modules/micromark/dist/character/markdown-line-ending-or-space.js
+var require_markdown_line_ending_or_space = /* @__PURE__ */ __commonJSMin(((exports, module) => {
+	function markdownLineEndingOrSpace(code) {
+		return code < 0 || code === 32;
+	}
+	module.exports = markdownLineEndingOrSpace;
+}));
+//#endregion
+//#region node_modules/micromark/dist/util/classify-character.js
+var require_classify_character = /* @__PURE__ */ __commonJSMin(((exports, module) => {
+	var markdownLineEndingOrSpace = require_markdown_line_ending_or_space();
+	var unicodePunctuation = require_unicode_punctuation();
+	var unicodeWhitespace = require_unicode_whitespace();
+	function classifyCharacter(code) {
+		if (code === null || markdownLineEndingOrSpace(code) || unicodeWhitespace(code)) return 1;
+		if (unicodePunctuation(code)) return 2;
+	}
+	module.exports = classifyCharacter;
+}));
+//#endregion
+//#region node_modules/micromark/dist/util/resolve-all.js
+var require_resolve_all = /* @__PURE__ */ __commonJSMin(((exports, module) => {
+	function resolveAll(constructs, events, context) {
+		var called = [];
+		var index = -1;
+		var resolve;
+		while (++index < constructs.length) {
+			resolve = constructs[index].resolveAll;
+			if (resolve && called.indexOf(resolve) < 0) {
+				events = resolve(events, context);
+				called.push(resolve);
+			}
+		}
+		return events;
+	}
+	module.exports = resolveAll;
+}));
+//#endregion
+//#region node_modules/micromark/dist/constant/assign.js
+var require_assign = /* @__PURE__ */ __commonJSMin(((exports, module) => {
+	module.exports = Object.assign;
+}));
+//#endregion
+//#region node_modules/micromark/dist/util/shallow.js
+var require_shallow = /* @__PURE__ */ __commonJSMin(((exports, module) => {
+	var assign = require_assign();
+	function shallow(object) {
+		return assign({}, object);
+	}
+	module.exports = shallow;
+}));
+//#endregion
+//#region node_modules/micromark-extension-gfm-strikethrough/index.js
+var require_micromark_extension_gfm_strikethrough = /* @__PURE__ */ __commonJSMin(((exports, module) => {
+	module.exports = create;
+	var classifyCharacter = require_classify_character();
+	var chunkedSplice = require_chunked_splice();
+	var resolveAll = require_resolve_all();
+	var shallow = require_shallow();
+	function create(options) {
+		var single = (options || {}).singleTilde;
+		var tokenizer = {
+			tokenize: tokenizeStrikethrough,
+			resolveAll: resolveAllStrikethrough
+		};
+		if (single === null || single === void 0) single = true;
+		return {
+			text: { 126: tokenizer },
+			insideSpan: { null: tokenizer }
+		};
+		function resolveAllStrikethrough(events, context) {
+			var index = -1;
+			var strikethrough;
+			var text;
+			var open;
+			var nextEvents;
+			while (++index < events.length) if (events[index][0] === "enter" && events[index][1].type === "strikethroughSequenceTemporary" && events[index][1]._close) {
+				open = index;
+				while (open--) if (events[open][0] === "exit" && events[open][1].type === "strikethroughSequenceTemporary" && events[open][1]._open && events[index][1].end.offset - events[index][1].start.offset === events[open][1].end.offset - events[open][1].start.offset) {
+					events[index][1].type = "strikethroughSequence";
+					events[open][1].type = "strikethroughSequence";
+					strikethrough = {
+						type: "strikethrough",
+						start: shallow(events[open][1].start),
+						end: shallow(events[index][1].end)
+					};
+					text = {
+						type: "strikethroughText",
+						start: shallow(events[open][1].end),
+						end: shallow(events[index][1].start)
+					};
+					nextEvents = [
+						[
+							"enter",
+							strikethrough,
+							context
+						],
+						[
+							"enter",
+							events[open][1],
+							context
+						],
+						[
+							"exit",
+							events[open][1],
+							context
+						],
+						[
+							"enter",
+							text,
+							context
+						]
+					];
+					chunkedSplice(nextEvents, nextEvents.length, 0, resolveAll(context.parser.constructs.insideSpan.null, events.slice(open + 1, index), context));
+					chunkedSplice(nextEvents, nextEvents.length, 0, [
+						[
+							"exit",
+							text,
+							context
+						],
+						[
+							"enter",
+							events[index][1],
+							context
+						],
+						[
+							"exit",
+							events[index][1],
+							context
+						],
+						[
+							"exit",
+							strikethrough,
+							context
+						]
+					]);
+					chunkedSplice(events, open - 1, index - open + 3, nextEvents);
+					index = open + nextEvents.length - 2;
+					break;
+				}
+			}
+			return removeRemainingSequences(events);
+		}
+		function removeRemainingSequences(events) {
+			var index = -1;
+			var length = events.length;
+			while (++index < length) if (events[index][1].type === "strikethroughSequenceTemporary") events[index][1].type = "data";
+			return events;
+		}
+		function tokenizeStrikethrough(effects, ok, nok) {
+			var previous = this.previous;
+			var events = this.events;
+			var size = 0;
+			return start;
+			function start(code) {
+				if (code !== 126 || previous === 126 && events[events.length - 1][1].type !== "characterEscape") return nok(code);
+				effects.enter("strikethroughSequenceTemporary");
+				return more(code);
+			}
+			function more(code) {
+				var before = classifyCharacter(previous);
+				var token;
+				var after;
+				if (code === 126) {
+					if (size > 1) return nok(code);
+					effects.consume(code);
+					size++;
+					return more;
+				}
+				if (size < 2 && !single) return nok(code);
+				token = effects.exit("strikethroughSequenceTemporary");
+				after = classifyCharacter(code);
+				token._open = !after || after === 2 && before;
+				token._close = !before || before === 2 && after;
+				return ok(code);
+			}
+		}
+	}
+}));
+//#endregion
+//#region node_modules/micromark/dist/character/markdown-space.js
+var require_markdown_space = /* @__PURE__ */ __commonJSMin(((exports, module) => {
+	function markdownSpace(code) {
+		return code === -2 || code === -1 || code === 32;
+	}
+	module.exports = markdownSpace;
+}));
+//#endregion
+//#region node_modules/micromark/dist/tokenize/factory-space.js
+var require_factory_space = /* @__PURE__ */ __commonJSMin(((exports, module) => {
+	var markdownSpace = require_markdown_space();
+	function spaceFactory(effects, ok, type, max) {
+		var limit = max ? max - 1 : Infinity;
+		var size = 0;
+		return start;
+		function start(code) {
+			if (markdownSpace(code)) {
+				effects.enter(type);
+				return prefix(code);
+			}
+			return ok(code);
+		}
+		function prefix(code) {
+			if (markdownSpace(code) && size++ < limit) {
+				effects.consume(code);
+				return prefix;
+			}
+			effects.exit(type);
+			return ok(code);
+		}
+	}
+	module.exports = spaceFactory;
+}));
+//#endregion
+//#region node_modules/micromark-extension-gfm-table/syntax.js
+var require_syntax$2 = /* @__PURE__ */ __commonJSMin(((exports) => {
+	exports.flow = { null: {
+		tokenize: tokenizeTable,
+		resolve: resolveTable,
+		interruptible: true
+	} };
+	var createSpace = require_factory_space();
+	var setextUnderlineMini = {
+		tokenize: tokenizeSetextUnderlineMini,
+		partial: true
+	};
+	var nextPrefixedOrBlank = {
+		tokenize: tokenizeNextPrefixedOrBlank,
+		partial: true
+	};
+	function resolveTable(events, context) {
+		var length = events.length;
+		var index = -1;
+		var token;
+		var inHead;
+		var inDelimiterRow;
+		var inRow;
+		var cell;
+		var content;
+		var text;
+		var contentStart;
+		var contentEnd;
+		var cellStart;
+		while (++index < length) {
+			token = events[index][1];
+			if (inRow) {
+				if (token.type === "temporaryTableCellContent") {
+					contentStart = contentStart || index;
+					contentEnd = index;
+				}
+				if ((token.type === "tableCellDivider" || token.type === "tableRow") && contentEnd) {
+					content = {
+						type: "tableContent",
+						start: events[contentStart][1].start,
+						end: events[contentEnd][1].end
+					};
+					text = {
+						type: "chunkText",
+						start: content.start,
+						end: content.end,
+						contentType: "text"
+					};
+					events.splice(contentStart, contentEnd - contentStart + 1, [
+						"enter",
+						content,
+						context
+					], [
+						"enter",
+						text,
+						context
+					], [
+						"exit",
+						text,
+						context
+					], [
+						"exit",
+						content,
+						context
+					]);
+					index -= contentEnd - contentStart - 3;
+					length = events.length;
+					contentStart = void 0;
+					contentEnd = void 0;
+				}
+			}
+			if (events[index][0] === "exit" && cellStart && cellStart + 1 < index && (token.type === "tableCellDivider" || token.type === "tableRow" && (cellStart + 3 < index || events[cellStart][1].type !== "whitespace"))) {
+				cell = {
+					type: inDelimiterRow ? "tableDelimiter" : inHead ? "tableHeader" : "tableData",
+					start: events[cellStart][1].start,
+					end: events[index][1].end
+				};
+				events.splice(index + (token.type === "tableCellDivider" ? 1 : 0), 0, [
+					"exit",
+					cell,
+					context
+				]);
+				events.splice(cellStart, 0, [
+					"enter",
+					cell,
+					context
+				]);
+				index += 2;
+				length = events.length;
+				cellStart = index + 1;
+			}
+			if (token.type === "tableRow") {
+				inRow = events[index][0] === "enter";
+				if (inRow) cellStart = index + 1;
+			}
+			if (token.type === "tableDelimiterRow") {
+				inDelimiterRow = events[index][0] === "enter";
+				if (inDelimiterRow) cellStart = index + 1;
+			}
+			if (token.type === "tableHead") inHead = events[index][0] === "enter";
+		}
+		return events;
+	}
+	function tokenizeTable(effects, ok, nok) {
+		var align = [];
+		var tableHeaderCount = 0;
+		var seenDelimiter;
+		var hasDash;
+		return start;
+		function start(code) {
+			/* istanbul ignore if - used to be passed in beta micromark versions. */
+			if (code === null || code === -5 || code === -4 || code === -3) return nok(code);
+			effects.enter("table")._align = align;
+			effects.enter("tableHead");
+			effects.enter("tableRow");
+			if (code === 124) return cellDividerHead(code);
+			tableHeaderCount++;
+			effects.enter("temporaryTableCellContent");
+			return inCellContentHead(code);
+		}
+		function cellDividerHead(code) {
+			effects.enter("tableCellDivider");
+			effects.consume(code);
+			effects.exit("tableCellDivider");
+			seenDelimiter = true;
+			return cellBreakHead;
+		}
+		function cellBreakHead(code) {
+			if (code === null || code === -5 || code === -4 || code === -3) return atRowEndHead(code);
+			if (code === -2 || code === -1 || code === 32) {
+				effects.enter("whitespace");
+				effects.consume(code);
+				return inWhitespaceHead;
+			}
+			if (seenDelimiter) {
+				seenDelimiter = void 0;
+				tableHeaderCount++;
+			}
+			if (code === 124) return cellDividerHead(code);
+			effects.enter("temporaryTableCellContent");
+			return inCellContentHead(code);
+		}
+		function inWhitespaceHead(code) {
+			if (code === -2 || code === -1 || code === 32) {
+				effects.consume(code);
+				return inWhitespaceHead;
+			}
+			effects.exit("whitespace");
+			return cellBreakHead(code);
+		}
+		function inCellContentHead(code) {
+			if (code === null || code < 0 || code === 32 || code === 124) {
+				effects.exit("temporaryTableCellContent");
+				return cellBreakHead(code);
+			}
+			effects.consume(code);
+			return code === 92 ? inCellContentEscapeHead : inCellContentHead;
+		}
+		function inCellContentEscapeHead(code) {
+			if (code === 92 || code === 124) {
+				effects.consume(code);
+				return inCellContentHead;
+			}
+			return inCellContentHead(code);
+		}
+		function atRowEndHead(code) {
+			if (code === null) return nok(code);
+			effects.exit("tableRow");
+			effects.exit("tableHead");
+			effects.enter("lineEnding");
+			effects.consume(code);
+			effects.exit("lineEnding");
+			return effects.check(setextUnderlineMini, nok, createSpace(effects, rowStartDelimiter, "linePrefix", 4));
+		}
+		function rowStartDelimiter(code) {
+			if (code === null || code < 0 || code === 32) return nok(code);
+			effects.enter("tableDelimiterRow");
+			return atDelimiterRowBreak(code);
+		}
+		function atDelimiterRowBreak(code) {
+			if (code === null || code === -5 || code === -4 || code === -3) return rowEndDelimiter(code);
+			if (code === -2 || code === -1 || code === 32) {
+				effects.enter("whitespace");
+				effects.consume(code);
+				return inWhitespaceDelimiter;
+			}
+			if (code === 45) {
+				effects.enter("tableDelimiterFiller");
+				effects.consume(code);
+				hasDash = true;
+				align.push(null);
+				return inFillerDelimiter;
+			}
+			if (code === 58) {
+				effects.enter("tableDelimiterAlignment");
+				effects.consume(code);
+				effects.exit("tableDelimiterAlignment");
+				align.push("left");
+				return afterLeftAlignment;
+			}
+			if (code === 124) {
+				effects.enter("tableCellDivider");
+				effects.consume(code);
+				effects.exit("tableCellDivider");
+				return atDelimiterRowBreak;
+			}
+			return nok(code);
+		}
+		function inWhitespaceDelimiter(code) {
+			if (code === -2 || code === -1 || code === 32) {
+				effects.consume(code);
+				return inWhitespaceDelimiter;
+			}
+			effects.exit("whitespace");
+			return atDelimiterRowBreak(code);
+		}
+		function inFillerDelimiter(code) {
+			if (code === 45) {
+				effects.consume(code);
+				return inFillerDelimiter;
+			}
+			effects.exit("tableDelimiterFiller");
+			if (code === 58) {
+				effects.enter("tableDelimiterAlignment");
+				effects.consume(code);
+				effects.exit("tableDelimiterAlignment");
+				align[align.length - 1] = align[align.length - 1] === "left" ? "center" : "right";
+				return afterRightAlignment;
+			}
+			return atDelimiterRowBreak(code);
+		}
+		function afterLeftAlignment(code) {
+			if (code === 45) {
+				effects.enter("tableDelimiterFiller");
+				effects.consume(code);
+				hasDash = true;
+				return inFillerDelimiter;
+			}
+			return nok(code);
+		}
+		function afterRightAlignment(code) {
+			if (code === null || code === -5 || code === -4 || code === -3) return rowEndDelimiter(code);
+			if (code === -2 || code === -1 || code === 32) {
+				effects.enter("whitespace");
+				effects.consume(code);
+				return inWhitespaceDelimiter;
+			}
+			if (code === 124) {
+				effects.enter("tableCellDivider");
+				effects.consume(code);
+				effects.exit("tableCellDivider");
+				return atDelimiterRowBreak;
+			}
+			return nok(code);
+		}
+		function rowEndDelimiter(code) {
+			effects.exit("tableDelimiterRow");
+			if (!hasDash || tableHeaderCount !== align.length) return nok(code);
+			if (code === null) return tableClose(code);
+			return effects.check(nextPrefixedOrBlank, tableClose, tableContinue)(code);
+		}
+		function tableClose(code) {
+			effects.exit("table");
+			return ok(code);
+		}
+		function tableContinue(code) {
+			effects.enter("lineEnding");
+			effects.consume(code);
+			effects.exit("lineEnding");
+			return createSpace(effects, bodyStart, "linePrefix", 4);
+		}
+		function bodyStart(code) {
+			effects.enter("tableBody");
+			return rowStartBody(code);
+		}
+		function rowStartBody(code) {
+			effects.enter("tableRow");
+			if (code === 124) return cellDividerBody(code);
+			effects.enter("temporaryTableCellContent");
+			return inCellContentBody(code);
+		}
+		function cellDividerBody(code) {
+			effects.enter("tableCellDivider");
+			effects.consume(code);
+			effects.exit("tableCellDivider");
+			return cellBreakBody;
+		}
+		function cellBreakBody(code) {
+			if (code === null || code === -5 || code === -4 || code === -3) return atRowEndBody(code);
+			if (code === -2 || code === -1 || code === 32) {
+				effects.enter("whitespace");
+				effects.consume(code);
+				return inWhitespaceBody;
+			}
+			if (code === 124) return cellDividerBody(code);
+			effects.enter("temporaryTableCellContent");
+			return inCellContentBody(code);
+		}
+		function inWhitespaceBody(code) {
+			if (code === -2 || code === -1 || code === 32) {
+				effects.consume(code);
+				return inWhitespaceBody;
+			}
+			effects.exit("whitespace");
+			return cellBreakBody(code);
+		}
+		function inCellContentBody(code) {
+			if (code === null || code < 0 || code === 32 || code === 124) {
+				effects.exit("temporaryTableCellContent");
+				return cellBreakBody(code);
+			}
+			effects.consume(code);
+			return code === 92 ? inCellContentEscapeBody : inCellContentBody;
+		}
+		function inCellContentEscapeBody(code) {
+			if (code === 92 || code === 124) {
+				effects.consume(code);
+				return inCellContentBody;
+			}
+			return inCellContentBody(code);
+		}
+		function atRowEndBody(code) {
+			effects.exit("tableRow");
+			if (code === null) return tableBodyClose(code);
+			return effects.check(nextPrefixedOrBlank, tableBodyClose, tableBodyContinue)(code);
+		}
+		function tableBodyClose(code) {
+			effects.exit("tableBody");
+			return tableClose(code);
+		}
+		function tableBodyContinue(code) {
+			effects.enter("lineEnding");
+			effects.consume(code);
+			effects.exit("lineEnding");
+			return createSpace(effects, rowStartBody, "linePrefix", 4);
+		}
+	}
+	function tokenizeSetextUnderlineMini(effects, ok, nok) {
+		return start;
+		function start(code) {
+			if (code !== 45) return nok(code);
+			effects.enter("setextUnderline");
+			return sequence(code);
+		}
+		function sequence(code) {
+			if (code === 45) {
+				effects.consume(code);
+				return sequence;
+			}
+			return whitespace(code);
+		}
+		function whitespace(code) {
+			if (code === -2 || code === -1 || code === 32) {
+				effects.consume(code);
+				return whitespace;
+			}
+			if (code === null || code === -5 || code === -4 || code === -3) return ok(code);
+			return nok(code);
+		}
+	}
+	function tokenizeNextPrefixedOrBlank(effects, ok, nok) {
+		var size = 0;
+		return start;
+		function start(code) {
+			effects.enter("check");
+			effects.consume(code);
+			return whitespace;
+		}
+		function whitespace(code) {
+			if (code === -1 || code === 32) {
+				effects.consume(code);
+				size++;
+				return size === 4 ? ok : whitespace;
+			}
+			if (code === null || code < 0) return ok(code);
+			return nok(code);
+		}
+	}
+}));
+//#endregion
+//#region node_modules/micromark-extension-gfm-table/index.js
+var require_micromark_extension_gfm_table = /* @__PURE__ */ __commonJSMin(((exports, module) => {
+	module.exports = require_syntax$2();
+}));
+//#endregion
+//#region node_modules/micromark/dist/util/size-chunks.js
+var require_size_chunks = /* @__PURE__ */ __commonJSMin(((exports, module) => {
+	function sizeChunks(chunks) {
+		var index = -1;
+		var size = 0;
+		while (++index < chunks.length) size += typeof chunks[index] === "string" ? chunks[index].length : 1;
+		return size;
+	}
+	module.exports = sizeChunks;
+}));
+//#endregion
+//#region node_modules/micromark/dist/util/prefix-size.js
+var require_prefix_size = /* @__PURE__ */ __commonJSMin(((exports, module) => {
+	var sizeChunks = require_size_chunks();
+	function prefixSize(events, type) {
+		var tail = events[events.length - 1];
+		if (!tail || tail[1].type !== type) return 0;
+		return sizeChunks(tail[2].sliceStream(tail[1]));
+	}
+	module.exports = prefixSize;
+}));
+//#endregion
+//#region node_modules/micromark-extension-gfm-task-list-item/syntax.js
+var require_syntax$1 = /* @__PURE__ */ __commonJSMin(((exports) => {
+	var markdownLineEndingOrSpace = require_markdown_line_ending_or_space();
+	var spaceFactory = require_factory_space();
+	var prefixSize = require_prefix_size();
+	var tasklistCheck = { tokenize: tokenizeTasklistCheck };
+	exports.text = { 91: tasklistCheck };
+	function tokenizeTasklistCheck(effects, ok, nok) {
+		var self = this;
+		return open;
+		function open(code) {
+			if (code !== 91 || self.previous !== null || !self._gfmTasklistFirstContentOfListItem) return nok(code);
+			effects.enter("taskListCheck");
+			effects.enter("taskListCheckMarker");
+			effects.consume(code);
+			effects.exit("taskListCheckMarker");
+			return inside;
+		}
+		function inside(code) {
+			if (code === -2 || code === 32) {
+				effects.enter("taskListCheckValueUnchecked");
+				effects.consume(code);
+				effects.exit("taskListCheckValueUnchecked");
+				return close;
+			}
+			if (code === 88 || code === 120) {
+				effects.enter("taskListCheckValueChecked");
+				effects.consume(code);
+				effects.exit("taskListCheckValueChecked");
+				return close;
+			}
+			return nok(code);
+		}
+		function close(code) {
+			if (code === 93) {
+				effects.enter("taskListCheckMarker");
+				effects.consume(code);
+				effects.exit("taskListCheckMarker");
+				effects.exit("taskListCheck");
+				return effects.check({ tokenize: spaceThenNonSpace }, ok, nok);
+			}
+			return nok(code);
+		}
+	}
+	function spaceThenNonSpace(effects, ok, nok) {
+		var self = this;
+		return spaceFactory(effects, after, "whitespace");
+		function after(code) {
+			return prefixSize(self.events, "whitespace") && code !== null && !markdownLineEndingOrSpace(code) ? ok(code) : nok(code);
+		}
+	}
+}));
+//#endregion
+//#region node_modules/micromark-extension-gfm-task-list-item/index.js
+var require_micromark_extension_gfm_task_list_item = /* @__PURE__ */ __commonJSMin(((exports, module) => {
+	module.exports = require_syntax$1();
+}));
+//#endregion
+//#region node_modules/micromark-extension-gfm/syntax.js
+var require_syntax = /* @__PURE__ */ __commonJSMin(((exports, module) => {
+	var combine = require_combine_extensions();
+	var autolink = require_micromark_extension_gfm_autolink_literal();
+	var strikethrough = require_micromark_extension_gfm_strikethrough();
+	var table = require_micromark_extension_gfm_table();
+	var tasklist = require_micromark_extension_gfm_task_list_item();
+	module.exports = create;
+	function create(options) {
+		return combine([
+			autolink,
+			strikethrough(options),
+			table,
+			tasklist
+		]);
+	}
+}));
+//#endregion
+//#region node_modules/micromark-extension-gfm/index.js
+var require_micromark_extension_gfm = /* @__PURE__ */ __commonJSMin(((exports, module) => {
+	module.exports = require_syntax();
+}));
+//#endregion
+//#region node_modules/ccount/index.js
+var require_ccount = /* @__PURE__ */ __commonJSMin(((exports, module) => {
+	module.exports = ccount;
+	function ccount(source, character) {
+		var value = String(source);
+		var count = 0;
+		var index;
+		if (typeof character !== "string") throw new Error("Expected character");
+		index = value.indexOf(character);
+		while (index !== -1) {
+			count++;
+			index = value.indexOf(character, index + character.length);
+		}
+		return count;
+	}
+}));
+//#endregion
+//#region node_modules/unist-util-is/convert.js
+var require_convert$1 = /* @__PURE__ */ __commonJSMin(((exports, module) => {
+	module.exports = convert;
+	function convert(test) {
+		if (test == null) return ok;
+		if (typeof test === "string") return typeFactory(test);
+		if (typeof test === "object") return "length" in test ? anyFactory(test) : allFactory(test);
+		if (typeof test === "function") return test;
+		throw new Error("Expected function, string, or object as test");
+	}
+	function allFactory(test) {
+		return all;
+		function all(node) {
+			var key;
+			for (key in test) if (node[key] !== test[key]) return false;
+			return true;
+		}
+	}
+	function anyFactory(tests) {
+		var checks = [];
+		var index = -1;
+		while (++index < tests.length) checks[index] = convert(tests[index]);
+		return any;
+		function any() {
+			var index = -1;
+			while (++index < checks.length) if (checks[index].apply(this, arguments)) return true;
+			return false;
+		}
+	}
+	function typeFactory(test) {
+		return type;
+		function type(node) {
+			return Boolean(node && node.type === test);
+		}
+	}
+	function ok() {
+		return true;
+	}
+}));
+//#endregion
+//#region node_modules/unist-util-visit-parents/color.js
+var require_color = /* @__PURE__ */ __commonJSMin(((exports, module) => {
+	module.exports = color;
+	function color(d) {
+		return "\x1B[33m" + d + "\x1B[39m";
+	}
+}));
+//#endregion
+//#region node_modules/unist-util-visit-parents/index.js
+var require_unist_util_visit_parents = /* @__PURE__ */ __commonJSMin(((exports, module) => {
+	module.exports = visitParents;
+	var convert = require_convert$1();
+	var color = require_color();
+	var CONTINUE = true;
+	var SKIP = "skip";
+	var EXIT = false;
+	visitParents.CONTINUE = CONTINUE;
+	visitParents.SKIP = SKIP;
+	visitParents.EXIT = EXIT;
+	function visitParents(tree, test, visitor, reverse) {
+		var step;
+		var is;
+		if (typeof test === "function" && typeof visitor !== "function") {
+			reverse = visitor;
+			visitor = test;
+			test = null;
+		}
+		is = convert(test);
+		step = reverse ? -1 : 1;
+		factory(tree, null, [])();
+		function factory(node, index, parents) {
+			var value = typeof node === "object" && node !== null ? node : {};
+			var name;
+			if (typeof value.type === "string") {
+				name = typeof value.tagName === "string" ? value.tagName : typeof value.name === "string" ? value.name : void 0;
+				visit.displayName = "node (" + color(value.type + (name ? "<" + name + ">" : "")) + ")";
+			}
+			return visit;
+			function visit() {
+				var grandparents = parents.concat(node);
+				var result = [];
+				var subresult;
+				var offset;
+				if (!test || is(node, index, parents[parents.length - 1] || null)) {
+					result = toResult(visitor(node, parents));
+					if (result[0] === EXIT) return result;
+				}
+				if (node.children && result[0] !== SKIP) {
+					offset = (reverse ? node.children.length : -1) + step;
+					while (offset > -1 && offset < node.children.length) {
+						subresult = factory(node.children[offset], offset, grandparents)();
+						if (subresult[0] === EXIT) return subresult;
+						offset = typeof subresult[1] === "number" ? subresult[1] : offset + step;
+					}
+				}
+				return result;
+			}
+		}
+	}
+	function toResult(value) {
+		if (value !== null && typeof value === "object" && "length" in value) return value;
+		if (typeof value === "number") return [CONTINUE, value];
+		return [value];
+	}
+}));
+//#endregion
+//#region node_modules/escape-string-regexp/index.js
+var require_escape_string_regexp = /* @__PURE__ */ __commonJSMin(((exports, module) => {
+	module.exports = (string) => {
+		if (typeof string !== "string") throw new TypeError("Expected a string");
+		return string.replace(/[|\\{}()[\]^$+*?.]/g, "\\$&").replace(/-/g, "\\x2d");
+	};
+}));
+//#endregion
+//#region node_modules/mdast-util-find-and-replace/index.js
+var require_mdast_util_find_and_replace = /* @__PURE__ */ __commonJSMin(((exports, module) => {
+	module.exports = findAndReplace;
+	var visit = require_unist_util_visit_parents();
+	var convert = require_convert$1();
+	var escape = require_escape_string_regexp();
+	var splice = [].splice;
+	function findAndReplace(tree, find, replace, options) {
+		var settings;
+		var schema;
+		if (typeof find === "string" || find && typeof find.exec === "function") schema = [[find, replace]];
+		else {
+			schema = find;
+			options = replace;
+		}
+		settings = options || {};
+		search(tree, settings, handlerFactory(toPairs(schema)));
+		return tree;
+		function handlerFactory(pairs) {
+			var pair = pairs[0];
+			return handler;
+			function handler(node, parent) {
+				var find = pair[0];
+				var replace = pair[1];
+				var nodes = [];
+				var start = 0;
+				var index = parent.children.indexOf(node);
+				var position;
+				var match;
+				var subhandler;
+				var value;
+				find.lastIndex = 0;
+				match = find.exec(node.value);
+				while (match) {
+					position = match.index;
+					value = replace.apply(null, [].concat(match, {
+						index: match.index,
+						input: match.input
+					}));
+					if (value !== false) {
+						if (start !== position) nodes.push({
+							type: "text",
+							value: node.value.slice(start, position)
+						});
+						if (typeof value === "string" && value.length > 0) value = {
+							type: "text",
+							value
+						};
+						if (value) nodes = [].concat(nodes, value);
+						start = position + match[0].length;
+					}
+					if (!find.global) break;
+					match = find.exec(node.value);
+				}
+				if (position === void 0) {
+					nodes = [node];
+					index--;
+				} else {
+					if (start < node.value.length) nodes.push({
+						type: "text",
+						value: node.value.slice(start)
+					});
+					nodes.unshift(index, 1);
+					splice.apply(parent.children, nodes);
+				}
+				if (pairs.length > 1) {
+					subhandler = handlerFactory(pairs.slice(1));
+					position = -1;
+					while (++position < nodes.length) {
+						node = nodes[position];
+						if (node.type === "text") subhandler(node, parent);
+						else search(node, settings, subhandler);
+					}
+				}
+				return index + nodes.length + 1;
+			}
+		}
+	}
+	function search(tree, settings, handler) {
+		var ignored = convert(settings.ignore || []);
+		var result = [];
+		visit(tree, "text", visitor);
+		return result;
+		function visitor(node, parents) {
+			var index = -1;
+			var parent;
+			var grandparent;
+			while (++index < parents.length) {
+				parent = parents[index];
+				if (ignored(parent, grandparent ? grandparent.children.indexOf(parent) : void 0, grandparent)) return;
+				grandparent = parent;
+			}
+			return handler(node, grandparent);
+		}
+	}
+	function toPairs(schema) {
+		var result = [];
+		var key;
+		var index;
+		if (typeof schema !== "object") throw new Error("Expected array or object as schema");
+		if ("length" in schema) {
+			index = -1;
+			while (++index < schema.length) result.push([toExpression(schema[index][0]), toFunction(schema[index][1])]);
+		} else for (key in schema) result.push([toExpression(key), toFunction(schema[key])]);
+		return result;
+	}
+	function toExpression(find) {
+		return typeof find === "string" ? new RegExp(escape(find), "g") : find;
+	}
+	function toFunction(replace) {
+		return typeof replace === "function" ? replace : returner;
+		function returner() {
+			return replace;
+		}
+	}
+}));
+//#endregion
+//#region node_modules/mdast-util-gfm-autolink-literal/from-markdown.js
+var require_from_markdown$4 = /* @__PURE__ */ __commonJSMin(((exports) => {
+	var ccount = require_ccount();
+	var findAndReplace = require_mdast_util_find_and_replace();
+	var unicodePunctuation = require_unicode_punctuation();
+	var unicodeWhitespace = require_unicode_whitespace();
+	exports.transforms = [transformGfmAutolinkLiterals];
+	exports.enter = {
+		literalAutolink: enterLiteralAutolink,
+		literalAutolinkEmail: enterLiteralAutolinkValue,
+		literalAutolinkHttp: enterLiteralAutolinkValue,
+		literalAutolinkWww: enterLiteralAutolinkValue
+	};
+	exports.exit = {
+		literalAutolink: exitLiteralAutolink,
+		literalAutolinkEmail: exitLiteralAutolinkEmail,
+		literalAutolinkHttp: exitLiteralAutolinkHttp,
+		literalAutolinkWww: exitLiteralAutolinkWww
+	};
+	function enterLiteralAutolink(token) {
+		this.enter({
+			type: "link",
+			title: null,
+			url: "",
+			children: []
+		}, token);
+	}
+	function enterLiteralAutolinkValue(token) {
+		this.config.enter.autolinkProtocol.call(this, token);
+	}
+	function exitLiteralAutolinkHttp(token) {
+		this.config.exit.autolinkProtocol.call(this, token);
+	}
+	function exitLiteralAutolinkWww(token) {
+		this.config.exit.data.call(this, token);
+		this.stack[this.stack.length - 1].url = "http://" + this.sliceSerialize(token);
+	}
+	function exitLiteralAutolinkEmail(token) {
+		this.config.exit.autolinkEmail.call(this, token);
+	}
+	function exitLiteralAutolink(token) {
+		this.exit(token);
+	}
+	function transformGfmAutolinkLiterals(tree) {
+		findAndReplace(tree, [[/(https?:\/\/|www(?=\.))([-.\w]+)([^ \t\r\n]*)/i, findUrl], [/([-.\w+]+)@([-\w]+(?:\.[-\w]+)+)/, findEmail]], { ignore: ["link", "linkReference"] });
+	}
+	function findUrl($0, protocol, domain, path, match) {
+		var prefix = "";
+		var parts;
+		var result;
+		if (!previous(match)) return false;
+		if (/^w/i.test(protocol)) {
+			domain = protocol + domain;
+			protocol = "";
+			prefix = "http://";
+		}
+		if (!isCorrectDomain(domain)) return false;
+		parts = splitUrl(domain + path);
+		if (!parts[0]) return false;
+		result = {
+			type: "link",
+			title: null,
+			url: prefix + protocol + parts[0],
+			children: [{
+				type: "text",
+				value: protocol + parts[0]
+			}]
+		};
+		if (parts[1]) result = [result, {
+			type: "text",
+			value: parts[1]
+		}];
+		return result;
+	}
+	function findEmail($0, atext, label, match) {
+		if (!previous(match, true) || /[_-]$/.test(label)) return false;
+		return {
+			type: "link",
+			title: null,
+			url: "mailto:" + atext + "@" + label,
+			children: [{
+				type: "text",
+				value: atext + "@" + label
+			}]
+		};
+	}
+	function isCorrectDomain(domain) {
+		var parts = domain.split(".");
+		if (parts.length < 2 || parts[parts.length - 1] && (/_/.test(parts[parts.length - 1]) || !/[a-zA-Z\d]/.test(parts[parts.length - 1])) || parts[parts.length - 2] && (/_/.test(parts[parts.length - 2]) || !/[a-zA-Z\d]/.test(parts[parts.length - 2]))) return false;
+		return true;
+	}
+	function splitUrl(url) {
+		var trail = /[!"&'),.:;<>?\]}]+$/.exec(url);
+		var closingParenIndex;
+		var openingParens;
+		var closingParens;
+		if (trail) {
+			url = url.slice(0, trail.index);
+			trail = trail[0];
+			closingParenIndex = trail.indexOf(")");
+			openingParens = ccount(url, "(");
+			closingParens = ccount(url, ")");
+			while (closingParenIndex !== -1 && openingParens > closingParens) {
+				url += trail.slice(0, closingParenIndex + 1);
+				trail = trail.slice(closingParenIndex + 1);
+				closingParenIndex = trail.indexOf(")");
+				closingParens++;
+			}
+		}
+		return [url, trail];
+	}
+	function previous(match, email) {
+		var code = match.input.charCodeAt(match.index - 1);
+		return (code !== code || unicodeWhitespace(code) || unicodePunctuation(code)) && (!email || code !== 47);
+	}
+}));
+//#endregion
+//#region node_modules/mdast-util-gfm-strikethrough/from-markdown.js
+var require_from_markdown$3 = /* @__PURE__ */ __commonJSMin(((exports) => {
+	exports.canContainEols = ["delete"];
+	exports.enter = { strikethrough: enterStrikethrough };
+	exports.exit = { strikethrough: exitStrikethrough };
+	function enterStrikethrough(token) {
+		this.enter({
+			type: "delete",
+			children: []
+		}, token);
+	}
+	function exitStrikethrough(token) {
+		this.exit(token);
+	}
+}));
+//#endregion
+//#region node_modules/mdast-util-gfm-table/from-markdown.js
+var require_from_markdown$2 = /* @__PURE__ */ __commonJSMin(((exports) => {
+	exports.enter = {
+		table: enterTable,
+		tableData: enterCell,
+		tableHeader: enterCell,
+		tableRow: enterRow
+	};
+	exports.exit = {
+		codeText: exitCodeText,
+		table: exitTable,
+		tableData: exit,
+		tableHeader: exit,
+		tableRow: exit
+	};
+	function enterTable(token) {
+		this.enter({
+			type: "table",
+			align: token._align,
+			children: []
+		}, token);
+		this.setData("inTable", true);
+	}
+	function exitTable(token) {
+		this.exit(token);
+		this.setData("inTable");
+	}
+	function enterRow(token) {
+		this.enter({
+			type: "tableRow",
+			children: []
+		}, token);
+	}
+	function exit(token) {
+		this.exit(token);
+	}
+	function enterCell(token) {
+		this.enter({
+			type: "tableCell",
+			children: []
+		}, token);
+	}
+	function exitCodeText(token) {
+		var value = this.resume();
+		if (this.getData("inTable")) value = value.replace(/\\([\\|])/g, replace);
+		this.stack[this.stack.length - 1].value = value;
+		this.exit(token);
+	}
+	function replace($0, $1) {
+		return $1 === "|" ? $1 : $0;
+	}
+}));
+//#endregion
+//#region node_modules/mdast-util-gfm-task-list-item/from-markdown.js
+var require_from_markdown$1 = /* @__PURE__ */ __commonJSMin(((exports) => {
+	exports.exit = {
+		taskListCheckValueChecked: exitCheck,
+		taskListCheckValueUnchecked: exitCheck,
+		paragraph: exitParagraphWithTaskListItem
+	};
+	function exitCheck(token) {
+		this.stack[this.stack.length - 2].checked = token.type === "taskListCheckValueChecked";
+	}
+	function exitParagraphWithTaskListItem(token) {
+		var parent = this.stack[this.stack.length - 2];
+		var node = this.stack[this.stack.length - 1];
+		var siblings = parent.children;
+		var head = node.children[0];
+		var index = -1;
+		var firstParaghraph;
+		if (parent && parent.type === "listItem" && typeof parent.checked === "boolean" && head && head.type === "text") {
+			while (++index < siblings.length) if (siblings[index].type === "paragraph") {
+				firstParaghraph = siblings[index];
+				break;
+			}
+			if (firstParaghraph === node) {
+				head.value = head.value.slice(1);
+				if (head.value.length === 0) node.children.shift();
+				else {
+					head.position.start.column++;
+					head.position.start.offset++;
+					node.position.start = Object.assign({}, head.position.start);
+				}
+			}
+		}
+		this.exit(token);
+	}
+}));
+//#endregion
+//#region node_modules/mdast-util-gfm/from-markdown.js
+var require_from_markdown = /* @__PURE__ */ __commonJSMin(((exports, module) => {
+	var autolinkLiteral = require_from_markdown$4();
+	var strikethrough = require_from_markdown$3();
+	var table = require_from_markdown$2();
+	var taskListItem = require_from_markdown$1();
+	var own = {}.hasOwnProperty;
+	module.exports = configure([
+		autolinkLiteral,
+		strikethrough,
+		table,
+		taskListItem
+	]);
+	function configure(extensions) {
+		var config = {
+			transforms: [],
+			canContainEols: []
+		};
+		var length = extensions.length;
+		var index = -1;
+		while (++index < length) extension(config, extensions[index]);
+		return config;
+	}
+	function extension(config, extension) {
+		var key;
+		var left;
+		var right;
+		for (key in extension) {
+			left = own.call(config, key) ? config[key] : config[key] = {};
+			right = extension[key];
+			if (key === "canContainEols" || key === "transforms") config[key] = [].concat(left, right);
+			else Object.assign(left, right);
+		}
+	}
+}));
+//#endregion
+//#region node_modules/mdast-util-gfm-autolink-literal/to-markdown.js
+var require_to_markdown$4 = /* @__PURE__ */ __commonJSMin(((exports) => {
+	var inConstruct = "phrasing";
+	var notInConstruct = [
+		"autolink",
+		"link",
+		"image",
+		"label"
+	];
+	exports.unsafe = [
+		{
+			character: "@",
+			before: "[+\\-.\\w]",
+			after: "[\\-.\\w]",
+			inConstruct,
+			notInConstruct
+		},
+		{
+			character: ".",
+			before: "[Ww]",
+			after: "[\\-.\\w]",
+			inConstruct,
+			notInConstruct
+		},
+		{
+			character: ":",
+			before: "[ps]",
+			after: "\\/",
+			inConstruct,
+			notInConstruct
+		}
+	];
+}));
+//#endregion
+//#region node_modules/mdast-util-to-markdown/lib/util/container-phrasing.js
+var require_container_phrasing = /* @__PURE__ */ __commonJSMin(((exports, module) => {
+	module.exports = phrasing;
+	function phrasing(parent, context, safeOptions) {
+		var children = parent.children || [];
+		var results = [];
+		var index = -1;
+		var before = safeOptions.before;
+		var after;
+		var handle;
+		var child;
+		while (++index < children.length) {
+			child = children[index];
+			if (index + 1 < children.length) {
+				handle = context.handle.handlers[children[index + 1].type];
+				if (handle && handle.peek) handle = handle.peek;
+				after = handle ? handle(children[index + 1], parent, context, {
+					before: "",
+					after: ""
+				}).charAt(0) : "";
+			} else after = safeOptions.after;
+			if (results.length > 0 && (before === "\r" || before === "\n") && child.type === "html") {
+				results[results.length - 1] = results[results.length - 1].replace(/(\r?\n|\r)$/, " ");
+				before = " ";
+			}
+			results.push(context.handle(child, parent, context, {
+				before,
+				after
+			}));
+			before = results[results.length - 1].slice(-1);
+		}
+		return results.join("");
+	}
+}));
+//#endregion
+//#region node_modules/mdast-util-gfm-strikethrough/to-markdown.js
+var require_to_markdown$3 = /* @__PURE__ */ __commonJSMin(((exports) => {
+	var phrasing = require_container_phrasing();
+	exports.unsafe = [{
+		character: "~",
+		inConstruct: "phrasing"
+	}];
+	exports.handlers = { delete: handleDelete };
+	handleDelete.peek = peekDelete;
+	function handleDelete(node, _, context) {
+		var exit = context.enter("emphasis");
+		var value = phrasing(node, context, {
+			before: "~",
+			after: "~"
+		});
+		exit();
+		return "~~" + value + "~~";
+	}
+	function peekDelete() {
+		return "~";
+	}
+}));
+//#endregion
+//#region node_modules/mdast-util-to-markdown/lib/util/pattern-compile.js
+var require_pattern_compile = /* @__PURE__ */ __commonJSMin(((exports, module) => {
+	module.exports = patternCompile;
+	function patternCompile(pattern) {
+		var before;
+		var after;
+		if (!pattern._compiled) {
+			before = pattern.before ? "(?:" + pattern.before + ")" : "";
+			after = pattern.after ? "(?:" + pattern.after + ")" : "";
+			if (pattern.atBreak) before = "[\\r\\n][\\t ]*" + before;
+			pattern._compiled = new RegExp((before ? "(" + before + ")" : "") + (/[|\\{}()[\]^$+*?.-]/.test(pattern.character) ? "\\" : "") + pattern.character + (after || ""), "g");
+		}
+		return pattern._compiled;
+	}
+}));
+//#endregion
+//#region node_modules/mdast-util-to-markdown/lib/handle/inline-code.js
+var require_inline_code = /* @__PURE__ */ __commonJSMin(((exports, module) => {
+	module.exports = inlineCode;
+	inlineCode.peek = inlineCodePeek;
+	var patternCompile = require_pattern_compile();
+	function inlineCode(node, parent, context) {
+		var value = node.value || "";
+		var sequence = "`";
+		var index = -1;
+		var pattern;
+		var expression;
+		var match;
+		var position;
+		while (new RegExp("(^|[^`])" + sequence + "([^`]|$)").test(value)) sequence += "`";
+		if (/[^ \r\n]/.test(value) && (/[ \r\n`]/.test(value.charAt(0)) || /[ \r\n`]/.test(value.charAt(value.length - 1)))) value = " " + value + " ";
+		while (++index < context.unsafe.length) {
+			pattern = context.unsafe[index];
+			if (!pattern.atBreak) continue;
+			expression = patternCompile(pattern);
+			while (match = expression.exec(value)) {
+				position = match.index;
+				if (value.charCodeAt(position) === 10 && value.charCodeAt(position - 1) === 13) position--;
+				value = value.slice(0, position) + " " + value.slice(match.index + 1);
+			}
+		}
+		return sequence + value + sequence;
+	}
+	function inlineCodePeek() {
+		return "`";
+	}
+}));
+//#endregion
+//#region node_modules/repeat-string/index.js
+/*!
+* repeat-string <https://github.com/jonschlinkert/repeat-string>
+*
+* Copyright (c) 2014-2015, Jon Schlinkert.
+* Licensed under the MIT License.
+*/
+var require_repeat_string = /* @__PURE__ */ __commonJSMin(((exports, module) => {
+	/**
+	* Results cache
+	*/
+	var res = "";
+	var cache;
+	/**
+	* Expose `repeat`
+	*/
+	module.exports = repeat;
+	/**
+	* Repeat the given `string` the specified `number`
+	* of times.
+	*
+	* **Example:**
+	*
+	* ```js
+	* var repeat = require('repeat-string');
+	* repeat('A', 5);
+	* //=> AAAAA
+	* ```
+	*
+	* @param {String} `string` The string to repeat
+	* @param {Number} `number` The number of times to repeat the string
+	* @return {String} Repeated string
+	* @api public
+	*/
+	function repeat(str, num) {
+		if (typeof str !== "string") throw new TypeError("expected a string");
+		if (num === 1) return str;
+		if (num === 2) return str + str;
+		var max = str.length * num;
+		if (cache !== str || typeof cache === "undefined") {
+			cache = str;
+			res = "";
+		} else if (res.length >= max) return res.substr(0, max);
+		while (max > res.length && num > 1) {
+			if (num & 1) res += str;
+			num >>= 1;
+			str += str;
+		}
+		res += str;
+		res = res.substr(0, max);
+		return res;
+	}
+}));
+//#endregion
+//#region node_modules/markdown-table/index.js
+var require_markdown_table = /* @__PURE__ */ __commonJSMin(((exports, module) => {
+	var repeat = require_repeat_string();
+	module.exports = markdownTable;
+	var trailingWhitespace = / +$/;
+	var space = " ";
+	var lineFeed = "\n";
+	var dash = "-";
+	var colon = ":";
+	var verticalBar = "|";
+	var x = 0;
+	var C = 67;
+	var L = 76;
+	var R = 82;
+	var c = 99;
+	var l = 108;
+	var r = 114;
+	function markdownTable(table, options) {
+		var settings = options || {};
+		var padding = settings.padding !== false;
+		var start = settings.delimiterStart !== false;
+		var end = settings.delimiterEnd !== false;
+		var align = (settings.align || []).concat();
+		var alignDelimiters = settings.alignDelimiters !== false;
+		var alignments = [];
+		var stringLength = settings.stringLength || defaultStringLength;
+		var rowIndex = -1;
+		var rowLength = table.length;
+		var cellMatrix = [];
+		var sizeMatrix = [];
+		var row = [];
+		var sizes = [];
+		var longestCellByColumn = [];
+		var mostCellsPerRow = 0;
+		var cells;
+		var columnIndex;
+		var columnLength;
+		var largest;
+		var size;
+		var cell;
+		var lines;
+		var line;
+		var before;
+		var after;
+		var code;
+		while (++rowIndex < rowLength) {
+			cells = table[rowIndex];
+			columnIndex = -1;
+			columnLength = cells.length;
+			row = [];
+			sizes = [];
+			if (columnLength > mostCellsPerRow) mostCellsPerRow = columnLength;
+			while (++columnIndex < columnLength) {
+				cell = serialize(cells[columnIndex]);
+				if (alignDelimiters === true) {
+					size = stringLength(cell);
+					sizes[columnIndex] = size;
+					largest = longestCellByColumn[columnIndex];
+					if (largest === void 0 || size > largest) longestCellByColumn[columnIndex] = size;
+				}
+				row.push(cell);
+			}
+			cellMatrix[rowIndex] = row;
+			sizeMatrix[rowIndex] = sizes;
+		}
+		columnIndex = -1;
+		columnLength = mostCellsPerRow;
+		if (typeof align === "object" && "length" in align) while (++columnIndex < columnLength) alignments[columnIndex] = toAlignment(align[columnIndex]);
+		else {
+			code = toAlignment(align);
+			while (++columnIndex < columnLength) alignments[columnIndex] = code;
+		}
+		columnIndex = -1;
+		columnLength = mostCellsPerRow;
+		row = [];
+		sizes = [];
+		while (++columnIndex < columnLength) {
+			code = alignments[columnIndex];
+			before = "";
+			after = "";
+			if (code === l) before = colon;
+			else if (code === r) after = colon;
+			else if (code === c) {
+				before = colon;
+				after = colon;
+			}
+			size = alignDelimiters ? Math.max(1, longestCellByColumn[columnIndex] - before.length - after.length) : 1;
+			cell = before + repeat(dash, size) + after;
+			if (alignDelimiters === true) {
+				size = before.length + size + after.length;
+				if (size > longestCellByColumn[columnIndex]) longestCellByColumn[columnIndex] = size;
+				sizes[columnIndex] = size;
+			}
+			row[columnIndex] = cell;
+		}
+		cellMatrix.splice(1, 0, row);
+		sizeMatrix.splice(1, 0, sizes);
+		rowIndex = -1;
+		rowLength = cellMatrix.length;
+		lines = [];
+		while (++rowIndex < rowLength) {
+			row = cellMatrix[rowIndex];
+			sizes = sizeMatrix[rowIndex];
+			columnIndex = -1;
+			columnLength = mostCellsPerRow;
+			line = [];
+			while (++columnIndex < columnLength) {
+				cell = row[columnIndex] || "";
+				before = "";
+				after = "";
+				if (alignDelimiters === true) {
+					size = longestCellByColumn[columnIndex] - (sizes[columnIndex] || 0);
+					code = alignments[columnIndex];
+					if (code === r) before = repeat(space, size);
+					else if (code === c) if (size % 2 === 0) {
+						before = repeat(space, size / 2);
+						after = before;
+					} else {
+						before = repeat(space, size / 2 + .5);
+						after = repeat(space, size / 2 - .5);
+					}
+					else after = repeat(space, size);
+				}
+				if (start === true && columnIndex === 0) line.push(verticalBar);
+				if (padding === true && !(alignDelimiters === false && cell === "") && (start === true || columnIndex !== 0)) line.push(space);
+				if (alignDelimiters === true) line.push(before);
+				line.push(cell);
+				if (alignDelimiters === true) line.push(after);
+				if (padding === true) line.push(space);
+				if (end === true || columnIndex !== columnLength - 1) line.push(verticalBar);
+			}
+			line = line.join("");
+			if (end === false) line = line.replace(trailingWhitespace, "");
+			lines.push(line);
+		}
+		return lines.join(lineFeed);
+	}
+	function serialize(value) {
+		return value === null || value === void 0 ? "" : String(value);
+	}
+	function defaultStringLength(value) {
+		return value.length;
+	}
+	function toAlignment(value) {
+		var code = typeof value === "string" ? value.charCodeAt(0) : x;
+		return code === L || code === l ? l : code === R || code === r ? r : code === C || code === c ? c : x;
+	}
+}));
+//#endregion
+//#region node_modules/mdast-util-gfm-table/to-markdown.js
+var require_to_markdown$2 = /* @__PURE__ */ __commonJSMin(((exports, module) => {
+	var phrasing = require_container_phrasing();
+	var defaultInlineCode = require_inline_code();
+	var markdownTable = require_markdown_table();
+	module.exports = toMarkdown;
+	function toMarkdown(options) {
+		var settings = options || {};
+		var padding = settings.tableCellPadding;
+		var alignDelimiters = settings.tablePipeAlign;
+		var stringLength = settings.stringLength;
+		var around = padding ? " " : "|";
+		return {
+			unsafe: [
+				{
+					character: "\r",
+					inConstruct: "tableCell"
+				},
+				{
+					character: "\n",
+					inConstruct: "tableCell"
+				},
+				{
+					atBreak: true,
+					character: "|",
+					after: "[	 :-]"
+				},
+				{
+					character: "|",
+					inConstruct: "tableCell"
+				},
+				{
+					atBreak: true,
+					character: ":",
+					after: "-"
+				},
+				{
+					atBreak: true,
+					character: "-",
+					after: "[:|-]"
+				}
+			],
+			handlers: {
+				table: handleTable,
+				tableRow: handleTableRow,
+				tableCell: handleTableCell,
+				inlineCode: inlineCodeWithTable
+			}
+		};
+		function handleTable(node, _, context) {
+			return serializeData(handleTableAsData(node, context), node.align);
+		}
+		function handleTableRow(node, _, context) {
+			var value = serializeData([handleTableRowAsData(node, context)]);
+			return value.slice(0, value.indexOf("\n"));
+		}
+		function handleTableCell(node, _, context) {
+			var exit = context.enter("tableCell");
+			var value = phrasing(node, context, {
+				before: around,
+				after: around
+			});
+			exit();
+			return value;
+		}
+		function serializeData(matrix, align) {
+			return markdownTable(matrix, {
+				align,
+				alignDelimiters,
+				padding,
+				stringLength
+			});
+		}
+		function handleTableAsData(node, context) {
+			var children = node.children;
+			var index = -1;
+			var length = children.length;
+			var result = [];
+			var subexit = context.enter("table");
+			while (++index < length) result[index] = handleTableRowAsData(children[index], context);
+			subexit();
+			return result;
+		}
+		function handleTableRowAsData(node, context) {
+			var children = node.children;
+			var index = -1;
+			var length = children.length;
+			var result = [];
+			var subexit = context.enter("tableRow");
+			while (++index < length) result[index] = handleTableCell(children[index], node, context);
+			subexit();
+			return result;
+		}
+		function inlineCodeWithTable(node, parent, context) {
+			var value = defaultInlineCode(node, parent, context);
+			if (context.stack.indexOf("tableCell") !== -1) value = value.replace(/\|/g, "\\$&");
+			return value;
+		}
+	}
+}));
+//#endregion
+//#region node_modules/mdast-util-to-markdown/lib/util/check-bullet.js
+var require_check_bullet = /* @__PURE__ */ __commonJSMin(((exports, module) => {
+	module.exports = checkBullet;
+	function checkBullet(context) {
+		var marker = context.options.bullet || "*";
+		if (marker !== "*" && marker !== "+" && marker !== "-") throw new Error("Cannot serialize items with `" + marker + "` for `options.bullet`, expected `*`, `+`, or `-`");
+		return marker;
+	}
+}));
+//#endregion
+//#region node_modules/mdast-util-to-markdown/lib/util/check-list-item-indent.js
+var require_check_list_item_indent = /* @__PURE__ */ __commonJSMin(((exports, module) => {
+	module.exports = checkListItemIndent;
+	function checkListItemIndent(context) {
+		var style = context.options.listItemIndent || "tab";
+		if (style === 1 || style === "1") return "one";
+		if (style !== "tab" && style !== "one" && style !== "mixed") throw new Error("Cannot serialize items with `" + style + "` for `options.listItemIndent`, expected `tab`, `one`, or `mixed`");
+		return style;
+	}
+}));
+//#endregion
+//#region node_modules/mdast-util-to-markdown/lib/util/container-flow.js
+var require_container_flow = /* @__PURE__ */ __commonJSMin(((exports, module) => {
+	module.exports = flow;
+	var repeat = require_repeat_string();
+	function flow(parent, context) {
+		var children = parent.children || [];
+		var results = [];
+		var index = -1;
+		var child;
+		while (++index < children.length) {
+			child = children[index];
+			results.push(context.handle(child, parent, context, {
+				before: "\n",
+				after: "\n"
+			}));
+			if (index + 1 < children.length) results.push(between(child, children[index + 1]));
+		}
+		return results.join("");
+		function between(left, right) {
+			var index = -1;
+			var result;
+			while (++index < context.join.length) {
+				result = context.join[index](left, right, parent, context);
+				if (result === true || result === 1) break;
+				if (typeof result === "number") return repeat("\n", 1 + Number(result));
+				if (result === false) return "\n\n<!---->\n\n";
+			}
+			return "\n\n";
+		}
+	}
+}));
+//#endregion
+//#region node_modules/mdast-util-to-markdown/lib/util/indent-lines.js
+var require_indent_lines = /* @__PURE__ */ __commonJSMin(((exports, module) => {
+	module.exports = indentLines;
+	var eol = /\r?\n|\r/g;
+	function indentLines(value, map) {
+		var result = [];
+		var start = 0;
+		var line = 0;
+		var match;
+		while (match = eol.exec(value)) {
+			one(value.slice(start, match.index));
+			result.push(match[0]);
+			start = match.index + match[0].length;
+			line++;
+		}
+		one(value.slice(start));
+		return result.join("");
+		function one(value) {
+			result.push(map(value, line, !value));
+		}
+	}
+}));
+//#endregion
+//#region node_modules/mdast-util-to-markdown/lib/handle/list-item.js
+var require_list_item = /* @__PURE__ */ __commonJSMin(((exports, module) => {
+	module.exports = listItem;
+	var repeat = require_repeat_string();
+	var checkBullet = require_check_bullet();
+	var checkListItemIndent = require_check_list_item_indent();
+	var flow = require_container_flow();
+	var indentLines = require_indent_lines();
+	function listItem(node, parent, context) {
+		var bullet = checkBullet(context);
+		var listItemIndent = checkListItemIndent(context);
+		var size;
+		var value;
+		var exit;
+		if (parent && parent.ordered) bullet = (parent.start > -1 ? parent.start : 1) + (context.options.incrementListMarker === false ? 0 : parent.children.indexOf(node)) + ".";
+		size = bullet.length + 1;
+		if (listItemIndent === "tab" || listItemIndent === "mixed" && (parent && parent.spread || node.spread)) size = Math.ceil(size / 4) * 4;
+		exit = context.enter("listItem");
+		value = indentLines(flow(node, context), map);
+		exit();
+		return value;
+		function map(line, index, blank) {
+			if (index) return (blank ? "" : repeat(" ", size)) + line;
+			return (blank ? bullet : bullet + repeat(" ", size - bullet.length)) + line;
+		}
+	}
+}));
+//#endregion
+//#region node_modules/mdast-util-gfm-task-list-item/to-markdown.js
+var require_to_markdown$1 = /* @__PURE__ */ __commonJSMin(((exports) => {
+	var defaultListItem = require_list_item();
+	exports.unsafe = [{
+		atBreak: true,
+		character: "-",
+		after: "[:|-]"
+	}];
+	exports.handlers = { listItem: listItemWithTaskListItem };
+	function listItemWithTaskListItem(node, parent, context) {
+		var value = defaultListItem(node, parent, context);
+		var head = node.children[0];
+		if (typeof node.checked === "boolean" && head && head.type === "paragraph") value = value.replace(/^(?:[*+-]|\d+\.)([\r\n]| {1,3})/, check);
+		return value;
+		function check($0) {
+			return $0 + "[" + (node.checked ? "x" : " ") + "] ";
+		}
+	}
+}));
+//#endregion
+//#region node_modules/mdast-util-to-markdown/lib/configure.js
+var require_configure = /* @__PURE__ */ __commonJSMin(((exports, module) => {
+	module.exports = configure;
+	function configure(base, extension) {
+		var index = -1;
+		var key;
+		if (extension.extensions) while (++index < extension.extensions.length) configure(base, extension.extensions[index]);
+		for (key in extension) if (key === "extensions") {} else if (key === "unsafe" || key === "join") base[key] = base[key].concat(extension[key] || []);
+		else if (key === "handlers") base[key] = Object.assign(base[key], extension[key] || {});
+		else base.options[key] = extension[key];
+		return base;
+	}
+}));
+//#endregion
+//#region node_modules/mdast-util-gfm/to-markdown.js
+var require_to_markdown = /* @__PURE__ */ __commonJSMin(((exports, module) => {
+	var autolinkLiteral = require_to_markdown$4();
+	var strikethrough = require_to_markdown$3();
+	var table = require_to_markdown$2();
+	var taskListItem = require_to_markdown$1();
+	var configure = require_configure();
+	module.exports = toMarkdown;
+	function toMarkdown(options) {
+		var config = configure({
+			handlers: {},
+			join: [],
+			unsafe: [],
+			options: {}
+		}, { extensions: [
+			autolinkLiteral,
+			strikethrough,
+			table(options),
+			taskListItem
+		] });
+		return Object.assign(config.options, {
+			handlers: config.handlers,
+			join: config.join,
+			unsafe: config.unsafe
+		});
+	}
+}));
+//#endregion
+//#region node_modules/remark-gfm/index.js
+var require_remark_gfm = /* @__PURE__ */ __commonJSMin(((exports, module) => {
+	var syntax = require_micromark_extension_gfm();
+	var fromMarkdown = require_from_markdown();
+	var toMarkdown = require_to_markdown();
+	var warningIssued;
+	module.exports = gfm;
+	function gfm(options) {
+		var data = this.data();
+		/* istanbul ignore next - old remark. */
+		if (!warningIssued && (this.Parser && this.Parser.prototype && this.Parser.prototype.blockTokenizers || this.Compiler && this.Compiler.prototype && this.Compiler.prototype.visitors)) {
+			warningIssued = true;
+			console.warn("[remark-gfm] Warning: please upgrade to remark 13 to use this plugin");
+		}
+		add("micromarkExtensions", syntax(options));
+		add("fromMarkdownExtensions", fromMarkdown);
+		add("toMarkdownExtensions", toMarkdown(options));
+		function add(field, value) {
+			/* istanbul ignore if - other extensions. */
+			if (data[field]) data[field].push(value);
+			else data[field] = [value];
+		}
+	}
+}));
+//#endregion
+//#region node_modules/mdast-util-to-string/index.js
+var require_mdast_util_to_string = /* @__PURE__ */ __commonJSMin(((exports, module) => {
+	module.exports = toString;
+	function toString(node) {
+		return node && (node.value || node.alt || node.title || "children" in node && all(node.children) || "length" in node && all(node)) || "";
+	}
+	function all(values) {
+		var result = [];
+		var index = -1;
+		while (++index < values.length) result[index] = toString(values[index]);
+		return result.join("");
+	}
+}));
+//#endregion
+//#region node_modules/micromark/dist/util/normalize-identifier.js
+var require_normalize_identifier = /* @__PURE__ */ __commonJSMin(((exports, module) => {
+	function normalizeIdentifier(value) {
+		return value.replace(/[\t\n\r ]+/g, " ").replace(/^ | $/g, "").toLowerCase().toUpperCase();
+	}
+	module.exports = normalizeIdentifier;
+}));
+//#endregion
+//#region node_modules/micromark/dist/util/safe-from-int.js
+var require_safe_from_int = /* @__PURE__ */ __commonJSMin(((exports, module) => {
+	var fromCharCode = require_from_char_code();
+	function safeFromInt(value, base) {
+		var code = parseInt(value, base);
+		if (code < 9 || code === 11 || code > 13 && code < 32 || code > 126 && code < 160 || code > 55295 && code < 57344 || code > 64975 && code < 65008 || (code & 65535) === 65535 || (code & 65535) === 65534 || code > 1114111) return "�";
+		return fromCharCode(code);
+	}
+	module.exports = safeFromInt;
+}));
+//#endregion
+//#region node_modules/micromark/dist/initialize/content.js
+var require_content$1 = /* @__PURE__ */ __commonJSMin(((exports) => {
+	Object.defineProperty(exports, "__esModule", { value: true });
+	var markdownLineEnding = require_markdown_line_ending();
+	var factorySpace = require_factory_space();
+	var tokenize = initializeContent;
+	function initializeContent(effects) {
+		var contentStart = effects.attempt(this.parser.constructs.contentInitial, afterContentStartConstruct, paragraphInitial);
+		var previous;
+		return contentStart;
+		function afterContentStartConstruct(code) {
+			if (code === null) {
+				effects.consume(code);
+				return;
+			}
+			effects.enter("lineEnding");
+			effects.consume(code);
+			effects.exit("lineEnding");
+			return factorySpace(effects, contentStart, "linePrefix");
+		}
+		function paragraphInitial(code) {
+			effects.enter("paragraph");
+			return lineStart(code);
+		}
+		function lineStart(code) {
+			var token = effects.enter("chunkText", {
+				contentType: "text",
+				previous
+			});
+			if (previous) previous.next = token;
+			previous = token;
+			return data(code);
+		}
+		function data(code) {
+			if (code === null) {
+				effects.exit("chunkText");
+				effects.exit("paragraph");
+				effects.consume(code);
+				return;
+			}
+			if (markdownLineEnding(code)) {
+				effects.consume(code);
+				effects.exit("chunkText");
+				return lineStart;
+			}
+			effects.consume(code);
+			return data;
+		}
+	}
+	exports.tokenize = tokenize;
+}));
+//#endregion
+//#region node_modules/micromark/dist/tokenize/partial-blank-line.js
+var require_partial_blank_line = /* @__PURE__ */ __commonJSMin(((exports, module) => {
+	var markdownLineEnding = require_markdown_line_ending();
+	var factorySpace = require_factory_space();
+	var partialBlankLine = {
+		tokenize: tokenizePartialBlankLine,
+		partial: true
+	};
+	function tokenizePartialBlankLine(effects, ok, nok) {
+		return factorySpace(effects, afterWhitespace, "linePrefix");
+		function afterWhitespace(code) {
+			return code === null || markdownLineEnding(code) ? ok(code) : nok(code);
+		}
+	}
+	module.exports = partialBlankLine;
+}));
+//#endregion
+//#region node_modules/micromark/dist/initialize/document.js
+var require_document = /* @__PURE__ */ __commonJSMin(((exports) => {
+	Object.defineProperty(exports, "__esModule", { value: true });
+	var markdownLineEnding = require_markdown_line_ending();
+	var factorySpace = require_factory_space();
+	var partialBlankLine = require_partial_blank_line();
+	var tokenize = initializeDocument;
+	var containerConstruct = { tokenize: tokenizeContainer };
+	var lazyFlowConstruct = { tokenize: tokenizeLazyFlow };
+	function initializeDocument(effects) {
+		var self = this;
+		var stack = [];
+		var continued = 0;
+		var inspectConstruct = {
+			tokenize: tokenizeInspect,
+			partial: true
+		};
+		var inspectResult;
+		var childFlow;
+		var childToken;
+		return start;
+		function start(code) {
+			if (continued < stack.length) {
+				self.containerState = stack[continued][1];
+				return effects.attempt(stack[continued][0].continuation, documentContinue, documentContinued)(code);
+			}
+			return documentContinued(code);
+		}
+		function documentContinue(code) {
+			continued++;
+			return start(code);
+		}
+		function documentContinued(code) {
+			if (inspectResult && inspectResult.flowContinue) return flowStart(code);
+			self.interrupt = childFlow && childFlow.currentConstruct && childFlow.currentConstruct.interruptible;
+			self.containerState = {};
+			return effects.attempt(containerConstruct, containerContinue, flowStart)(code);
+		}
+		function containerContinue(code) {
+			stack.push([self.currentConstruct, self.containerState]);
+			self.containerState = void 0;
+			return documentContinued(code);
+		}
+		function flowStart(code) {
+			if (code === null) {
+				exitContainers(0, true);
+				effects.consume(code);
+				return;
+			}
+			childFlow = childFlow || self.parser.flow(self.now());
+			effects.enter("chunkFlow", {
+				contentType: "flow",
+				previous: childToken,
+				_tokenizer: childFlow
+			});
+			return flowContinue(code);
+		}
+		function flowContinue(code) {
+			if (code === null) {
+				continueFlow(effects.exit("chunkFlow"));
+				return flowStart(code);
+			}
+			if (markdownLineEnding(code)) {
+				effects.consume(code);
+				continueFlow(effects.exit("chunkFlow"));
+				return effects.check(inspectConstruct, documentAfterPeek);
+			}
+			effects.consume(code);
+			return flowContinue;
+		}
+		function documentAfterPeek(code) {
+			exitContainers(inspectResult.continued, inspectResult && inspectResult.flowEnd);
+			continued = 0;
+			return start(code);
+		}
+		function continueFlow(token) {
+			if (childToken) childToken.next = token;
+			childToken = token;
+			childFlow.lazy = inspectResult && inspectResult.lazy;
+			childFlow.defineSkip(token.start);
+			childFlow.write(self.sliceStream(token));
+		}
+		function exitContainers(size, end) {
+			var index = stack.length;
+			if (childFlow && end) {
+				childFlow.write([null]);
+				childToken = childFlow = void 0;
+			}
+			while (index-- > size) {
+				self.containerState = stack[index][1];
+				stack[index][0].exit.call(self, effects);
+			}
+			stack.length = size;
+		}
+		function tokenizeInspect(effects, ok) {
+			var subcontinued = 0;
+			inspectResult = {};
+			return inspectStart;
+			function inspectStart(code) {
+				if (subcontinued < stack.length) {
+					self.containerState = stack[subcontinued][1];
+					return effects.attempt(stack[subcontinued][0].continuation, inspectContinue, inspectLess)(code);
+				}
+				if (childFlow.currentConstruct && childFlow.currentConstruct.concrete) {
+					inspectResult.flowContinue = true;
+					return inspectDone(code);
+				}
+				self.interrupt = childFlow.currentConstruct && childFlow.currentConstruct.interruptible;
+				self.containerState = {};
+				return effects.attempt(containerConstruct, inspectFlowEnd, inspectDone)(code);
+			}
+			function inspectContinue(code) {
+				subcontinued++;
+				return self.containerState._closeFlow ? inspectFlowEnd(code) : inspectStart(code);
+			}
+			function inspectLess(code) {
+				if (childFlow.currentConstruct && childFlow.currentConstruct.lazy) {
+					self.containerState = {};
+					return effects.attempt(containerConstruct, inspectFlowEnd, effects.attempt(lazyFlowConstruct, inspectFlowEnd, effects.check(partialBlankLine, inspectFlowEnd, inspectLazy)))(code);
+				}
+				return inspectFlowEnd(code);
+			}
+			function inspectLazy(code) {
+				subcontinued = stack.length;
+				inspectResult.lazy = true;
+				inspectResult.flowContinue = true;
+				return inspectDone(code);
+			}
+			function inspectFlowEnd(code) {
+				inspectResult.flowEnd = true;
+				return inspectDone(code);
+			}
+			function inspectDone(code) {
+				inspectResult.continued = subcontinued;
+				self.interrupt = self.containerState = void 0;
+				return ok(code);
+			}
+		}
+	}
+	function tokenizeContainer(effects, ok, nok) {
+		return factorySpace(effects, effects.attempt(this.parser.constructs.document, ok, nok), "linePrefix", this.parser.constructs.disable.null.indexOf("codeIndented") > -1 ? void 0 : 4);
+	}
+	function tokenizeLazyFlow(effects, ok, nok) {
+		return factorySpace(effects, effects.lazy(this.parser.constructs.flow, ok, nok), "linePrefix", this.parser.constructs.disable.null.indexOf("codeIndented") > -1 ? void 0 : 4);
+	}
+	exports.tokenize = tokenize;
+}));
+//#endregion
+//#region node_modules/micromark/dist/util/subtokenize.js
+var require_subtokenize = /* @__PURE__ */ __commonJSMin(((exports, module) => {
+	var assign = require_assign();
+	var chunkedSplice = require_chunked_splice();
+	var shallow = require_shallow();
+	function subtokenize(events) {
+		var jumps = {};
+		var index = -1;
+		var event;
+		var lineIndex;
+		var otherIndex;
+		var otherEvent;
+		var parameters;
+		var subevents;
+		var more;
+		while (++index < events.length) {
+			while (index in jumps) index = jumps[index];
+			event = events[index];
+			if (index && event[1].type === "chunkFlow" && events[index - 1][1].type === "listItemPrefix") {
+				subevents = event[1]._tokenizer.events;
+				otherIndex = 0;
+				if (otherIndex < subevents.length && subevents[otherIndex][1].type === "lineEndingBlank") otherIndex += 2;
+				if (otherIndex < subevents.length && subevents[otherIndex][1].type === "content") while (++otherIndex < subevents.length) {
+					if (subevents[otherIndex][1].type === "content") break;
+					if (subevents[otherIndex][1].type === "chunkText") {
+						subevents[otherIndex][1].isInFirstContentOfListItem = true;
+						otherIndex++;
+					}
+				}
+			}
+			if (event[0] === "enter") {
+				if (event[1].contentType) {
+					assign(jumps, subcontent(events, index));
+					index = jumps[index];
+					more = true;
+				}
+			} else if (event[1]._container || event[1]._movePreviousLineEndings) {
+				otherIndex = index;
+				lineIndex = void 0;
+				while (otherIndex--) {
+					otherEvent = events[otherIndex];
+					if (otherEvent[1].type === "lineEnding" || otherEvent[1].type === "lineEndingBlank") {
+						if (otherEvent[0] === "enter") {
+							if (lineIndex) events[lineIndex][1].type = "lineEndingBlank";
+							otherEvent[1].type = "lineEnding";
+							lineIndex = otherIndex;
+						}
+					} else break;
+				}
+				if (lineIndex) {
+					event[1].end = shallow(events[lineIndex][1].start);
+					parameters = events.slice(lineIndex, index);
+					parameters.unshift(event);
+					chunkedSplice(events, lineIndex, index - lineIndex + 1, parameters);
+				}
+			}
+		}
+		return !more;
+	}
+	function subcontent(events, eventIndex) {
+		var token = events[eventIndex][1];
+		var context = events[eventIndex][2];
+		var startPosition = eventIndex - 1;
+		var startPositions = [];
+		var tokenizer = token._tokenizer || context.parser[token.contentType](token.start);
+		var childEvents = tokenizer.events;
+		var jumps = [];
+		var gaps = {};
+		var stream;
+		var previous;
+		var index;
+		var entered;
+		var end;
+		var adjust;
+		while (token) {
+			while (events[++startPosition][1] !== token);
+			startPositions.push(startPosition);
+			if (!token._tokenizer) {
+				stream = context.sliceStream(token);
+				if (!token.next) stream.push(null);
+				if (previous) tokenizer.defineSkip(token.start);
+				if (token.isInFirstContentOfListItem) tokenizer._gfmTasklistFirstContentOfListItem = true;
+				tokenizer.write(stream);
+				if (token.isInFirstContentOfListItem) tokenizer._gfmTasklistFirstContentOfListItem = void 0;
+			}
+			previous = token;
+			token = token.next;
+		}
+		token = previous;
+		index = childEvents.length;
+		while (index--) if (childEvents[index][0] === "enter") entered = true;
+		else if (entered && childEvents[index][1].type === childEvents[index - 1][1].type && childEvents[index][1].start.line !== childEvents[index][1].end.line) {
+			add(childEvents.slice(index + 1, end));
+			token._tokenizer = token.next = void 0;
+			token = token.previous;
+			end = index + 1;
+		}
+		tokenizer.events = token._tokenizer = token.next = void 0;
+		add(childEvents.slice(0, end));
+		index = -1;
+		adjust = 0;
+		while (++index < jumps.length) {
+			gaps[adjust + jumps[index][0]] = adjust + jumps[index][1];
+			adjust += jumps[index][1] - jumps[index][0] - 1;
+		}
+		return gaps;
+		function add(slice) {
+			var start = startPositions.pop();
+			jumps.unshift([start, start + slice.length - 1]);
+			chunkedSplice(events, start, 2, slice);
+		}
+	}
+	module.exports = subtokenize;
+}));
+//#endregion
+//#region node_modules/micromark/dist/tokenize/content.js
+var require_content = /* @__PURE__ */ __commonJSMin(((exports, module) => {
+	var markdownLineEnding = require_markdown_line_ending();
+	var prefixSize = require_prefix_size();
+	var subtokenize = require_subtokenize();
+	var factorySpace = require_factory_space();
+	var content = {
+		tokenize: tokenizeContent,
+		resolve: resolveContent,
+		interruptible: true,
+		lazy: true
+	};
+	var continuationConstruct = {
+		tokenize: tokenizeContinuation,
+		partial: true
+	};
+	function resolveContent(events) {
+		subtokenize(events);
+		return events;
+	}
+	function tokenizeContent(effects, ok) {
+		var previous;
+		return start;
+		function start(code) {
+			effects.enter("content");
+			previous = effects.enter("chunkContent", { contentType: "content" });
+			return data(code);
+		}
+		function data(code) {
+			if (code === null) return contentEnd(code);
+			if (markdownLineEnding(code)) return effects.check(continuationConstruct, contentContinue, contentEnd)(code);
+			effects.consume(code);
+			return data;
+		}
+		function contentEnd(code) {
+			effects.exit("chunkContent");
+			effects.exit("content");
+			return ok(code);
+		}
+		function contentContinue(code) {
+			effects.consume(code);
+			effects.exit("chunkContent");
+			previous = previous.next = effects.enter("chunkContent", {
+				contentType: "content",
+				previous
+			});
+			return data;
+		}
+	}
+	function tokenizeContinuation(effects, ok, nok) {
+		var self = this;
+		return startLookahead;
+		function startLookahead(code) {
+			effects.enter("lineEnding");
+			effects.consume(code);
+			effects.exit("lineEnding");
+			return factorySpace(effects, prefixed, "linePrefix");
+		}
+		function prefixed(code) {
+			if (code === null || markdownLineEnding(code)) return nok(code);
+			if (self.parser.constructs.disable.null.indexOf("codeIndented") > -1 || prefixSize(self.events, "linePrefix") < 4) return effects.interrupt(self.parser.constructs.flow, nok, ok)(code);
+			return ok(code);
+		}
+	}
+	module.exports = content;
+}));
+//#endregion
+//#region node_modules/micromark/dist/initialize/flow.js
+var require_flow = /* @__PURE__ */ __commonJSMin(((exports) => {
+	Object.defineProperty(exports, "__esModule", { value: true });
+	var content = require_content();
+	var factorySpace = require_factory_space();
+	var partialBlankLine = require_partial_blank_line();
+	var tokenize = initializeFlow;
+	function initializeFlow(effects) {
+		var self = this;
+		var initial = effects.attempt(partialBlankLine, atBlankEnding, effects.attempt(this.parser.constructs.flowInitial, afterConstruct, factorySpace(effects, effects.attempt(this.parser.constructs.flow, afterConstruct, effects.attempt(content, afterConstruct)), "linePrefix")));
+		return initial;
+		function atBlankEnding(code) {
+			if (code === null) {
+				effects.consume(code);
+				return;
+			}
+			effects.enter("lineEndingBlank");
+			effects.consume(code);
+			effects.exit("lineEndingBlank");
+			self.currentConstruct = void 0;
+			return initial;
+		}
+		function afterConstruct(code) {
+			if (code === null) {
+				effects.consume(code);
+				return;
+			}
+			effects.enter("lineEnding");
+			effects.consume(code);
+			effects.exit("lineEnding");
+			self.currentConstruct = void 0;
+			return initial;
+		}
+	}
+	exports.tokenize = tokenize;
+}));
+//#endregion
+//#region node_modules/micromark/dist/initialize/text.js
+var require_text$1 = /* @__PURE__ */ __commonJSMin(((exports) => {
+	Object.defineProperty(exports, "__esModule", { value: true });
+	var assign = require_assign();
+	var shallow = require_shallow();
+	var text = initializeFactory("text");
+	var string = initializeFactory("string");
+	var resolver = { resolveAll: createResolver() };
+	function initializeFactory(field) {
+		return {
+			tokenize: initializeText,
+			resolveAll: createResolver(field === "text" ? resolveAllLineSuffixes : void 0)
+		};
+		function initializeText(effects) {
+			var self = this;
+			var constructs = this.parser.constructs[field];
+			var text = effects.attempt(constructs, start, notText);
+			return start;
+			function start(code) {
+				return atBreak(code) ? text(code) : notText(code);
+			}
+			function notText(code) {
+				if (code === null) {
+					effects.consume(code);
+					return;
+				}
+				effects.enter("data");
+				effects.consume(code);
+				return data;
+			}
+			function data(code) {
+				if (atBreak(code)) {
+					effects.exit("data");
+					return text(code);
+				}
+				effects.consume(code);
+				return data;
+			}
+			function atBreak(code) {
+				var list = constructs[code];
+				var index = -1;
+				if (code === null) return true;
+				if (list) {
+					while (++index < list.length) if (!list[index].previous || list[index].previous.call(self, self.previous)) return true;
+				}
+			}
+		}
+	}
+	function createResolver(extraResolver) {
+		return resolveAllText;
+		function resolveAllText(events, context) {
+			var index = -1;
+			var enter;
+			while (++index <= events.length) if (enter === void 0) {
+				if (events[index] && events[index][1].type === "data") {
+					enter = index;
+					index++;
+				}
+			} else if (!events[index] || events[index][1].type !== "data") {
+				if (index !== enter + 2) {
+					events[enter][1].end = events[index - 1][1].end;
+					events.splice(enter + 2, index - enter - 2);
+					index = enter + 2;
+				}
+				enter = void 0;
+			}
+			return extraResolver ? extraResolver(events, context) : events;
+		}
+	}
+	function resolveAllLineSuffixes(events, context) {
+		var eventIndex = -1;
+		var chunks;
+		var data;
+		var chunk;
+		var index;
+		var bufferIndex;
+		var size;
+		var tabs;
+		var token;
+		while (++eventIndex <= events.length) if ((eventIndex === events.length || events[eventIndex][1].type === "lineEnding") && events[eventIndex - 1][1].type === "data") {
+			data = events[eventIndex - 1][1];
+			chunks = context.sliceStream(data);
+			index = chunks.length;
+			bufferIndex = -1;
+			size = 0;
+			tabs = void 0;
+			while (index--) {
+				chunk = chunks[index];
+				if (typeof chunk === "string") {
+					bufferIndex = chunk.length;
+					while (chunk.charCodeAt(bufferIndex - 1) === 32) {
+						size++;
+						bufferIndex--;
+					}
+					if (bufferIndex) break;
+					bufferIndex = -1;
+				} else if (chunk === -2) {
+					tabs = true;
+					size++;
+				} else if (chunk === -1);
+				else {
+					index++;
+					break;
+				}
+			}
+			if (size) {
+				token = {
+					type: eventIndex === events.length || tabs || size < 2 ? "lineSuffix" : "hardBreakTrailing",
+					start: {
+						line: data.end.line,
+						column: data.end.column - size,
+						offset: data.end.offset - size,
+						_index: data.start._index + index,
+						_bufferIndex: index ? bufferIndex : data.start._bufferIndex + bufferIndex
+					},
+					end: shallow(data.end)
+				};
+				data.end = shallow(token.start);
+				if (data.start.offset === data.end.offset) assign(data, token);
+				else {
+					events.splice(eventIndex, 0, [
+						"enter",
+						token,
+						context
+					], [
+						"exit",
+						token,
+						context
+					]);
+					eventIndex += 2;
+				}
+			}
+			eventIndex++;
+		}
+		return events;
+	}
+	exports.resolver = resolver;
+	exports.string = string;
+	exports.text = text;
+}));
+//#endregion
+//#region node_modules/micromark/dist/util/chunked-push.js
+var require_chunked_push = /* @__PURE__ */ __commonJSMin(((exports, module) => {
+	var chunkedSplice = require_chunked_splice();
+	function chunkedPush(list, items) {
+		if (list.length) {
+			chunkedSplice(list, list.length, 0, items);
+			return list;
+		}
+		return items;
+	}
+	module.exports = chunkedPush;
+}));
+//#endregion
+//#region node_modules/micromark/dist/util/serialize-chunks.js
+var require_serialize_chunks = /* @__PURE__ */ __commonJSMin(((exports, module) => {
+	var fromCharCode = require_from_char_code();
+	function serializeChunks(chunks) {
+		var index = -1;
+		var result = [];
+		var chunk;
+		var value;
+		var atTab;
+		while (++index < chunks.length) {
+			chunk = chunks[index];
+			if (typeof chunk === "string") value = chunk;
+			else if (chunk === -5) value = "\r";
+			else if (chunk === -4) value = "\n";
+			else if (chunk === -3) value = "\r\n";
+			else if (chunk === -2) value = "	";
+			else if (chunk === -1) {
+				if (atTab) continue;
+				value = " ";
+			} else value = fromCharCode(chunk);
+			atTab = chunk === -2;
+			result.push(value);
+		}
+		return result.join("");
+	}
+	module.exports = serializeChunks;
+}));
+//#endregion
+//#region node_modules/micromark/dist/util/slice-chunks.js
+var require_slice_chunks = /* @__PURE__ */ __commonJSMin(((exports, module) => {
+	function sliceChunks(chunks, token) {
+		var startIndex = token.start._index;
+		var startBufferIndex = token.start._bufferIndex;
+		var endIndex = token.end._index;
+		var endBufferIndex = token.end._bufferIndex;
+		var view;
+		if (startIndex === endIndex) view = [chunks[startIndex].slice(startBufferIndex, endBufferIndex)];
+		else {
+			view = chunks.slice(startIndex, endIndex);
+			if (startBufferIndex > -1) view[0] = view[0].slice(startBufferIndex);
+			if (endBufferIndex > 0) view.push(chunks[endIndex].slice(0, endBufferIndex));
+		}
+		return view;
+	}
+	module.exports = sliceChunks;
+}));
+//#endregion
+//#region node_modules/micromark/dist/util/create-tokenizer.js
+var require_create_tokenizer = /* @__PURE__ */ __commonJSMin(((exports, module) => {
+	var assign = require_assign();
+	var markdownLineEnding = require_markdown_line_ending();
+	var chunkedPush = require_chunked_push();
+	var chunkedSplice = require_chunked_splice();
+	var miniflat = require_miniflat();
+	var resolveAll = require_resolve_all();
+	var serializeChunks = require_serialize_chunks();
+	var shallow = require_shallow();
+	var sliceChunks = require_slice_chunks();
+	function createTokenizer(parser, initialize, from) {
+		var point = from ? shallow(from) : {
+			line: 1,
+			column: 1,
+			offset: 0
+		};
+		var columnStart = {};
+		var resolveAllConstructs = [];
+		var chunks = [];
+		var stack = [];
+		var effects = {
+			consume,
+			enter,
+			exit,
+			attempt: constructFactory(onsuccessfulconstruct),
+			check: constructFactory(onsuccessfulcheck),
+			interrupt: constructFactory(onsuccessfulcheck, { interrupt: true }),
+			lazy: constructFactory(onsuccessfulcheck, { lazy: true })
+		};
+		var context = {
+			previous: null,
+			events: [],
+			parser,
+			sliceStream,
+			sliceSerialize,
+			now,
+			defineSkip: skip,
+			write
+		};
+		var state = initialize.tokenize.call(context, effects);
+		if (initialize.resolveAll) resolveAllConstructs.push(initialize);
+		point._index = 0;
+		point._bufferIndex = -1;
+		return context;
+		function write(slice) {
+			chunks = chunkedPush(chunks, slice);
+			main();
+			if (chunks[chunks.length - 1] !== null) return [];
+			addResult(initialize, 0);
+			context.events = resolveAll(resolveAllConstructs, context.events, context);
+			return context.events;
+		}
+		function sliceSerialize(token) {
+			return serializeChunks(sliceStream(token));
+		}
+		function sliceStream(token) {
+			return sliceChunks(chunks, token);
+		}
+		function now() {
+			return shallow(point);
+		}
+		function skip(value) {
+			columnStart[value.line] = value.column;
+			accountForPotentialSkip();
+		}
+		function main() {
+			var chunkIndex;
+			var chunk;
+			while (point._index < chunks.length) {
+				chunk = chunks[point._index];
+				if (typeof chunk === "string") {
+					chunkIndex = point._index;
+					if (point._bufferIndex < 0) point._bufferIndex = 0;
+					while (point._index === chunkIndex && point._bufferIndex < chunk.length) go(chunk.charCodeAt(point._bufferIndex));
+				} else go(chunk);
+			}
+		}
+		function go(code) {
+			state = state(code);
+		}
+		function consume(code) {
+			if (markdownLineEnding(code)) {
+				point.line++;
+				point.column = 1;
+				point.offset += code === -3 ? 2 : 1;
+				accountForPotentialSkip();
+			} else if (code !== -1) {
+				point.column++;
+				point.offset++;
+			}
+			if (point._bufferIndex < 0) point._index++;
+			else {
+				point._bufferIndex++;
+				if (point._bufferIndex === chunks[point._index].length) {
+					point._bufferIndex = -1;
+					point._index++;
+				}
+			}
+			context.previous = code;
+		}
+		function enter(type, fields) {
+			var token = fields || {};
+			token.type = type;
+			token.start = now();
+			context.events.push([
+				"enter",
+				token,
+				context
+			]);
+			stack.push(token);
+			return token;
+		}
+		function exit(type) {
+			var token = stack.pop();
+			token.end = now();
+			context.events.push([
+				"exit",
+				token,
+				context
+			]);
+			return token;
+		}
+		function onsuccessfulconstruct(construct, info) {
+			addResult(construct, info.from);
+		}
+		function onsuccessfulcheck(construct, info) {
+			info.restore();
+		}
+		function constructFactory(onreturn, fields) {
+			return hook;
+			function hook(constructs, returnState, bogusState) {
+				var listOfConstructs;
+				var constructIndex;
+				var currentConstruct;
+				var info;
+				return constructs.tokenize || "length" in constructs ? handleListOfConstructs(miniflat(constructs)) : handleMapOfConstructs;
+				function handleMapOfConstructs(code) {
+					if (code in constructs || null in constructs) return handleListOfConstructs(constructs.null ? miniflat(constructs[code]).concat(miniflat(constructs.null)) : constructs[code])(code);
+					return bogusState(code);
+				}
+				function handleListOfConstructs(list) {
+					listOfConstructs = list;
+					constructIndex = 0;
+					return handleConstruct(list[constructIndex]);
+				}
+				function handleConstruct(construct) {
+					return start;
+					function start(code) {
+						info = store();
+						currentConstruct = construct;
+						if (!construct.partial) context.currentConstruct = construct;
+						if (construct.name && context.parser.constructs.disable.null.indexOf(construct.name) > -1) return nok();
+						return construct.tokenize.call(fields ? assign({}, context, fields) : context, effects, ok, nok)(code);
+					}
+				}
+				function ok(code) {
+					onreturn(currentConstruct, info);
+					return returnState;
+				}
+				function nok(code) {
+					info.restore();
+					if (++constructIndex < listOfConstructs.length) return handleConstruct(listOfConstructs[constructIndex]);
+					return bogusState;
+				}
+			}
+		}
+		function addResult(construct, from) {
+			if (construct.resolveAll && resolveAllConstructs.indexOf(construct) < 0) resolveAllConstructs.push(construct);
+			if (construct.resolve) chunkedSplice(context.events, from, context.events.length - from, construct.resolve(context.events.slice(from), context));
+			if (construct.resolveTo) context.events = construct.resolveTo(context.events, context);
+		}
+		function store() {
+			var startPoint = now();
+			var startPrevious = context.previous;
+			var startCurrentConstruct = context.currentConstruct;
+			var startEventsIndex = context.events.length;
+			var startStack = Array.from(stack);
+			return {
+				restore,
+				from: startEventsIndex
+			};
+			function restore() {
+				point = startPoint;
+				context.previous = startPrevious;
+				context.currentConstruct = startCurrentConstruct;
+				context.events.length = startEventsIndex;
+				stack = startStack;
+				accountForPotentialSkip();
+			}
+		}
+		function accountForPotentialSkip() {
+			if (point.line in columnStart && point.column < 2) {
+				point.column = columnStart[point.line];
+				point.offset += columnStart[point.line] - 1;
+			}
+		}
+	}
+	module.exports = createTokenizer;
+}));
+//#endregion
+//#region node_modules/micromark/dist/util/move-point.js
+var require_move_point = /* @__PURE__ */ __commonJSMin(((exports, module) => {
+	function movePoint(point, offset) {
+		point.column += offset;
+		point.offset += offset;
+		point._bufferIndex += offset;
+		return point;
+	}
+	module.exports = movePoint;
+}));
+//#endregion
+//#region node_modules/micromark/dist/tokenize/attention.js
+var require_attention = /* @__PURE__ */ __commonJSMin(((exports, module) => {
+	var chunkedPush = require_chunked_push();
+	var chunkedSplice = require_chunked_splice();
+	var classifyCharacter = require_classify_character();
+	var movePoint = require_move_point();
+	var resolveAll = require_resolve_all();
+	var shallow = require_shallow();
+	var attention = {
+		name: "attention",
+		tokenize: tokenizeAttention,
+		resolveAll: resolveAllAttention
+	};
+	function resolveAllAttention(events, context) {
+		var index = -1;
+		var open;
+		var group;
+		var text;
+		var openingSequence;
+		var closingSequence;
+		var use;
+		var nextEvents;
+		var offset;
+		while (++index < events.length) if (events[index][0] === "enter" && events[index][1].type === "attentionSequence" && events[index][1]._close) {
+			open = index;
+			while (open--) if (events[open][0] === "exit" && events[open][1].type === "attentionSequence" && events[open][1]._open && context.sliceSerialize(events[open][1]).charCodeAt(0) === context.sliceSerialize(events[index][1]).charCodeAt(0)) {
+				if ((events[open][1]._close || events[index][1]._open) && (events[index][1].end.offset - events[index][1].start.offset) % 3 && !((events[open][1].end.offset - events[open][1].start.offset + events[index][1].end.offset - events[index][1].start.offset) % 3)) continue;
+				use = events[open][1].end.offset - events[open][1].start.offset > 1 && events[index][1].end.offset - events[index][1].start.offset > 1 ? 2 : 1;
+				openingSequence = {
+					type: use > 1 ? "strongSequence" : "emphasisSequence",
+					start: movePoint(shallow(events[open][1].end), -use),
+					end: shallow(events[open][1].end)
+				};
+				closingSequence = {
+					type: use > 1 ? "strongSequence" : "emphasisSequence",
+					start: shallow(events[index][1].start),
+					end: movePoint(shallow(events[index][1].start), use)
+				};
+				text = {
+					type: use > 1 ? "strongText" : "emphasisText",
+					start: shallow(events[open][1].end),
+					end: shallow(events[index][1].start)
+				};
+				group = {
+					type: use > 1 ? "strong" : "emphasis",
+					start: shallow(openingSequence.start),
+					end: shallow(closingSequence.end)
+				};
+				events[open][1].end = shallow(openingSequence.start);
+				events[index][1].start = shallow(closingSequence.end);
+				nextEvents = [];
+				if (events[open][1].end.offset - events[open][1].start.offset) nextEvents = chunkedPush(nextEvents, [[
+					"enter",
+					events[open][1],
+					context
+				], [
+					"exit",
+					events[open][1],
+					context
+				]]);
+				nextEvents = chunkedPush(nextEvents, [
+					[
+						"enter",
+						group,
+						context
+					],
+					[
+						"enter",
+						openingSequence,
+						context
+					],
+					[
+						"exit",
+						openingSequence,
+						context
+					],
+					[
+						"enter",
+						text,
+						context
+					]
+				]);
+				nextEvents = chunkedPush(nextEvents, resolveAll(context.parser.constructs.insideSpan.null, events.slice(open + 1, index), context));
+				nextEvents = chunkedPush(nextEvents, [
+					[
+						"exit",
+						text,
+						context
+					],
+					[
+						"enter",
+						closingSequence,
+						context
+					],
+					[
+						"exit",
+						closingSequence,
+						context
+					],
+					[
+						"exit",
+						group,
+						context
+					]
+				]);
+				if (events[index][1].end.offset - events[index][1].start.offset) {
+					offset = 2;
+					nextEvents = chunkedPush(nextEvents, [[
+						"enter",
+						events[index][1],
+						context
+					], [
+						"exit",
+						events[index][1],
+						context
+					]]);
+				} else offset = 0;
+				chunkedSplice(events, open - 1, index - open + 3, nextEvents);
+				index = open + nextEvents.length - offset - 2;
+				break;
+			}
+		}
+		index = -1;
+		while (++index < events.length) if (events[index][1].type === "attentionSequence") events[index][1].type = "data";
+		return events;
+	}
+	function tokenizeAttention(effects, ok) {
+		var before = classifyCharacter(this.previous);
+		var marker;
+		return start;
+		function start(code) {
+			effects.enter("attentionSequence");
+			marker = code;
+			return sequence(code);
+		}
+		function sequence(code) {
+			var token;
+			var after;
+			var open;
+			var close;
+			if (code === marker) {
+				effects.consume(code);
+				return sequence;
+			}
+			token = effects.exit("attentionSequence");
+			after = classifyCharacter(code);
+			open = !after || after === 2 && before;
+			close = !before || before === 2 && after;
+			token._open = marker === 42 ? open : open && (before || !close);
+			token._close = marker === 42 ? close : close && (after || !open);
+			return ok(code);
+		}
+	}
+	module.exports = attention;
+}));
+//#endregion
+//#region node_modules/micromark/dist/character/ascii-atext.js
+var require_ascii_atext = /* @__PURE__ */ __commonJSMin(((exports, module) => {
+	module.exports = require_regex_check()(/[#-'*+\--9=?A-Z^-~]/);
+}));
+//#endregion
+//#region node_modules/micromark/dist/tokenize/autolink.js
+var require_autolink = /* @__PURE__ */ __commonJSMin(((exports, module) => {
+	var asciiAlpha = require_ascii_alpha();
+	var asciiAlphanumeric = require_ascii_alphanumeric();
+	var asciiAtext = require_ascii_atext();
+	var asciiControl = require_ascii_control();
+	var autolink = {
+		name: "autolink",
+		tokenize: tokenizeAutolink
+	};
+	function tokenizeAutolink(effects, ok, nok) {
+		var size = 1;
+		return start;
+		function start(code) {
+			effects.enter("autolink");
+			effects.enter("autolinkMarker");
+			effects.consume(code);
+			effects.exit("autolinkMarker");
+			effects.enter("autolinkProtocol");
+			return open;
+		}
+		function open(code) {
+			if (asciiAlpha(code)) {
+				effects.consume(code);
+				return schemeOrEmailAtext;
+			}
+			return asciiAtext(code) ? emailAtext(code) : nok(code);
+		}
+		function schemeOrEmailAtext(code) {
+			return code === 43 || code === 45 || code === 46 || asciiAlphanumeric(code) ? schemeInsideOrEmailAtext(code) : emailAtext(code);
+		}
+		function schemeInsideOrEmailAtext(code) {
+			if (code === 58) {
+				effects.consume(code);
+				return urlInside;
+			}
+			if ((code === 43 || code === 45 || code === 46 || asciiAlphanumeric(code)) && size++ < 32) {
+				effects.consume(code);
+				return schemeInsideOrEmailAtext;
+			}
+			return emailAtext(code);
+		}
+		function urlInside(code) {
+			if (code === 62) {
+				effects.exit("autolinkProtocol");
+				return end(code);
+			}
+			if (code === 32 || code === 60 || asciiControl(code)) return nok(code);
+			effects.consume(code);
+			return urlInside;
+		}
+		function emailAtext(code) {
+			if (code === 64) {
+				effects.consume(code);
+				size = 0;
+				return emailAtSignOrDot;
+			}
+			if (asciiAtext(code)) {
+				effects.consume(code);
+				return emailAtext;
+			}
+			return nok(code);
+		}
+		function emailAtSignOrDot(code) {
+			return asciiAlphanumeric(code) ? emailLabel(code) : nok(code);
+		}
+		function emailLabel(code) {
+			if (code === 46) {
+				effects.consume(code);
+				size = 0;
+				return emailAtSignOrDot;
+			}
+			if (code === 62) {
+				effects.exit("autolinkProtocol").type = "autolinkEmail";
+				return end(code);
+			}
+			return emailValue(code);
+		}
+		function emailValue(code) {
+			if ((code === 45 || asciiAlphanumeric(code)) && size++ < 63) {
+				effects.consume(code);
+				return code === 45 ? emailValue : emailLabel;
+			}
+			return nok(code);
+		}
+		function end(code) {
+			effects.enter("autolinkMarker");
+			effects.consume(code);
+			effects.exit("autolinkMarker");
+			effects.exit("autolink");
+			return ok;
+		}
+	}
+	module.exports = autolink;
+}));
+//#endregion
+//#region node_modules/micromark/dist/tokenize/block-quote.js
+var require_block_quote = /* @__PURE__ */ __commonJSMin(((exports, module) => {
+	var markdownSpace = require_markdown_space();
+	var factorySpace = require_factory_space();
+	var blockQuote = {
+		name: "blockQuote",
+		tokenize: tokenizeBlockQuoteStart,
+		continuation: { tokenize: tokenizeBlockQuoteContinuation },
+		exit
+	};
+	function tokenizeBlockQuoteStart(effects, ok, nok) {
+		var self = this;
+		return start;
+		function start(code) {
+			if (code === 62) {
+				if (!self.containerState.open) {
+					effects.enter("blockQuote", { _container: true });
+					self.containerState.open = true;
+				}
+				effects.enter("blockQuotePrefix");
+				effects.enter("blockQuoteMarker");
+				effects.consume(code);
+				effects.exit("blockQuoteMarker");
+				return after;
+			}
+			return nok(code);
+		}
+		function after(code) {
+			if (markdownSpace(code)) {
+				effects.enter("blockQuotePrefixWhitespace");
+				effects.consume(code);
+				effects.exit("blockQuotePrefixWhitespace");
+				effects.exit("blockQuotePrefix");
+				return ok;
+			}
+			effects.exit("blockQuotePrefix");
+			return ok(code);
+		}
+	}
+	function tokenizeBlockQuoteContinuation(effects, ok, nok) {
+		return factorySpace(effects, effects.attempt(blockQuote, ok, nok), "linePrefix", this.parser.constructs.disable.null.indexOf("codeIndented") > -1 ? void 0 : 4);
+	}
+	function exit(effects) {
+		effects.exit("blockQuote");
+	}
+	module.exports = blockQuote;
+}));
+//#endregion
+//#region node_modules/micromark/dist/character/ascii-punctuation.js
+var require_ascii_punctuation = /* @__PURE__ */ __commonJSMin(((exports, module) => {
+	module.exports = require_regex_check()(/[!-/:-@[-`{-~]/);
+}));
+//#endregion
+//#region node_modules/micromark/dist/tokenize/character-escape.js
+var require_character_escape = /* @__PURE__ */ __commonJSMin(((exports, module) => {
+	var asciiPunctuation = require_ascii_punctuation();
+	var characterEscape = {
+		name: "characterEscape",
+		tokenize: tokenizeCharacterEscape
+	};
+	function tokenizeCharacterEscape(effects, ok, nok) {
+		return start;
+		function start(code) {
+			effects.enter("characterEscape");
+			effects.enter("escapeMarker");
+			effects.consume(code);
+			effects.exit("escapeMarker");
+			return open;
+		}
+		function open(code) {
+			if (asciiPunctuation(code)) {
+				effects.enter("characterEscapeValue");
+				effects.consume(code);
+				effects.exit("characterEscapeValue");
+				effects.exit("characterEscape");
+				return ok;
+			}
+			return nok(code);
+		}
+	}
+	module.exports = characterEscape;
+}));
+//#endregion
+//#region node_modules/character-entities/index.json
+var require_character_entities = /* @__PURE__ */ __commonJSMin(((exports, module) => {
+	module.exports = {
+		"AEli": "Æ",
+		"AElig": "Æ",
+		"AM": "&",
+		"AMP": "&",
+		"Aacut": "Á",
+		"Aacute": "Á",
+		"Abreve": "Ă",
+		"Acir": "Â",
+		"Acirc": "Â",
+		"Acy": "А",
+		"Afr": "𝔄",
+		"Agrav": "À",
+		"Agrave": "À",
+		"Alpha": "Α",
+		"Amacr": "Ā",
+		"And": "⩓",
+		"Aogon": "Ą",
+		"Aopf": "𝔸",
+		"ApplyFunction": "⁡",
+		"Arin": "Å",
+		"Aring": "Å",
+		"Ascr": "𝒜",
+		"Assign": "≔",
+		"Atild": "Ã",
+		"Atilde": "Ã",
+		"Aum": "Ä",
+		"Auml": "Ä",
+		"Backslash": "∖",
+		"Barv": "⫧",
+		"Barwed": "⌆",
+		"Bcy": "Б",
+		"Because": "∵",
+		"Bernoullis": "ℬ",
+		"Beta": "Β",
+		"Bfr": "𝔅",
+		"Bopf": "𝔹",
+		"Breve": "˘",
+		"Bscr": "ℬ",
+		"Bumpeq": "≎",
+		"CHcy": "Ч",
+		"COP": "©",
+		"COPY": "©",
+		"Cacute": "Ć",
+		"Cap": "⋒",
+		"CapitalDifferentialD": "ⅅ",
+		"Cayleys": "ℭ",
+		"Ccaron": "Č",
+		"Ccedi": "Ç",
+		"Ccedil": "Ç",
+		"Ccirc": "Ĉ",
+		"Cconint": "∰",
+		"Cdot": "Ċ",
+		"Cedilla": "¸",
+		"CenterDot": "·",
+		"Cfr": "ℭ",
+		"Chi": "Χ",
+		"CircleDot": "⊙",
+		"CircleMinus": "⊖",
+		"CirclePlus": "⊕",
+		"CircleTimes": "⊗",
+		"ClockwiseContourIntegral": "∲",
+		"CloseCurlyDoubleQuote": "”",
+		"CloseCurlyQuote": "’",
+		"Colon": "∷",
+		"Colone": "⩴",
+		"Congruent": "≡",
+		"Conint": "∯",
+		"ContourIntegral": "∮",
+		"Copf": "ℂ",
+		"Coproduct": "∐",
+		"CounterClockwiseContourIntegral": "∳",
+		"Cross": "⨯",
+		"Cscr": "𝒞",
+		"Cup": "⋓",
+		"CupCap": "≍",
+		"DD": "ⅅ",
+		"DDotrahd": "⤑",
+		"DJcy": "Ђ",
+		"DScy": "Ѕ",
+		"DZcy": "Џ",
+		"Dagger": "‡",
+		"Darr": "↡",
+		"Dashv": "⫤",
+		"Dcaron": "Ď",
+		"Dcy": "Д",
+		"Del": "∇",
+		"Delta": "Δ",
+		"Dfr": "𝔇",
+		"DiacriticalAcute": "´",
+		"DiacriticalDot": "˙",
+		"DiacriticalDoubleAcute": "˝",
+		"DiacriticalGrave": "`",
+		"DiacriticalTilde": "˜",
+		"Diamond": "⋄",
+		"DifferentialD": "ⅆ",
+		"Dopf": "𝔻",
+		"Dot": "¨",
+		"DotDot": "⃜",
+		"DotEqual": "≐",
+		"DoubleContourIntegral": "∯",
+		"DoubleDot": "¨",
+		"DoubleDownArrow": "⇓",
+		"DoubleLeftArrow": "⇐",
+		"DoubleLeftRightArrow": "⇔",
+		"DoubleLeftTee": "⫤",
+		"DoubleLongLeftArrow": "⟸",
+		"DoubleLongLeftRightArrow": "⟺",
+		"DoubleLongRightArrow": "⟹",
+		"DoubleRightArrow": "⇒",
+		"DoubleRightTee": "⊨",
+		"DoubleUpArrow": "⇑",
+		"DoubleUpDownArrow": "⇕",
+		"DoubleVerticalBar": "∥",
+		"DownArrow": "↓",
+		"DownArrowBar": "⤓",
+		"DownArrowUpArrow": "⇵",
+		"DownBreve": "̑",
+		"DownLeftRightVector": "⥐",
+		"DownLeftTeeVector": "⥞",
+		"DownLeftVector": "↽",
+		"DownLeftVectorBar": "⥖",
+		"DownRightTeeVector": "⥟",
+		"DownRightVector": "⇁",
+		"DownRightVectorBar": "⥗",
+		"DownTee": "⊤",
+		"DownTeeArrow": "↧",
+		"Downarrow": "⇓",
+		"Dscr": "𝒟",
+		"Dstrok": "Đ",
+		"ENG": "Ŋ",
+		"ET": "Ð",
+		"ETH": "Ð",
+		"Eacut": "É",
+		"Eacute": "É",
+		"Ecaron": "Ě",
+		"Ecir": "Ê",
+		"Ecirc": "Ê",
+		"Ecy": "Э",
+		"Edot": "Ė",
+		"Efr": "𝔈",
+		"Egrav": "È",
+		"Egrave": "È",
+		"Element": "∈",
+		"Emacr": "Ē",
+		"EmptySmallSquare": "◻",
+		"EmptyVerySmallSquare": "▫",
+		"Eogon": "Ę",
+		"Eopf": "𝔼",
+		"Epsilon": "Ε",
+		"Equal": "⩵",
+		"EqualTilde": "≂",
+		"Equilibrium": "⇌",
+		"Escr": "ℰ",
+		"Esim": "⩳",
+		"Eta": "Η",
+		"Eum": "Ë",
+		"Euml": "Ë",
+		"Exists": "∃",
+		"ExponentialE": "ⅇ",
+		"Fcy": "Ф",
+		"Ffr": "𝔉",
+		"FilledSmallSquare": "◼",
+		"FilledVerySmallSquare": "▪",
+		"Fopf": "𝔽",
+		"ForAll": "∀",
+		"Fouriertrf": "ℱ",
+		"Fscr": "ℱ",
+		"GJcy": "Ѓ",
+		"G": ">",
+		"GT": ">",
+		"Gamma": "Γ",
+		"Gammad": "Ϝ",
+		"Gbreve": "Ğ",
+		"Gcedil": "Ģ",
+		"Gcirc": "Ĝ",
+		"Gcy": "Г",
+		"Gdot": "Ġ",
+		"Gfr": "𝔊",
+		"Gg": "⋙",
+		"Gopf": "𝔾",
+		"GreaterEqual": "≥",
+		"GreaterEqualLess": "⋛",
+		"GreaterFullEqual": "≧",
+		"GreaterGreater": "⪢",
+		"GreaterLess": "≷",
+		"GreaterSlantEqual": "⩾",
+		"GreaterTilde": "≳",
+		"Gscr": "𝒢",
+		"Gt": "≫",
+		"HARDcy": "Ъ",
+		"Hacek": "ˇ",
+		"Hat": "^",
+		"Hcirc": "Ĥ",
+		"Hfr": "ℌ",
+		"HilbertSpace": "ℋ",
+		"Hopf": "ℍ",
+		"HorizontalLine": "─",
+		"Hscr": "ℋ",
+		"Hstrok": "Ħ",
+		"HumpDownHump": "≎",
+		"HumpEqual": "≏",
+		"IEcy": "Е",
+		"IJlig": "Ĳ",
+		"IOcy": "Ё",
+		"Iacut": "Í",
+		"Iacute": "Í",
+		"Icir": "Î",
+		"Icirc": "Î",
+		"Icy": "И",
+		"Idot": "İ",
+		"Ifr": "ℑ",
+		"Igrav": "Ì",
+		"Igrave": "Ì",
+		"Im": "ℑ",
+		"Imacr": "Ī",
+		"ImaginaryI": "ⅈ",
+		"Implies": "⇒",
+		"Int": "∬",
+		"Integral": "∫",
+		"Intersection": "⋂",
+		"InvisibleComma": "⁣",
+		"InvisibleTimes": "⁢",
+		"Iogon": "Į",
+		"Iopf": "𝕀",
+		"Iota": "Ι",
+		"Iscr": "ℐ",
+		"Itilde": "Ĩ",
+		"Iukcy": "І",
+		"Ium": "Ï",
+		"Iuml": "Ï",
+		"Jcirc": "Ĵ",
+		"Jcy": "Й",
+		"Jfr": "𝔍",
+		"Jopf": "𝕁",
+		"Jscr": "𝒥",
+		"Jsercy": "Ј",
+		"Jukcy": "Є",
+		"KHcy": "Х",
+		"KJcy": "Ќ",
+		"Kappa": "Κ",
+		"Kcedil": "Ķ",
+		"Kcy": "К",
+		"Kfr": "𝔎",
+		"Kopf": "𝕂",
+		"Kscr": "𝒦",
+		"LJcy": "Љ",
+		"L": "<",
+		"LT": "<",
+		"Lacute": "Ĺ",
+		"Lambda": "Λ",
+		"Lang": "⟪",
+		"Laplacetrf": "ℒ",
+		"Larr": "↞",
+		"Lcaron": "Ľ",
+		"Lcedil": "Ļ",
+		"Lcy": "Л",
+		"LeftAngleBracket": "⟨",
+		"LeftArrow": "←",
+		"LeftArrowBar": "⇤",
+		"LeftArrowRightArrow": "⇆",
+		"LeftCeiling": "⌈",
+		"LeftDoubleBracket": "⟦",
+		"LeftDownTeeVector": "⥡",
+		"LeftDownVector": "⇃",
+		"LeftDownVectorBar": "⥙",
+		"LeftFloor": "⌊",
+		"LeftRightArrow": "↔",
+		"LeftRightVector": "⥎",
+		"LeftTee": "⊣",
+		"LeftTeeArrow": "↤",
+		"LeftTeeVector": "⥚",
+		"LeftTriangle": "⊲",
+		"LeftTriangleBar": "⧏",
+		"LeftTriangleEqual": "⊴",
+		"LeftUpDownVector": "⥑",
+		"LeftUpTeeVector": "⥠",
+		"LeftUpVector": "↿",
+		"LeftUpVectorBar": "⥘",
+		"LeftVector": "↼",
+		"LeftVectorBar": "⥒",
+		"Leftarrow": "⇐",
+		"Leftrightarrow": "⇔",
+		"LessEqualGreater": "⋚",
+		"LessFullEqual": "≦",
+		"LessGreater": "≶",
+		"LessLess": "⪡",
+		"LessSlantEqual": "⩽",
+		"LessTilde": "≲",
+		"Lfr": "𝔏",
+		"Ll": "⋘",
+		"Lleftarrow": "⇚",
+		"Lmidot": "Ŀ",
+		"LongLeftArrow": "⟵",
+		"LongLeftRightArrow": "⟷",
+		"LongRightArrow": "⟶",
+		"Longleftarrow": "⟸",
+		"Longleftrightarrow": "⟺",
+		"Longrightarrow": "⟹",
+		"Lopf": "𝕃",
+		"LowerLeftArrow": "↙",
+		"LowerRightArrow": "↘",
+		"Lscr": "ℒ",
+		"Lsh": "↰",
+		"Lstrok": "Ł",
+		"Lt": "≪",
+		"Map": "⤅",
+		"Mcy": "М",
+		"MediumSpace": " ",
+		"Mellintrf": "ℳ",
+		"Mfr": "𝔐",
+		"MinusPlus": "∓",
+		"Mopf": "𝕄",
+		"Mscr": "ℳ",
+		"Mu": "Μ",
+		"NJcy": "Њ",
+		"Nacute": "Ń",
+		"Ncaron": "Ň",
+		"Ncedil": "Ņ",
+		"Ncy": "Н",
+		"NegativeMediumSpace": "​",
+		"NegativeThickSpace": "​",
+		"NegativeThinSpace": "​",
+		"NegativeVeryThinSpace": "​",
+		"NestedGreaterGreater": "≫",
+		"NestedLessLess": "≪",
+		"NewLine": "\n",
+		"Nfr": "𝔑",
+		"NoBreak": "⁠",
+		"NonBreakingSpace": "\xA0",
+		"Nopf": "ℕ",
+		"Not": "⫬",
+		"NotCongruent": "≢",
+		"NotCupCap": "≭",
+		"NotDoubleVerticalBar": "∦",
+		"NotElement": "∉",
+		"NotEqual": "≠",
+		"NotEqualTilde": "≂̸",
+		"NotExists": "∄",
+		"NotGreater": "≯",
+		"NotGreaterEqual": "≱",
+		"NotGreaterFullEqual": "≧̸",
+		"NotGreaterGreater": "≫̸",
+		"NotGreaterLess": "≹",
+		"NotGreaterSlantEqual": "⩾̸",
+		"NotGreaterTilde": "≵",
+		"NotHumpDownHump": "≎̸",
+		"NotHumpEqual": "≏̸",
+		"NotLeftTriangle": "⋪",
+		"NotLeftTriangleBar": "⧏̸",
+		"NotLeftTriangleEqual": "⋬",
+		"NotLess": "≮",
+		"NotLessEqual": "≰",
+		"NotLessGreater": "≸",
+		"NotLessLess": "≪̸",
+		"NotLessSlantEqual": "⩽̸",
+		"NotLessTilde": "≴",
+		"NotNestedGreaterGreater": "⪢̸",
+		"NotNestedLessLess": "⪡̸",
+		"NotPrecedes": "⊀",
+		"NotPrecedesEqual": "⪯̸",
+		"NotPrecedesSlantEqual": "⋠",
+		"NotReverseElement": "∌",
+		"NotRightTriangle": "⋫",
+		"NotRightTriangleBar": "⧐̸",
+		"NotRightTriangleEqual": "⋭",
+		"NotSquareSubset": "⊏̸",
+		"NotSquareSubsetEqual": "⋢",
+		"NotSquareSuperset": "⊐̸",
+		"NotSquareSupersetEqual": "⋣",
+		"NotSubset": "⊂⃒",
+		"NotSubsetEqual": "⊈",
+		"NotSucceeds": "⊁",
+		"NotSucceedsEqual": "⪰̸",
+		"NotSucceedsSlantEqual": "⋡",
+		"NotSucceedsTilde": "≿̸",
+		"NotSuperset": "⊃⃒",
+		"NotSupersetEqual": "⊉",
+		"NotTilde": "≁",
+		"NotTildeEqual": "≄",
+		"NotTildeFullEqual": "≇",
+		"NotTildeTilde": "≉",
+		"NotVerticalBar": "∤",
+		"Nscr": "𝒩",
+		"Ntild": "Ñ",
+		"Ntilde": "Ñ",
+		"Nu": "Ν",
+		"OElig": "Œ",
+		"Oacut": "Ó",
+		"Oacute": "Ó",
+		"Ocir": "Ô",
+		"Ocirc": "Ô",
+		"Ocy": "О",
+		"Odblac": "Ő",
+		"Ofr": "𝔒",
+		"Ograv": "Ò",
+		"Ograve": "Ò",
+		"Omacr": "Ō",
+		"Omega": "Ω",
+		"Omicron": "Ο",
+		"Oopf": "𝕆",
+		"OpenCurlyDoubleQuote": "“",
+		"OpenCurlyQuote": "‘",
+		"Or": "⩔",
+		"Oscr": "𝒪",
+		"Oslas": "Ø",
+		"Oslash": "Ø",
+		"Otild": "Õ",
+		"Otilde": "Õ",
+		"Otimes": "⨷",
+		"Oum": "Ö",
+		"Ouml": "Ö",
+		"OverBar": "‾",
+		"OverBrace": "⏞",
+		"OverBracket": "⎴",
+		"OverParenthesis": "⏜",
+		"PartialD": "∂",
+		"Pcy": "П",
+		"Pfr": "𝔓",
+		"Phi": "Φ",
+		"Pi": "Π",
+		"PlusMinus": "±",
+		"Poincareplane": "ℌ",
+		"Popf": "ℙ",
+		"Pr": "⪻",
+		"Precedes": "≺",
+		"PrecedesEqual": "⪯",
+		"PrecedesSlantEqual": "≼",
+		"PrecedesTilde": "≾",
+		"Prime": "″",
+		"Product": "∏",
+		"Proportion": "∷",
+		"Proportional": "∝",
+		"Pscr": "𝒫",
+		"Psi": "Ψ",
+		"QUO": "\"",
+		"QUOT": "\"",
+		"Qfr": "𝔔",
+		"Qopf": "ℚ",
+		"Qscr": "𝒬",
+		"RBarr": "⤐",
+		"RE": "®",
+		"REG": "®",
+		"Racute": "Ŕ",
+		"Rang": "⟫",
+		"Rarr": "↠",
+		"Rarrtl": "⤖",
+		"Rcaron": "Ř",
+		"Rcedil": "Ŗ",
+		"Rcy": "Р",
+		"Re": "ℜ",
+		"ReverseElement": "∋",
+		"ReverseEquilibrium": "⇋",
+		"ReverseUpEquilibrium": "⥯",
+		"Rfr": "ℜ",
+		"Rho": "Ρ",
+		"RightAngleBracket": "⟩",
+		"RightArrow": "→",
+		"RightArrowBar": "⇥",
+		"RightArrowLeftArrow": "⇄",
+		"RightCeiling": "⌉",
+		"RightDoubleBracket": "⟧",
+		"RightDownTeeVector": "⥝",
+		"RightDownVector": "⇂",
+		"RightDownVectorBar": "⥕",
+		"RightFloor": "⌋",
+		"RightTee": "⊢",
+		"RightTeeArrow": "↦",
+		"RightTeeVector": "⥛",
+		"RightTriangle": "⊳",
+		"RightTriangleBar": "⧐",
+		"RightTriangleEqual": "⊵",
+		"RightUpDownVector": "⥏",
+		"RightUpTeeVector": "⥜",
+		"RightUpVector": "↾",
+		"RightUpVectorBar": "⥔",
+		"RightVector": "⇀",
+		"RightVectorBar": "⥓",
+		"Rightarrow": "⇒",
+		"Ropf": "ℝ",
+		"RoundImplies": "⥰",
+		"Rrightarrow": "⇛",
+		"Rscr": "ℛ",
+		"Rsh": "↱",
+		"RuleDelayed": "⧴",
+		"SHCHcy": "Щ",
+		"SHcy": "Ш",
+		"SOFTcy": "Ь",
+		"Sacute": "Ś",
+		"Sc": "⪼",
+		"Scaron": "Š",
+		"Scedil": "Ş",
+		"Scirc": "Ŝ",
+		"Scy": "С",
+		"Sfr": "𝔖",
+		"ShortDownArrow": "↓",
+		"ShortLeftArrow": "←",
+		"ShortRightArrow": "→",
+		"ShortUpArrow": "↑",
+		"Sigma": "Σ",
+		"SmallCircle": "∘",
+		"Sopf": "𝕊",
+		"Sqrt": "√",
+		"Square": "□",
+		"SquareIntersection": "⊓",
+		"SquareSubset": "⊏",
+		"SquareSubsetEqual": "⊑",
+		"SquareSuperset": "⊐",
+		"SquareSupersetEqual": "⊒",
+		"SquareUnion": "⊔",
+		"Sscr": "𝒮",
+		"Star": "⋆",
+		"Sub": "⋐",
+		"Subset": "⋐",
+		"SubsetEqual": "⊆",
+		"Succeeds": "≻",
+		"SucceedsEqual": "⪰",
+		"SucceedsSlantEqual": "≽",
+		"SucceedsTilde": "≿",
+		"SuchThat": "∋",
+		"Sum": "∑",
+		"Sup": "⋑",
+		"Superset": "⊃",
+		"SupersetEqual": "⊇",
+		"Supset": "⋑",
+		"THOR": "Þ",
+		"THORN": "Þ",
+		"TRADE": "™",
+		"TSHcy": "Ћ",
+		"TScy": "Ц",
+		"Tab": "	",
+		"Tau": "Τ",
+		"Tcaron": "Ť",
+		"Tcedil": "Ţ",
+		"Tcy": "Т",
+		"Tfr": "𝔗",
+		"Therefore": "∴",
+		"Theta": "Θ",
+		"ThickSpace": "  ",
+		"ThinSpace": " ",
+		"Tilde": "∼",
+		"TildeEqual": "≃",
+		"TildeFullEqual": "≅",
+		"TildeTilde": "≈",
+		"Topf": "𝕋",
+		"TripleDot": "⃛",
+		"Tscr": "𝒯",
+		"Tstrok": "Ŧ",
+		"Uacut": "Ú",
+		"Uacute": "Ú",
+		"Uarr": "↟",
+		"Uarrocir": "⥉",
+		"Ubrcy": "Ў",
+		"Ubreve": "Ŭ",
+		"Ucir": "Û",
+		"Ucirc": "Û",
+		"Ucy": "У",
+		"Udblac": "Ű",
+		"Ufr": "𝔘",
+		"Ugrav": "Ù",
+		"Ugrave": "Ù",
+		"Umacr": "Ū",
+		"UnderBar": "_",
+		"UnderBrace": "⏟",
+		"UnderBracket": "⎵",
+		"UnderParenthesis": "⏝",
+		"Union": "⋃",
+		"UnionPlus": "⊎",
+		"Uogon": "Ų",
+		"Uopf": "𝕌",
+		"UpArrow": "↑",
+		"UpArrowBar": "⤒",
+		"UpArrowDownArrow": "⇅",
+		"UpDownArrow": "↕",
+		"UpEquilibrium": "⥮",
+		"UpTee": "⊥",
+		"UpTeeArrow": "↥",
+		"Uparrow": "⇑",
+		"Updownarrow": "⇕",
+		"UpperLeftArrow": "↖",
+		"UpperRightArrow": "↗",
+		"Upsi": "ϒ",
+		"Upsilon": "Υ",
+		"Uring": "Ů",
+		"Uscr": "𝒰",
+		"Utilde": "Ũ",
+		"Uum": "Ü",
+		"Uuml": "Ü",
+		"VDash": "⊫",
+		"Vbar": "⫫",
+		"Vcy": "В",
+		"Vdash": "⊩",
+		"Vdashl": "⫦",
+		"Vee": "⋁",
+		"Verbar": "‖",
+		"Vert": "‖",
+		"VerticalBar": "∣",
+		"VerticalLine": "|",
+		"VerticalSeparator": "❘",
+		"VerticalTilde": "≀",
+		"VeryThinSpace": " ",
+		"Vfr": "𝔙",
+		"Vopf": "𝕍",
+		"Vscr": "𝒱",
+		"Vvdash": "⊪",
+		"Wcirc": "Ŵ",
+		"Wedge": "⋀",
+		"Wfr": "𝔚",
+		"Wopf": "𝕎",
+		"Wscr": "𝒲",
+		"Xfr": "𝔛",
+		"Xi": "Ξ",
+		"Xopf": "𝕏",
+		"Xscr": "𝒳",
+		"YAcy": "Я",
+		"YIcy": "Ї",
+		"YUcy": "Ю",
+		"Yacut": "Ý",
+		"Yacute": "Ý",
+		"Ycirc": "Ŷ",
+		"Ycy": "Ы",
+		"Yfr": "𝔜",
+		"Yopf": "𝕐",
+		"Yscr": "𝒴",
+		"Yuml": "Ÿ",
+		"ZHcy": "Ж",
+		"Zacute": "Ź",
+		"Zcaron": "Ž",
+		"Zcy": "З",
+		"Zdot": "Ż",
+		"ZeroWidthSpace": "​",
+		"Zeta": "Ζ",
+		"Zfr": "ℨ",
+		"Zopf": "ℤ",
+		"Zscr": "𝒵",
+		"aacut": "á",
+		"aacute": "á",
+		"abreve": "ă",
+		"ac": "∾",
+		"acE": "∾̳",
+		"acd": "∿",
+		"acir": "â",
+		"acirc": "â",
+		"acut": "´",
+		"acute": "´",
+		"acy": "а",
+		"aeli": "æ",
+		"aelig": "æ",
+		"af": "⁡",
+		"afr": "𝔞",
+		"agrav": "à",
+		"agrave": "à",
+		"alefsym": "ℵ",
+		"aleph": "ℵ",
+		"alpha": "α",
+		"amacr": "ā",
+		"amalg": "⨿",
+		"am": "&",
+		"amp": "&",
+		"and": "∧",
+		"andand": "⩕",
+		"andd": "⩜",
+		"andslope": "⩘",
+		"andv": "⩚",
+		"ang": "∠",
+		"ange": "⦤",
+		"angle": "∠",
+		"angmsd": "∡",
+		"angmsdaa": "⦨",
+		"angmsdab": "⦩",
+		"angmsdac": "⦪",
+		"angmsdad": "⦫",
+		"angmsdae": "⦬",
+		"angmsdaf": "⦭",
+		"angmsdag": "⦮",
+		"angmsdah": "⦯",
+		"angrt": "∟",
+		"angrtvb": "⊾",
+		"angrtvbd": "⦝",
+		"angsph": "∢",
+		"angst": "Å",
+		"angzarr": "⍼",
+		"aogon": "ą",
+		"aopf": "𝕒",
+		"ap": "≈",
+		"apE": "⩰",
+		"apacir": "⩯",
+		"ape": "≊",
+		"apid": "≋",
+		"apos": "'",
+		"approx": "≈",
+		"approxeq": "≊",
+		"arin": "å",
+		"aring": "å",
+		"ascr": "𝒶",
+		"ast": "*",
+		"asymp": "≈",
+		"asympeq": "≍",
+		"atild": "ã",
+		"atilde": "ã",
+		"aum": "ä",
+		"auml": "ä",
+		"awconint": "∳",
+		"awint": "⨑",
+		"bNot": "⫭",
+		"backcong": "≌",
+		"backepsilon": "϶",
+		"backprime": "‵",
+		"backsim": "∽",
+		"backsimeq": "⋍",
+		"barvee": "⊽",
+		"barwed": "⌅",
+		"barwedge": "⌅",
+		"bbrk": "⎵",
+		"bbrktbrk": "⎶",
+		"bcong": "≌",
+		"bcy": "б",
+		"bdquo": "„",
+		"becaus": "∵",
+		"because": "∵",
+		"bemptyv": "⦰",
+		"bepsi": "϶",
+		"bernou": "ℬ",
+		"beta": "β",
+		"beth": "ℶ",
+		"between": "≬",
+		"bfr": "𝔟",
+		"bigcap": "⋂",
+		"bigcirc": "◯",
+		"bigcup": "⋃",
+		"bigodot": "⨀",
+		"bigoplus": "⨁",
+		"bigotimes": "⨂",
+		"bigsqcup": "⨆",
+		"bigstar": "★",
+		"bigtriangledown": "▽",
+		"bigtriangleup": "△",
+		"biguplus": "⨄",
+		"bigvee": "⋁",
+		"bigwedge": "⋀",
+		"bkarow": "⤍",
+		"blacklozenge": "⧫",
+		"blacksquare": "▪",
+		"blacktriangle": "▴",
+		"blacktriangledown": "▾",
+		"blacktriangleleft": "◂",
+		"blacktriangleright": "▸",
+		"blank": "␣",
+		"blk12": "▒",
+		"blk14": "░",
+		"blk34": "▓",
+		"block": "█",
+		"bne": "=⃥",
+		"bnequiv": "≡⃥",
+		"bnot": "⌐",
+		"bopf": "𝕓",
+		"bot": "⊥",
+		"bottom": "⊥",
+		"bowtie": "⋈",
+		"boxDL": "╗",
+		"boxDR": "╔",
+		"boxDl": "╖",
+		"boxDr": "╓",
+		"boxH": "═",
+		"boxHD": "╦",
+		"boxHU": "╩",
+		"boxHd": "╤",
+		"boxHu": "╧",
+		"boxUL": "╝",
+		"boxUR": "╚",
+		"boxUl": "╜",
+		"boxUr": "╙",
+		"boxV": "║",
+		"boxVH": "╬",
+		"boxVL": "╣",
+		"boxVR": "╠",
+		"boxVh": "╫",
+		"boxVl": "╢",
+		"boxVr": "╟",
+		"boxbox": "⧉",
+		"boxdL": "╕",
+		"boxdR": "╒",
+		"boxdl": "┐",
+		"boxdr": "┌",
+		"boxh": "─",
+		"boxhD": "╥",
+		"boxhU": "╨",
+		"boxhd": "┬",
+		"boxhu": "┴",
+		"boxminus": "⊟",
+		"boxplus": "⊞",
+		"boxtimes": "⊠",
+		"boxuL": "╛",
+		"boxuR": "╘",
+		"boxul": "┘",
+		"boxur": "└",
+		"boxv": "│",
+		"boxvH": "╪",
+		"boxvL": "╡",
+		"boxvR": "╞",
+		"boxvh": "┼",
+		"boxvl": "┤",
+		"boxvr": "├",
+		"bprime": "‵",
+		"breve": "˘",
+		"brvba": "¦",
+		"brvbar": "¦",
+		"bscr": "𝒷",
+		"bsemi": "⁏",
+		"bsim": "∽",
+		"bsime": "⋍",
+		"bsol": "\\",
+		"bsolb": "⧅",
+		"bsolhsub": "⟈",
+		"bull": "•",
+		"bullet": "•",
+		"bump": "≎",
+		"bumpE": "⪮",
+		"bumpe": "≏",
+		"bumpeq": "≏",
+		"cacute": "ć",
+		"cap": "∩",
+		"capand": "⩄",
+		"capbrcup": "⩉",
+		"capcap": "⩋",
+		"capcup": "⩇",
+		"capdot": "⩀",
+		"caps": "∩︀",
+		"caret": "⁁",
+		"caron": "ˇ",
+		"ccaps": "⩍",
+		"ccaron": "č",
+		"ccedi": "ç",
+		"ccedil": "ç",
+		"ccirc": "ĉ",
+		"ccups": "⩌",
+		"ccupssm": "⩐",
+		"cdot": "ċ",
+		"cedi": "¸",
+		"cedil": "¸",
+		"cemptyv": "⦲",
+		"cen": "¢",
+		"cent": "¢",
+		"centerdot": "·",
+		"cfr": "𝔠",
+		"chcy": "ч",
+		"check": "✓",
+		"checkmark": "✓",
+		"chi": "χ",
+		"cir": "○",
+		"cirE": "⧃",
+		"circ": "ˆ",
+		"circeq": "≗",
+		"circlearrowleft": "↺",
+		"circlearrowright": "↻",
+		"circledR": "®",
+		"circledS": "Ⓢ",
+		"circledast": "⊛",
+		"circledcirc": "⊚",
+		"circleddash": "⊝",
+		"cire": "≗",
+		"cirfnint": "⨐",
+		"cirmid": "⫯",
+		"cirscir": "⧂",
+		"clubs": "♣",
+		"clubsuit": "♣",
+		"colon": ":",
+		"colone": "≔",
+		"coloneq": "≔",
+		"comma": ",",
+		"commat": "@",
+		"comp": "∁",
+		"compfn": "∘",
+		"complement": "∁",
+		"complexes": "ℂ",
+		"cong": "≅",
+		"congdot": "⩭",
+		"conint": "∮",
+		"copf": "𝕔",
+		"coprod": "∐",
+		"cop": "©",
+		"copy": "©",
+		"copysr": "℗",
+		"crarr": "↵",
+		"cross": "✗",
+		"cscr": "𝒸",
+		"csub": "⫏",
+		"csube": "⫑",
+		"csup": "⫐",
+		"csupe": "⫒",
+		"ctdot": "⋯",
+		"cudarrl": "⤸",
+		"cudarrr": "⤵",
+		"cuepr": "⋞",
+		"cuesc": "⋟",
+		"cularr": "↶",
+		"cularrp": "⤽",
+		"cup": "∪",
+		"cupbrcap": "⩈",
+		"cupcap": "⩆",
+		"cupcup": "⩊",
+		"cupdot": "⊍",
+		"cupor": "⩅",
+		"cups": "∪︀",
+		"curarr": "↷",
+		"curarrm": "⤼",
+		"curlyeqprec": "⋞",
+		"curlyeqsucc": "⋟",
+		"curlyvee": "⋎",
+		"curlywedge": "⋏",
+		"curre": "¤",
+		"curren": "¤",
+		"curvearrowleft": "↶",
+		"curvearrowright": "↷",
+		"cuvee": "⋎",
+		"cuwed": "⋏",
+		"cwconint": "∲",
+		"cwint": "∱",
+		"cylcty": "⌭",
+		"dArr": "⇓",
+		"dHar": "⥥",
+		"dagger": "†",
+		"daleth": "ℸ",
+		"darr": "↓",
+		"dash": "‐",
+		"dashv": "⊣",
+		"dbkarow": "⤏",
+		"dblac": "˝",
+		"dcaron": "ď",
+		"dcy": "д",
+		"dd": "ⅆ",
+		"ddagger": "‡",
+		"ddarr": "⇊",
+		"ddotseq": "⩷",
+		"de": "°",
+		"deg": "°",
+		"delta": "δ",
+		"demptyv": "⦱",
+		"dfisht": "⥿",
+		"dfr": "𝔡",
+		"dharl": "⇃",
+		"dharr": "⇂",
+		"diam": "⋄",
+		"diamond": "⋄",
+		"diamondsuit": "♦",
+		"diams": "♦",
+		"die": "¨",
+		"digamma": "ϝ",
+		"disin": "⋲",
+		"div": "÷",
+		"divid": "÷",
+		"divide": "÷",
+		"divideontimes": "⋇",
+		"divonx": "⋇",
+		"djcy": "ђ",
+		"dlcorn": "⌞",
+		"dlcrop": "⌍",
+		"dollar": "$",
+		"dopf": "𝕕",
+		"dot": "˙",
+		"doteq": "≐",
+		"doteqdot": "≑",
+		"dotminus": "∸",
+		"dotplus": "∔",
+		"dotsquare": "⊡",
+		"doublebarwedge": "⌆",
+		"downarrow": "↓",
+		"downdownarrows": "⇊",
+		"downharpoonleft": "⇃",
+		"downharpoonright": "⇂",
+		"drbkarow": "⤐",
+		"drcorn": "⌟",
+		"drcrop": "⌌",
+		"dscr": "𝒹",
+		"dscy": "ѕ",
+		"dsol": "⧶",
+		"dstrok": "đ",
+		"dtdot": "⋱",
+		"dtri": "▿",
+		"dtrif": "▾",
+		"duarr": "⇵",
+		"duhar": "⥯",
+		"dwangle": "⦦",
+		"dzcy": "џ",
+		"dzigrarr": "⟿",
+		"eDDot": "⩷",
+		"eDot": "≑",
+		"eacut": "é",
+		"eacute": "é",
+		"easter": "⩮",
+		"ecaron": "ě",
+		"ecir": "ê",
+		"ecirc": "ê",
+		"ecolon": "≕",
+		"ecy": "э",
+		"edot": "ė",
+		"ee": "ⅇ",
+		"efDot": "≒",
+		"efr": "𝔢",
+		"eg": "⪚",
+		"egrav": "è",
+		"egrave": "è",
+		"egs": "⪖",
+		"egsdot": "⪘",
+		"el": "⪙",
+		"elinters": "⏧",
+		"ell": "ℓ",
+		"els": "⪕",
+		"elsdot": "⪗",
+		"emacr": "ē",
+		"empty": "∅",
+		"emptyset": "∅",
+		"emptyv": "∅",
+		"emsp13": " ",
+		"emsp14": " ",
+		"emsp": " ",
+		"eng": "ŋ",
+		"ensp": " ",
+		"eogon": "ę",
+		"eopf": "𝕖",
+		"epar": "⋕",
+		"eparsl": "⧣",
+		"eplus": "⩱",
+		"epsi": "ε",
+		"epsilon": "ε",
+		"epsiv": "ϵ",
+		"eqcirc": "≖",
+		"eqcolon": "≕",
+		"eqsim": "≂",
+		"eqslantgtr": "⪖",
+		"eqslantless": "⪕",
+		"equals": "=",
+		"equest": "≟",
+		"equiv": "≡",
+		"equivDD": "⩸",
+		"eqvparsl": "⧥",
+		"erDot": "≓",
+		"erarr": "⥱",
+		"escr": "ℯ",
+		"esdot": "≐",
+		"esim": "≂",
+		"eta": "η",
+		"et": "ð",
+		"eth": "ð",
+		"eum": "ë",
+		"euml": "ë",
+		"euro": "€",
+		"excl": "!",
+		"exist": "∃",
+		"expectation": "ℰ",
+		"exponentiale": "ⅇ",
+		"fallingdotseq": "≒",
+		"fcy": "ф",
+		"female": "♀",
+		"ffilig": "ﬃ",
+		"fflig": "ﬀ",
+		"ffllig": "ﬄ",
+		"ffr": "𝔣",
+		"filig": "ﬁ",
+		"fjlig": "fj",
+		"flat": "♭",
+		"fllig": "ﬂ",
+		"fltns": "▱",
+		"fnof": "ƒ",
+		"fopf": "𝕗",
+		"forall": "∀",
+		"fork": "⋔",
+		"forkv": "⫙",
+		"fpartint": "⨍",
+		"frac1": "¼",
+		"frac12": "½",
+		"frac13": "⅓",
+		"frac14": "¼",
+		"frac15": "⅕",
+		"frac16": "⅙",
+		"frac18": "⅛",
+		"frac23": "⅔",
+		"frac25": "⅖",
+		"frac3": "¾",
+		"frac34": "¾",
+		"frac35": "⅗",
+		"frac38": "⅜",
+		"frac45": "⅘",
+		"frac56": "⅚",
+		"frac58": "⅝",
+		"frac78": "⅞",
+		"frasl": "⁄",
+		"frown": "⌢",
+		"fscr": "𝒻",
+		"gE": "≧",
+		"gEl": "⪌",
+		"gacute": "ǵ",
+		"gamma": "γ",
+		"gammad": "ϝ",
+		"gap": "⪆",
+		"gbreve": "ğ",
+		"gcirc": "ĝ",
+		"gcy": "г",
+		"gdot": "ġ",
+		"ge": "≥",
+		"gel": "⋛",
+		"geq": "≥",
+		"geqq": "≧",
+		"geqslant": "⩾",
+		"ges": "⩾",
+		"gescc": "⪩",
+		"gesdot": "⪀",
+		"gesdoto": "⪂",
+		"gesdotol": "⪄",
+		"gesl": "⋛︀",
+		"gesles": "⪔",
+		"gfr": "𝔤",
+		"gg": "≫",
+		"ggg": "⋙",
+		"gimel": "ℷ",
+		"gjcy": "ѓ",
+		"gl": "≷",
+		"glE": "⪒",
+		"gla": "⪥",
+		"glj": "⪤",
+		"gnE": "≩",
+		"gnap": "⪊",
+		"gnapprox": "⪊",
+		"gne": "⪈",
+		"gneq": "⪈",
+		"gneqq": "≩",
+		"gnsim": "⋧",
+		"gopf": "𝕘",
+		"grave": "`",
+		"gscr": "ℊ",
+		"gsim": "≳",
+		"gsime": "⪎",
+		"gsiml": "⪐",
+		"g": ">",
+		"gt": ">",
+		"gtcc": "⪧",
+		"gtcir": "⩺",
+		"gtdot": "⋗",
+		"gtlPar": "⦕",
+		"gtquest": "⩼",
+		"gtrapprox": "⪆",
+		"gtrarr": "⥸",
+		"gtrdot": "⋗",
+		"gtreqless": "⋛",
+		"gtreqqless": "⪌",
+		"gtrless": "≷",
+		"gtrsim": "≳",
+		"gvertneqq": "≩︀",
+		"gvnE": "≩︀",
+		"hArr": "⇔",
+		"hairsp": " ",
+		"half": "½",
+		"hamilt": "ℋ",
+		"hardcy": "ъ",
+		"harr": "↔",
+		"harrcir": "⥈",
+		"harrw": "↭",
+		"hbar": "ℏ",
+		"hcirc": "ĥ",
+		"hearts": "♥",
+		"heartsuit": "♥",
+		"hellip": "…",
+		"hercon": "⊹",
+		"hfr": "𝔥",
+		"hksearow": "⤥",
+		"hkswarow": "⤦",
+		"hoarr": "⇿",
+		"homtht": "∻",
+		"hookleftarrow": "↩",
+		"hookrightarrow": "↪",
+		"hopf": "𝕙",
+		"horbar": "―",
+		"hscr": "𝒽",
+		"hslash": "ℏ",
+		"hstrok": "ħ",
+		"hybull": "⁃",
+		"hyphen": "‐",
+		"iacut": "í",
+		"iacute": "í",
+		"ic": "⁣",
+		"icir": "î",
+		"icirc": "î",
+		"icy": "и",
+		"iecy": "е",
+		"iexc": "¡",
+		"iexcl": "¡",
+		"iff": "⇔",
+		"ifr": "𝔦",
+		"igrav": "ì",
+		"igrave": "ì",
+		"ii": "ⅈ",
+		"iiiint": "⨌",
+		"iiint": "∭",
+		"iinfin": "⧜",
+		"iiota": "℩",
+		"ijlig": "ĳ",
+		"imacr": "ī",
+		"image": "ℑ",
+		"imagline": "ℐ",
+		"imagpart": "ℑ",
+		"imath": "ı",
+		"imof": "⊷",
+		"imped": "Ƶ",
+		"in": "∈",
+		"incare": "℅",
+		"infin": "∞",
+		"infintie": "⧝",
+		"inodot": "ı",
+		"int": "∫",
+		"intcal": "⊺",
+		"integers": "ℤ",
+		"intercal": "⊺",
+		"intlarhk": "⨗",
+		"intprod": "⨼",
+		"iocy": "ё",
+		"iogon": "į",
+		"iopf": "𝕚",
+		"iota": "ι",
+		"iprod": "⨼",
+		"iques": "¿",
+		"iquest": "¿",
+		"iscr": "𝒾",
+		"isin": "∈",
+		"isinE": "⋹",
+		"isindot": "⋵",
+		"isins": "⋴",
+		"isinsv": "⋳",
+		"isinv": "∈",
+		"it": "⁢",
+		"itilde": "ĩ",
+		"iukcy": "і",
+		"ium": "ï",
+		"iuml": "ï",
+		"jcirc": "ĵ",
+		"jcy": "й",
+		"jfr": "𝔧",
+		"jmath": "ȷ",
+		"jopf": "𝕛",
+		"jscr": "𝒿",
+		"jsercy": "ј",
+		"jukcy": "є",
+		"kappa": "κ",
+		"kappav": "ϰ",
+		"kcedil": "ķ",
+		"kcy": "к",
+		"kfr": "𝔨",
+		"kgreen": "ĸ",
+		"khcy": "х",
+		"kjcy": "ќ",
+		"kopf": "𝕜",
+		"kscr": "𝓀",
+		"lAarr": "⇚",
+		"lArr": "⇐",
+		"lAtail": "⤛",
+		"lBarr": "⤎",
+		"lE": "≦",
+		"lEg": "⪋",
+		"lHar": "⥢",
+		"lacute": "ĺ",
+		"laemptyv": "⦴",
+		"lagran": "ℒ",
+		"lambda": "λ",
+		"lang": "⟨",
+		"langd": "⦑",
+		"langle": "⟨",
+		"lap": "⪅",
+		"laqu": "«",
+		"laquo": "«",
+		"larr": "←",
+		"larrb": "⇤",
+		"larrbfs": "⤟",
+		"larrfs": "⤝",
+		"larrhk": "↩",
+		"larrlp": "↫",
+		"larrpl": "⤹",
+		"larrsim": "⥳",
+		"larrtl": "↢",
+		"lat": "⪫",
+		"latail": "⤙",
+		"late": "⪭",
+		"lates": "⪭︀",
+		"lbarr": "⤌",
+		"lbbrk": "❲",
+		"lbrace": "{",
+		"lbrack": "[",
+		"lbrke": "⦋",
+		"lbrksld": "⦏",
+		"lbrkslu": "⦍",
+		"lcaron": "ľ",
+		"lcedil": "ļ",
+		"lceil": "⌈",
+		"lcub": "{",
+		"lcy": "л",
+		"ldca": "⤶",
+		"ldquo": "“",
+		"ldquor": "„",
+		"ldrdhar": "⥧",
+		"ldrushar": "⥋",
+		"ldsh": "↲",
+		"le": "≤",
+		"leftarrow": "←",
+		"leftarrowtail": "↢",
+		"leftharpoondown": "↽",
+		"leftharpoonup": "↼",
+		"leftleftarrows": "⇇",
+		"leftrightarrow": "↔",
+		"leftrightarrows": "⇆",
+		"leftrightharpoons": "⇋",
+		"leftrightsquigarrow": "↭",
+		"leftthreetimes": "⋋",
+		"leg": "⋚",
+		"leq": "≤",
+		"leqq": "≦",
+		"leqslant": "⩽",
+		"les": "⩽",
+		"lescc": "⪨",
+		"lesdot": "⩿",
+		"lesdoto": "⪁",
+		"lesdotor": "⪃",
+		"lesg": "⋚︀",
+		"lesges": "⪓",
+		"lessapprox": "⪅",
+		"lessdot": "⋖",
+		"lesseqgtr": "⋚",
+		"lesseqqgtr": "⪋",
+		"lessgtr": "≶",
+		"lesssim": "≲",
+		"lfisht": "⥼",
+		"lfloor": "⌊",
+		"lfr": "𝔩",
+		"lg": "≶",
+		"lgE": "⪑",
+		"lhard": "↽",
+		"lharu": "↼",
+		"lharul": "⥪",
+		"lhblk": "▄",
+		"ljcy": "љ",
+		"ll": "≪",
+		"llarr": "⇇",
+		"llcorner": "⌞",
+		"llhard": "⥫",
+		"lltri": "◺",
+		"lmidot": "ŀ",
+		"lmoust": "⎰",
+		"lmoustache": "⎰",
+		"lnE": "≨",
+		"lnap": "⪉",
+		"lnapprox": "⪉",
+		"lne": "⪇",
+		"lneq": "⪇",
+		"lneqq": "≨",
+		"lnsim": "⋦",
+		"loang": "⟬",
+		"loarr": "⇽",
+		"lobrk": "⟦",
+		"longleftarrow": "⟵",
+		"longleftrightarrow": "⟷",
+		"longmapsto": "⟼",
+		"longrightarrow": "⟶",
+		"looparrowleft": "↫",
+		"looparrowright": "↬",
+		"lopar": "⦅",
+		"lopf": "𝕝",
+		"loplus": "⨭",
+		"lotimes": "⨴",
+		"lowast": "∗",
+		"lowbar": "_",
+		"loz": "◊",
+		"lozenge": "◊",
+		"lozf": "⧫",
+		"lpar": "(",
+		"lparlt": "⦓",
+		"lrarr": "⇆",
+		"lrcorner": "⌟",
+		"lrhar": "⇋",
+		"lrhard": "⥭",
+		"lrm": "‎",
+		"lrtri": "⊿",
+		"lsaquo": "‹",
+		"lscr": "𝓁",
+		"lsh": "↰",
+		"lsim": "≲",
+		"lsime": "⪍",
+		"lsimg": "⪏",
+		"lsqb": "[",
+		"lsquo": "‘",
+		"lsquor": "‚",
+		"lstrok": "ł",
+		"l": "<",
+		"lt": "<",
+		"ltcc": "⪦",
+		"ltcir": "⩹",
+		"ltdot": "⋖",
+		"lthree": "⋋",
+		"ltimes": "⋉",
+		"ltlarr": "⥶",
+		"ltquest": "⩻",
+		"ltrPar": "⦖",
+		"ltri": "◃",
+		"ltrie": "⊴",
+		"ltrif": "◂",
+		"lurdshar": "⥊",
+		"luruhar": "⥦",
+		"lvertneqq": "≨︀",
+		"lvnE": "≨︀",
+		"mDDot": "∺",
+		"mac": "¯",
+		"macr": "¯",
+		"male": "♂",
+		"malt": "✠",
+		"maltese": "✠",
+		"map": "↦",
+		"mapsto": "↦",
+		"mapstodown": "↧",
+		"mapstoleft": "↤",
+		"mapstoup": "↥",
+		"marker": "▮",
+		"mcomma": "⨩",
+		"mcy": "м",
+		"mdash": "—",
+		"measuredangle": "∡",
+		"mfr": "𝔪",
+		"mho": "℧",
+		"micr": "µ",
+		"micro": "µ",
+		"mid": "∣",
+		"midast": "*",
+		"midcir": "⫰",
+		"middo": "·",
+		"middot": "·",
+		"minus": "−",
+		"minusb": "⊟",
+		"minusd": "∸",
+		"minusdu": "⨪",
+		"mlcp": "⫛",
+		"mldr": "…",
+		"mnplus": "∓",
+		"models": "⊧",
+		"mopf": "𝕞",
+		"mp": "∓",
+		"mscr": "𝓂",
+		"mstpos": "∾",
+		"mu": "μ",
+		"multimap": "⊸",
+		"mumap": "⊸",
+		"nGg": "⋙̸",
+		"nGt": "≫⃒",
+		"nGtv": "≫̸",
+		"nLeftarrow": "⇍",
+		"nLeftrightarrow": "⇎",
+		"nLl": "⋘̸",
+		"nLt": "≪⃒",
+		"nLtv": "≪̸",
+		"nRightarrow": "⇏",
+		"nVDash": "⊯",
+		"nVdash": "⊮",
+		"nabla": "∇",
+		"nacute": "ń",
+		"nang": "∠⃒",
+		"nap": "≉",
+		"napE": "⩰̸",
+		"napid": "≋̸",
+		"napos": "ŉ",
+		"napprox": "≉",
+		"natur": "♮",
+		"natural": "♮",
+		"naturals": "ℕ",
+		"nbs": "\xA0",
+		"nbsp": "\xA0",
+		"nbump": "≎̸",
+		"nbumpe": "≏̸",
+		"ncap": "⩃",
+		"ncaron": "ň",
+		"ncedil": "ņ",
+		"ncong": "≇",
+		"ncongdot": "⩭̸",
+		"ncup": "⩂",
+		"ncy": "н",
+		"ndash": "–",
+		"ne": "≠",
+		"neArr": "⇗",
+		"nearhk": "⤤",
+		"nearr": "↗",
+		"nearrow": "↗",
+		"nedot": "≐̸",
+		"nequiv": "≢",
+		"nesear": "⤨",
+		"nesim": "≂̸",
+		"nexist": "∄",
+		"nexists": "∄",
+		"nfr": "𝔫",
+		"ngE": "≧̸",
+		"nge": "≱",
+		"ngeq": "≱",
+		"ngeqq": "≧̸",
+		"ngeqslant": "⩾̸",
+		"nges": "⩾̸",
+		"ngsim": "≵",
+		"ngt": "≯",
+		"ngtr": "≯",
+		"nhArr": "⇎",
+		"nharr": "↮",
+		"nhpar": "⫲",
+		"ni": "∋",
+		"nis": "⋼",
+		"nisd": "⋺",
+		"niv": "∋",
+		"njcy": "њ",
+		"nlArr": "⇍",
+		"nlE": "≦̸",
+		"nlarr": "↚",
+		"nldr": "‥",
+		"nle": "≰",
+		"nleftarrow": "↚",
+		"nleftrightarrow": "↮",
+		"nleq": "≰",
+		"nleqq": "≦̸",
+		"nleqslant": "⩽̸",
+		"nles": "⩽̸",
+		"nless": "≮",
+		"nlsim": "≴",
+		"nlt": "≮",
+		"nltri": "⋪",
+		"nltrie": "⋬",
+		"nmid": "∤",
+		"nopf": "𝕟",
+		"no": "¬",
+		"not": "¬",
+		"notin": "∉",
+		"notinE": "⋹̸",
+		"notindot": "⋵̸",
+		"notinva": "∉",
+		"notinvb": "⋷",
+		"notinvc": "⋶",
+		"notni": "∌",
+		"notniva": "∌",
+		"notnivb": "⋾",
+		"notnivc": "⋽",
+		"npar": "∦",
+		"nparallel": "∦",
+		"nparsl": "⫽⃥",
+		"npart": "∂̸",
+		"npolint": "⨔",
+		"npr": "⊀",
+		"nprcue": "⋠",
+		"npre": "⪯̸",
+		"nprec": "⊀",
+		"npreceq": "⪯̸",
+		"nrArr": "⇏",
+		"nrarr": "↛",
+		"nrarrc": "⤳̸",
+		"nrarrw": "↝̸",
+		"nrightarrow": "↛",
+		"nrtri": "⋫",
+		"nrtrie": "⋭",
+		"nsc": "⊁",
+		"nsccue": "⋡",
+		"nsce": "⪰̸",
+		"nscr": "𝓃",
+		"nshortmid": "∤",
+		"nshortparallel": "∦",
+		"nsim": "≁",
+		"nsime": "≄",
+		"nsimeq": "≄",
+		"nsmid": "∤",
+		"nspar": "∦",
+		"nsqsube": "⋢",
+		"nsqsupe": "⋣",
+		"nsub": "⊄",
+		"nsubE": "⫅̸",
+		"nsube": "⊈",
+		"nsubset": "⊂⃒",
+		"nsubseteq": "⊈",
+		"nsubseteqq": "⫅̸",
+		"nsucc": "⊁",
+		"nsucceq": "⪰̸",
+		"nsup": "⊅",
+		"nsupE": "⫆̸",
+		"nsupe": "⊉",
+		"nsupset": "⊃⃒",
+		"nsupseteq": "⊉",
+		"nsupseteqq": "⫆̸",
+		"ntgl": "≹",
+		"ntild": "ñ",
+		"ntilde": "ñ",
+		"ntlg": "≸",
+		"ntriangleleft": "⋪",
+		"ntrianglelefteq": "⋬",
+		"ntriangleright": "⋫",
+		"ntrianglerighteq": "⋭",
+		"nu": "ν",
+		"num": "#",
+		"numero": "№",
+		"numsp": " ",
+		"nvDash": "⊭",
+		"nvHarr": "⤄",
+		"nvap": "≍⃒",
+		"nvdash": "⊬",
+		"nvge": "≥⃒",
+		"nvgt": ">⃒",
+		"nvinfin": "⧞",
+		"nvlArr": "⤂",
+		"nvle": "≤⃒",
+		"nvlt": "<⃒",
+		"nvltrie": "⊴⃒",
+		"nvrArr": "⤃",
+		"nvrtrie": "⊵⃒",
+		"nvsim": "∼⃒",
+		"nwArr": "⇖",
+		"nwarhk": "⤣",
+		"nwarr": "↖",
+		"nwarrow": "↖",
+		"nwnear": "⤧",
+		"oS": "Ⓢ",
+		"oacut": "ó",
+		"oacute": "ó",
+		"oast": "⊛",
+		"ocir": "ô",
+		"ocirc": "ô",
+		"ocy": "о",
+		"odash": "⊝",
+		"odblac": "ő",
+		"odiv": "⨸",
+		"odot": "⊙",
+		"odsold": "⦼",
+		"oelig": "œ",
+		"ofcir": "⦿",
+		"ofr": "𝔬",
+		"ogon": "˛",
+		"ograv": "ò",
+		"ograve": "ò",
+		"ogt": "⧁",
+		"ohbar": "⦵",
+		"ohm": "Ω",
+		"oint": "∮",
+		"olarr": "↺",
+		"olcir": "⦾",
+		"olcross": "⦻",
+		"oline": "‾",
+		"olt": "⧀",
+		"omacr": "ō",
+		"omega": "ω",
+		"omicron": "ο",
+		"omid": "⦶",
+		"ominus": "⊖",
+		"oopf": "𝕠",
+		"opar": "⦷",
+		"operp": "⦹",
+		"oplus": "⊕",
+		"or": "∨",
+		"orarr": "↻",
+		"ord": "º",
+		"order": "ℴ",
+		"orderof": "ℴ",
+		"ordf": "ª",
+		"ordm": "º",
+		"origof": "⊶",
+		"oror": "⩖",
+		"orslope": "⩗",
+		"orv": "⩛",
+		"oscr": "ℴ",
+		"oslas": "ø",
+		"oslash": "ø",
+		"osol": "⊘",
+		"otild": "õ",
+		"otilde": "õ",
+		"otimes": "⊗",
+		"otimesas": "⨶",
+		"oum": "ö",
+		"ouml": "ö",
+		"ovbar": "⌽",
+		"par": "¶",
+		"para": "¶",
+		"parallel": "∥",
+		"parsim": "⫳",
+		"parsl": "⫽",
+		"part": "∂",
+		"pcy": "п",
+		"percnt": "%",
+		"period": ".",
+		"permil": "‰",
+		"perp": "⊥",
+		"pertenk": "‱",
+		"pfr": "𝔭",
+		"phi": "φ",
+		"phiv": "ϕ",
+		"phmmat": "ℳ",
+		"phone": "☎",
+		"pi": "π",
+		"pitchfork": "⋔",
+		"piv": "ϖ",
+		"planck": "ℏ",
+		"planckh": "ℎ",
+		"plankv": "ℏ",
+		"plus": "+",
+		"plusacir": "⨣",
+		"plusb": "⊞",
+		"pluscir": "⨢",
+		"plusdo": "∔",
+		"plusdu": "⨥",
+		"pluse": "⩲",
+		"plusm": "±",
+		"plusmn": "±",
+		"plussim": "⨦",
+		"plustwo": "⨧",
+		"pm": "±",
+		"pointint": "⨕",
+		"popf": "𝕡",
+		"poun": "£",
+		"pound": "£",
+		"pr": "≺",
+		"prE": "⪳",
+		"prap": "⪷",
+		"prcue": "≼",
+		"pre": "⪯",
+		"prec": "≺",
+		"precapprox": "⪷",
+		"preccurlyeq": "≼",
+		"preceq": "⪯",
+		"precnapprox": "⪹",
+		"precneqq": "⪵",
+		"precnsim": "⋨",
+		"precsim": "≾",
+		"prime": "′",
+		"primes": "ℙ",
+		"prnE": "⪵",
+		"prnap": "⪹",
+		"prnsim": "⋨",
+		"prod": "∏",
+		"profalar": "⌮",
+		"profline": "⌒",
+		"profsurf": "⌓",
+		"prop": "∝",
+		"propto": "∝",
+		"prsim": "≾",
+		"prurel": "⊰",
+		"pscr": "𝓅",
+		"psi": "ψ",
+		"puncsp": " ",
+		"qfr": "𝔮",
+		"qint": "⨌",
+		"qopf": "𝕢",
+		"qprime": "⁗",
+		"qscr": "𝓆",
+		"quaternions": "ℍ",
+		"quatint": "⨖",
+		"quest": "?",
+		"questeq": "≟",
+		"quo": "\"",
+		"quot": "\"",
+		"rAarr": "⇛",
+		"rArr": "⇒",
+		"rAtail": "⤜",
+		"rBarr": "⤏",
+		"rHar": "⥤",
+		"race": "∽̱",
+		"racute": "ŕ",
+		"radic": "√",
+		"raemptyv": "⦳",
+		"rang": "⟩",
+		"rangd": "⦒",
+		"range": "⦥",
+		"rangle": "⟩",
+		"raqu": "»",
+		"raquo": "»",
+		"rarr": "→",
+		"rarrap": "⥵",
+		"rarrb": "⇥",
+		"rarrbfs": "⤠",
+		"rarrc": "⤳",
+		"rarrfs": "⤞",
+		"rarrhk": "↪",
+		"rarrlp": "↬",
+		"rarrpl": "⥅",
+		"rarrsim": "⥴",
+		"rarrtl": "↣",
+		"rarrw": "↝",
+		"ratail": "⤚",
+		"ratio": "∶",
+		"rationals": "ℚ",
+		"rbarr": "⤍",
+		"rbbrk": "❳",
+		"rbrace": "}",
+		"rbrack": "]",
+		"rbrke": "⦌",
+		"rbrksld": "⦎",
+		"rbrkslu": "⦐",
+		"rcaron": "ř",
+		"rcedil": "ŗ",
+		"rceil": "⌉",
+		"rcub": "}",
+		"rcy": "р",
+		"rdca": "⤷",
+		"rdldhar": "⥩",
+		"rdquo": "”",
+		"rdquor": "”",
+		"rdsh": "↳",
+		"real": "ℜ",
+		"realine": "ℛ",
+		"realpart": "ℜ",
+		"reals": "ℝ",
+		"rect": "▭",
+		"re": "®",
+		"reg": "®",
+		"rfisht": "⥽",
+		"rfloor": "⌋",
+		"rfr": "𝔯",
+		"rhard": "⇁",
+		"rharu": "⇀",
+		"rharul": "⥬",
+		"rho": "ρ",
+		"rhov": "ϱ",
+		"rightarrow": "→",
+		"rightarrowtail": "↣",
+		"rightharpoondown": "⇁",
+		"rightharpoonup": "⇀",
+		"rightleftarrows": "⇄",
+		"rightleftharpoons": "⇌",
+		"rightrightarrows": "⇉",
+		"rightsquigarrow": "↝",
+		"rightthreetimes": "⋌",
+		"ring": "˚",
+		"risingdotseq": "≓",
+		"rlarr": "⇄",
+		"rlhar": "⇌",
+		"rlm": "‏",
+		"rmoust": "⎱",
+		"rmoustache": "⎱",
+		"rnmid": "⫮",
+		"roang": "⟭",
+		"roarr": "⇾",
+		"robrk": "⟧",
+		"ropar": "⦆",
+		"ropf": "𝕣",
+		"roplus": "⨮",
+		"rotimes": "⨵",
+		"rpar": ")",
+		"rpargt": "⦔",
+		"rppolint": "⨒",
+		"rrarr": "⇉",
+		"rsaquo": "›",
+		"rscr": "𝓇",
+		"rsh": "↱",
+		"rsqb": "]",
+		"rsquo": "’",
+		"rsquor": "’",
+		"rthree": "⋌",
+		"rtimes": "⋊",
+		"rtri": "▹",
+		"rtrie": "⊵",
+		"rtrif": "▸",
+		"rtriltri": "⧎",
+		"ruluhar": "⥨",
+		"rx": "℞",
+		"sacute": "ś",
+		"sbquo": "‚",
+		"sc": "≻",
+		"scE": "⪴",
+		"scap": "⪸",
+		"scaron": "š",
+		"sccue": "≽",
+		"sce": "⪰",
+		"scedil": "ş",
+		"scirc": "ŝ",
+		"scnE": "⪶",
+		"scnap": "⪺",
+		"scnsim": "⋩",
+		"scpolint": "⨓",
+		"scsim": "≿",
+		"scy": "с",
+		"sdot": "⋅",
+		"sdotb": "⊡",
+		"sdote": "⩦",
+		"seArr": "⇘",
+		"searhk": "⤥",
+		"searr": "↘",
+		"searrow": "↘",
+		"sec": "§",
+		"sect": "§",
+		"semi": ";",
+		"seswar": "⤩",
+		"setminus": "∖",
+		"setmn": "∖",
+		"sext": "✶",
+		"sfr": "𝔰",
+		"sfrown": "⌢",
+		"sharp": "♯",
+		"shchcy": "щ",
+		"shcy": "ш",
+		"shortmid": "∣",
+		"shortparallel": "∥",
+		"sh": "­",
+		"shy": "­",
+		"sigma": "σ",
+		"sigmaf": "ς",
+		"sigmav": "ς",
+		"sim": "∼",
+		"simdot": "⩪",
+		"sime": "≃",
+		"simeq": "≃",
+		"simg": "⪞",
+		"simgE": "⪠",
+		"siml": "⪝",
+		"simlE": "⪟",
+		"simne": "≆",
+		"simplus": "⨤",
+		"simrarr": "⥲",
+		"slarr": "←",
+		"smallsetminus": "∖",
+		"smashp": "⨳",
+		"smeparsl": "⧤",
+		"smid": "∣",
+		"smile": "⌣",
+		"smt": "⪪",
+		"smte": "⪬",
+		"smtes": "⪬︀",
+		"softcy": "ь",
+		"sol": "/",
+		"solb": "⧄",
+		"solbar": "⌿",
+		"sopf": "𝕤",
+		"spades": "♠",
+		"spadesuit": "♠",
+		"spar": "∥",
+		"sqcap": "⊓",
+		"sqcaps": "⊓︀",
+		"sqcup": "⊔",
+		"sqcups": "⊔︀",
+		"sqsub": "⊏",
+		"sqsube": "⊑",
+		"sqsubset": "⊏",
+		"sqsubseteq": "⊑",
+		"sqsup": "⊐",
+		"sqsupe": "⊒",
+		"sqsupset": "⊐",
+		"sqsupseteq": "⊒",
+		"squ": "□",
+		"square": "□",
+		"squarf": "▪",
+		"squf": "▪",
+		"srarr": "→",
+		"sscr": "𝓈",
+		"ssetmn": "∖",
+		"ssmile": "⌣",
+		"sstarf": "⋆",
+		"star": "☆",
+		"starf": "★",
+		"straightepsilon": "ϵ",
+		"straightphi": "ϕ",
+		"strns": "¯",
+		"sub": "⊂",
+		"subE": "⫅",
+		"subdot": "⪽",
+		"sube": "⊆",
+		"subedot": "⫃",
+		"submult": "⫁",
+		"subnE": "⫋",
+		"subne": "⊊",
+		"subplus": "⪿",
+		"subrarr": "⥹",
+		"subset": "⊂",
+		"subseteq": "⊆",
+		"subseteqq": "⫅",
+		"subsetneq": "⊊",
+		"subsetneqq": "⫋",
+		"subsim": "⫇",
+		"subsub": "⫕",
+		"subsup": "⫓",
+		"succ": "≻",
+		"succapprox": "⪸",
+		"succcurlyeq": "≽",
+		"succeq": "⪰",
+		"succnapprox": "⪺",
+		"succneqq": "⪶",
+		"succnsim": "⋩",
+		"succsim": "≿",
+		"sum": "∑",
+		"sung": "♪",
+		"sup": "⊃",
+		"sup1": "¹",
+		"sup2": "²",
+		"sup3": "³",
+		"supE": "⫆",
+		"supdot": "⪾",
+		"supdsub": "⫘",
+		"supe": "⊇",
+		"supedot": "⫄",
+		"suphsol": "⟉",
+		"suphsub": "⫗",
+		"suplarr": "⥻",
+		"supmult": "⫂",
+		"supnE": "⫌",
+		"supne": "⊋",
+		"supplus": "⫀",
+		"supset": "⊃",
+		"supseteq": "⊇",
+		"supseteqq": "⫆",
+		"supsetneq": "⊋",
+		"supsetneqq": "⫌",
+		"supsim": "⫈",
+		"supsub": "⫔",
+		"supsup": "⫖",
+		"swArr": "⇙",
+		"swarhk": "⤦",
+		"swarr": "↙",
+		"swarrow": "↙",
+		"swnwar": "⤪",
+		"szli": "ß",
+		"szlig": "ß",
+		"target": "⌖",
+		"tau": "τ",
+		"tbrk": "⎴",
+		"tcaron": "ť",
+		"tcedil": "ţ",
+		"tcy": "т",
+		"tdot": "⃛",
+		"telrec": "⌕",
+		"tfr": "𝔱",
+		"there4": "∴",
+		"therefore": "∴",
+		"theta": "θ",
+		"thetasym": "ϑ",
+		"thetav": "ϑ",
+		"thickapprox": "≈",
+		"thicksim": "∼",
+		"thinsp": " ",
+		"thkap": "≈",
+		"thksim": "∼",
+		"thor": "þ",
+		"thorn": "þ",
+		"tilde": "˜",
+		"time": "×",
+		"times": "×",
+		"timesb": "⊠",
+		"timesbar": "⨱",
+		"timesd": "⨰",
+		"tint": "∭",
+		"toea": "⤨",
+		"top": "⊤",
+		"topbot": "⌶",
+		"topcir": "⫱",
+		"topf": "𝕥",
+		"topfork": "⫚",
+		"tosa": "⤩",
+		"tprime": "‴",
+		"trade": "™",
+		"triangle": "▵",
+		"triangledown": "▿",
+		"triangleleft": "◃",
+		"trianglelefteq": "⊴",
+		"triangleq": "≜",
+		"triangleright": "▹",
+		"trianglerighteq": "⊵",
+		"tridot": "◬",
+		"trie": "≜",
+		"triminus": "⨺",
+		"triplus": "⨹",
+		"trisb": "⧍",
+		"tritime": "⨻",
+		"trpezium": "⏢",
+		"tscr": "𝓉",
+		"tscy": "ц",
+		"tshcy": "ћ",
+		"tstrok": "ŧ",
+		"twixt": "≬",
+		"twoheadleftarrow": "↞",
+		"twoheadrightarrow": "↠",
+		"uArr": "⇑",
+		"uHar": "⥣",
+		"uacut": "ú",
+		"uacute": "ú",
+		"uarr": "↑",
+		"ubrcy": "ў",
+		"ubreve": "ŭ",
+		"ucir": "û",
+		"ucirc": "û",
+		"ucy": "у",
+		"udarr": "⇅",
+		"udblac": "ű",
+		"udhar": "⥮",
+		"ufisht": "⥾",
+		"ufr": "𝔲",
+		"ugrav": "ù",
+		"ugrave": "ù",
+		"uharl": "↿",
+		"uharr": "↾",
+		"uhblk": "▀",
+		"ulcorn": "⌜",
+		"ulcorner": "⌜",
+		"ulcrop": "⌏",
+		"ultri": "◸",
+		"umacr": "ū",
+		"um": "¨",
+		"uml": "¨",
+		"uogon": "ų",
+		"uopf": "𝕦",
+		"uparrow": "↑",
+		"updownarrow": "↕",
+		"upharpoonleft": "↿",
+		"upharpoonright": "↾",
+		"uplus": "⊎",
+		"upsi": "υ",
+		"upsih": "ϒ",
+		"upsilon": "υ",
+		"upuparrows": "⇈",
+		"urcorn": "⌝",
+		"urcorner": "⌝",
+		"urcrop": "⌎",
+		"uring": "ů",
+		"urtri": "◹",
+		"uscr": "𝓊",
+		"utdot": "⋰",
+		"utilde": "ũ",
+		"utri": "▵",
+		"utrif": "▴",
+		"uuarr": "⇈",
+		"uum": "ü",
+		"uuml": "ü",
+		"uwangle": "⦧",
+		"vArr": "⇕",
+		"vBar": "⫨",
+		"vBarv": "⫩",
+		"vDash": "⊨",
+		"vangrt": "⦜",
+		"varepsilon": "ϵ",
+		"varkappa": "ϰ",
+		"varnothing": "∅",
+		"varphi": "ϕ",
+		"varpi": "ϖ",
+		"varpropto": "∝",
+		"varr": "↕",
+		"varrho": "ϱ",
+		"varsigma": "ς",
+		"varsubsetneq": "⊊︀",
+		"varsubsetneqq": "⫋︀",
+		"varsupsetneq": "⊋︀",
+		"varsupsetneqq": "⫌︀",
+		"vartheta": "ϑ",
+		"vartriangleleft": "⊲",
+		"vartriangleright": "⊳",
+		"vcy": "в",
+		"vdash": "⊢",
+		"vee": "∨",
+		"veebar": "⊻",
+		"veeeq": "≚",
+		"vellip": "⋮",
+		"verbar": "|",
+		"vert": "|",
+		"vfr": "𝔳",
+		"vltri": "⊲",
+		"vnsub": "⊂⃒",
+		"vnsup": "⊃⃒",
+		"vopf": "𝕧",
+		"vprop": "∝",
+		"vrtri": "⊳",
+		"vscr": "𝓋",
+		"vsubnE": "⫋︀",
+		"vsubne": "⊊︀",
+		"vsupnE": "⫌︀",
+		"vsupne": "⊋︀",
+		"vzigzag": "⦚",
+		"wcirc": "ŵ",
+		"wedbar": "⩟",
+		"wedge": "∧",
+		"wedgeq": "≙",
+		"weierp": "℘",
+		"wfr": "𝔴",
+		"wopf": "𝕨",
+		"wp": "℘",
+		"wr": "≀",
+		"wreath": "≀",
+		"wscr": "𝓌",
+		"xcap": "⋂",
+		"xcirc": "◯",
+		"xcup": "⋃",
+		"xdtri": "▽",
+		"xfr": "𝔵",
+		"xhArr": "⟺",
+		"xharr": "⟷",
+		"xi": "ξ",
+		"xlArr": "⟸",
+		"xlarr": "⟵",
+		"xmap": "⟼",
+		"xnis": "⋻",
+		"xodot": "⨀",
+		"xopf": "𝕩",
+		"xoplus": "⨁",
+		"xotime": "⨂",
+		"xrArr": "⟹",
+		"xrarr": "⟶",
+		"xscr": "𝓍",
+		"xsqcup": "⨆",
+		"xuplus": "⨄",
+		"xutri": "△",
+		"xvee": "⋁",
+		"xwedge": "⋀",
+		"yacut": "ý",
+		"yacute": "ý",
+		"yacy": "я",
+		"ycirc": "ŷ",
+		"ycy": "ы",
+		"ye": "¥",
+		"yen": "¥",
+		"yfr": "𝔶",
+		"yicy": "ї",
+		"yopf": "𝕪",
+		"yscr": "𝓎",
+		"yucy": "ю",
+		"yum": "ÿ",
+		"yuml": "ÿ",
+		"zacute": "ź",
+		"zcaron": "ž",
+		"zcy": "з",
+		"zdot": "ż",
+		"zeetrf": "ℨ",
+		"zeta": "ζ",
+		"zfr": "𝔷",
+		"zhcy": "ж",
+		"zigrarr": "⇝",
+		"zopf": "𝕫",
+		"zscr": "𝓏",
+		"zwj": "‍",
+		"zwnj": "‌"
+	};
+}));
+//#endregion
+//#region node_modules/parse-entities/decode-entity.js
+var require_decode_entity = /* @__PURE__ */ __commonJSMin(((exports, module) => {
+	var characterEntities = require_character_entities();
+	module.exports = decodeEntity;
+	var own = {}.hasOwnProperty;
+	function decodeEntity(characters) {
+		return own.call(characterEntities, characters) ? characterEntities[characters] : false;
+	}
+}));
+//#endregion
+//#region node_modules/micromark/dist/character/ascii-digit.js
+var require_ascii_digit = /* @__PURE__ */ __commonJSMin(((exports, module) => {
+	module.exports = require_regex_check()(/\d/);
+}));
+//#endregion
+//#region node_modules/micromark/dist/character/ascii-hex-digit.js
+var require_ascii_hex_digit = /* @__PURE__ */ __commonJSMin(((exports, module) => {
+	module.exports = require_regex_check()(/[\dA-Fa-f]/);
+}));
+//#endregion
+//#region node_modules/micromark/dist/tokenize/character-reference.js
+var require_character_reference = /* @__PURE__ */ __commonJSMin(((exports, module) => {
+	var decodeEntity = require_decode_entity();
+	var asciiAlphanumeric = require_ascii_alphanumeric();
+	var asciiDigit = require_ascii_digit();
+	var asciiHexDigit = require_ascii_hex_digit();
+	function _interopDefaultLegacy(e) {
+		return e && typeof e === "object" && "default" in e ? e : { default: e };
+	}
+	var decodeEntity__default = /* @__PURE__ */ _interopDefaultLegacy(decodeEntity);
+	var characterReference = {
+		name: "characterReference",
+		tokenize: tokenizeCharacterReference
+	};
+	function tokenizeCharacterReference(effects, ok, nok) {
+		var self = this;
+		var size = 0;
+		var max;
+		var test;
+		return start;
+		function start(code) {
+			effects.enter("characterReference");
+			effects.enter("characterReferenceMarker");
+			effects.consume(code);
+			effects.exit("characterReferenceMarker");
+			return open;
+		}
+		function open(code) {
+			if (code === 35) {
+				effects.enter("characterReferenceMarkerNumeric");
+				effects.consume(code);
+				effects.exit("characterReferenceMarkerNumeric");
+				return numeric;
+			}
+			effects.enter("characterReferenceValue");
+			max = 31;
+			test = asciiAlphanumeric;
+			return value(code);
+		}
+		function numeric(code) {
+			if (code === 88 || code === 120) {
+				effects.enter("characterReferenceMarkerHexadecimal");
+				effects.consume(code);
+				effects.exit("characterReferenceMarkerHexadecimal");
+				effects.enter("characterReferenceValue");
+				max = 6;
+				test = asciiHexDigit;
+				return value;
+			}
+			effects.enter("characterReferenceValue");
+			max = 7;
+			test = asciiDigit;
+			return value(code);
+		}
+		function value(code) {
+			var token;
+			if (code === 59 && size) {
+				token = effects.exit("characterReferenceValue");
+				if (test === asciiAlphanumeric && !decodeEntity__default["default"](self.sliceSerialize(token))) return nok(code);
+				effects.enter("characterReferenceMarker");
+				effects.consume(code);
+				effects.exit("characterReferenceMarker");
+				effects.exit("characterReference");
+				return ok;
+			}
+			if (test(code) && size++ < max) {
+				effects.consume(code);
+				return value;
+			}
+			return nok(code);
+		}
+	}
+	module.exports = characterReference;
+}));
+//#endregion
+//#region node_modules/micromark/dist/tokenize/code-fenced.js
+var require_code_fenced = /* @__PURE__ */ __commonJSMin(((exports, module) => {
+	var markdownLineEnding = require_markdown_line_ending();
+	var markdownLineEndingOrSpace = require_markdown_line_ending_or_space();
+	var prefixSize = require_prefix_size();
+	var factorySpace = require_factory_space();
+	var codeFenced = {
+		name: "codeFenced",
+		tokenize: tokenizeCodeFenced,
+		concrete: true
+	};
+	function tokenizeCodeFenced(effects, ok, nok) {
+		var self = this;
+		var closingFenceConstruct = {
+			tokenize: tokenizeClosingFence,
+			partial: true
+		};
+		var initialPrefix = prefixSize(this.events, "linePrefix");
+		var sizeOpen = 0;
+		var marker;
+		return start;
+		function start(code) {
+			effects.enter("codeFenced");
+			effects.enter("codeFencedFence");
+			effects.enter("codeFencedFenceSequence");
+			marker = code;
+			return sequenceOpen(code);
+		}
+		function sequenceOpen(code) {
+			if (code === marker) {
+				effects.consume(code);
+				sizeOpen++;
+				return sequenceOpen;
+			}
+			effects.exit("codeFencedFenceSequence");
+			return sizeOpen < 3 ? nok(code) : factorySpace(effects, infoOpen, "whitespace")(code);
+		}
+		function infoOpen(code) {
+			if (code === null || markdownLineEnding(code)) return openAfter(code);
+			effects.enter("codeFencedFenceInfo");
+			effects.enter("chunkString", { contentType: "string" });
+			return info(code);
+		}
+		function info(code) {
+			if (code === null || markdownLineEndingOrSpace(code)) {
+				effects.exit("chunkString");
+				effects.exit("codeFencedFenceInfo");
+				return factorySpace(effects, infoAfter, "whitespace")(code);
+			}
+			if (code === 96 && code === marker) return nok(code);
+			effects.consume(code);
+			return info;
+		}
+		function infoAfter(code) {
+			if (code === null || markdownLineEnding(code)) return openAfter(code);
+			effects.enter("codeFencedFenceMeta");
+			effects.enter("chunkString", { contentType: "string" });
+			return meta(code);
+		}
+		function meta(code) {
+			if (code === null || markdownLineEnding(code)) {
+				effects.exit("chunkString");
+				effects.exit("codeFencedFenceMeta");
+				return openAfter(code);
+			}
+			if (code === 96 && code === marker) return nok(code);
+			effects.consume(code);
+			return meta;
+		}
+		function openAfter(code) {
+			effects.exit("codeFencedFence");
+			return self.interrupt ? ok(code) : content(code);
+		}
+		function content(code) {
+			if (code === null) return after(code);
+			if (markdownLineEnding(code)) {
+				effects.enter("lineEnding");
+				effects.consume(code);
+				effects.exit("lineEnding");
+				return effects.attempt(closingFenceConstruct, after, initialPrefix ? factorySpace(effects, content, "linePrefix", initialPrefix + 1) : content);
+			}
+			effects.enter("codeFlowValue");
+			return contentContinue(code);
+		}
+		function contentContinue(code) {
+			if (code === null || markdownLineEnding(code)) {
+				effects.exit("codeFlowValue");
+				return content(code);
+			}
+			effects.consume(code);
+			return contentContinue;
+		}
+		function after(code) {
+			effects.exit("codeFenced");
+			return ok(code);
+		}
+		function tokenizeClosingFence(effects, ok, nok) {
+			var size = 0;
+			return factorySpace(effects, closingSequenceStart, "linePrefix", this.parser.constructs.disable.null.indexOf("codeIndented") > -1 ? void 0 : 4);
+			function closingSequenceStart(code) {
+				effects.enter("codeFencedFence");
+				effects.enter("codeFencedFenceSequence");
+				return closingSequence(code);
+			}
+			function closingSequence(code) {
+				if (code === marker) {
+					effects.consume(code);
+					size++;
+					return closingSequence;
+				}
+				if (size < sizeOpen) return nok(code);
+				effects.exit("codeFencedFenceSequence");
+				return factorySpace(effects, closingSequenceEnd, "whitespace")(code);
+			}
+			function closingSequenceEnd(code) {
+				if (code === null || markdownLineEnding(code)) {
+					effects.exit("codeFencedFence");
+					return ok(code);
+				}
+				return nok(code);
+			}
+		}
+	}
+	module.exports = codeFenced;
+}));
+//#endregion
+//#region node_modules/micromark/dist/tokenize/code-indented.js
+var require_code_indented = /* @__PURE__ */ __commonJSMin(((exports, module) => {
+	var markdownLineEnding = require_markdown_line_ending();
+	var chunkedSplice = require_chunked_splice();
+	var prefixSize = require_prefix_size();
+	var factorySpace = require_factory_space();
+	var codeIndented = {
+		name: "codeIndented",
+		tokenize: tokenizeCodeIndented,
+		resolve: resolveCodeIndented
+	};
+	var indentedContentConstruct = {
+		tokenize: tokenizeIndentedContent,
+		partial: true
+	};
+	function resolveCodeIndented(events, context) {
+		var code = {
+			type: "codeIndented",
+			start: events[0][1].start,
+			end: events[events.length - 1][1].end
+		};
+		chunkedSplice(events, 0, 0, [[
+			"enter",
+			code,
+			context
+		]]);
+		chunkedSplice(events, events.length, 0, [[
+			"exit",
+			code,
+			context
+		]]);
+		return events;
+	}
+	function tokenizeCodeIndented(effects, ok, nok) {
+		return effects.attempt(indentedContentConstruct, afterPrefix, nok);
+		function afterPrefix(code) {
+			if (code === null) return ok(code);
+			if (markdownLineEnding(code)) return effects.attempt(indentedContentConstruct, afterPrefix, ok)(code);
+			effects.enter("codeFlowValue");
+			return content(code);
+		}
+		function content(code) {
+			if (code === null || markdownLineEnding(code)) {
+				effects.exit("codeFlowValue");
+				return afterPrefix(code);
+			}
+			effects.consume(code);
+			return content;
+		}
+	}
+	function tokenizeIndentedContent(effects, ok, nok) {
+		var self = this;
+		return factorySpace(effects, afterPrefix, "linePrefix", 5);
+		function afterPrefix(code) {
+			if (markdownLineEnding(code)) {
+				effects.enter("lineEnding");
+				effects.consume(code);
+				effects.exit("lineEnding");
+				return factorySpace(effects, afterPrefix, "linePrefix", 5);
+			}
+			return prefixSize(self.events, "linePrefix") < 4 ? nok(code) : ok(code);
+		}
+	}
+	module.exports = codeIndented;
+}));
+//#endregion
+//#region node_modules/micromark/dist/tokenize/code-text.js
+var require_code_text = /* @__PURE__ */ __commonJSMin(((exports, module) => {
+	var markdownLineEnding = require_markdown_line_ending();
+	var codeText = {
+		name: "codeText",
+		tokenize: tokenizeCodeText,
+		resolve: resolveCodeText,
+		previous
+	};
+	function resolveCodeText(events) {
+		var tailExitIndex = events.length - 4;
+		var headEnterIndex = 3;
+		var index;
+		var enter;
+		if ((events[headEnterIndex][1].type === "lineEnding" || events[headEnterIndex][1].type === "space") && (events[tailExitIndex][1].type === "lineEnding" || events[tailExitIndex][1].type === "space")) {
+			index = headEnterIndex;
+			while (++index < tailExitIndex) if (events[index][1].type === "codeTextData") {
+				events[tailExitIndex][1].type = events[headEnterIndex][1].type = "codeTextPadding";
+				headEnterIndex += 2;
+				tailExitIndex -= 2;
+				break;
+			}
+		}
+		index = headEnterIndex - 1;
+		tailExitIndex++;
+		while (++index <= tailExitIndex) if (enter === void 0) {
+			if (index !== tailExitIndex && events[index][1].type !== "lineEnding") enter = index;
+		} else if (index === tailExitIndex || events[index][1].type === "lineEnding") {
+			events[enter][1].type = "codeTextData";
+			if (index !== enter + 2) {
+				events[enter][1].end = events[index - 1][1].end;
+				events.splice(enter + 2, index - enter - 2);
+				tailExitIndex -= index - enter - 2;
+				index = enter + 2;
+			}
+			enter = void 0;
+		}
+		return events;
+	}
+	function previous(code) {
+		return code !== 96 || this.events[this.events.length - 1][1].type === "characterEscape";
+	}
+	function tokenizeCodeText(effects, ok, nok) {
+		var sizeOpen = 0;
+		var size;
+		var token;
+		return start;
+		function start(code) {
+			effects.enter("codeText");
+			effects.enter("codeTextSequence");
+			return openingSequence(code);
+		}
+		function openingSequence(code) {
+			if (code === 96) {
+				effects.consume(code);
+				sizeOpen++;
+				return openingSequence;
+			}
+			effects.exit("codeTextSequence");
+			return gap(code);
+		}
+		function gap(code) {
+			if (code === null) return nok(code);
+			if (code === 96) {
+				token = effects.enter("codeTextSequence");
+				size = 0;
+				return closingSequence(code);
+			}
+			if (code === 32) {
+				effects.enter("space");
+				effects.consume(code);
+				effects.exit("space");
+				return gap;
+			}
+			if (markdownLineEnding(code)) {
+				effects.enter("lineEnding");
+				effects.consume(code);
+				effects.exit("lineEnding");
+				return gap;
+			}
+			effects.enter("codeTextData");
+			return data(code);
+		}
+		function data(code) {
+			if (code === null || code === 32 || code === 96 || markdownLineEnding(code)) {
+				effects.exit("codeTextData");
+				return gap(code);
+			}
+			effects.consume(code);
+			return data;
+		}
+		function closingSequence(code) {
+			if (code === 96) {
+				effects.consume(code);
+				size++;
+				return closingSequence;
+			}
+			if (size === sizeOpen) {
+				effects.exit("codeTextSequence");
+				effects.exit("codeText");
+				return ok(code);
+			}
+			token.type = "codeTextData";
+			return data(code);
+		}
+	}
+	module.exports = codeText;
+}));
+//#endregion
+//#region node_modules/micromark/dist/tokenize/factory-destination.js
+var require_factory_destination = /* @__PURE__ */ __commonJSMin(((exports, module) => {
+	var asciiControl = require_ascii_control();
+	var markdownLineEndingOrSpace = require_markdown_line_ending_or_space();
+	var markdownLineEnding = require_markdown_line_ending();
+	function destinationFactory(effects, ok, nok, type, literalType, literalMarkerType, rawType, stringType, max) {
+		var limit = max || Infinity;
+		var balance = 0;
+		return start;
+		function start(code) {
+			if (code === 60) {
+				effects.enter(type);
+				effects.enter(literalType);
+				effects.enter(literalMarkerType);
+				effects.consume(code);
+				effects.exit(literalMarkerType);
+				return destinationEnclosedBefore;
+			}
+			if (asciiControl(code) || code === 41) return nok(code);
+			effects.enter(type);
+			effects.enter(rawType);
+			effects.enter(stringType);
+			effects.enter("chunkString", { contentType: "string" });
+			return destinationRaw(code);
+		}
+		function destinationEnclosedBefore(code) {
+			if (code === 62) {
+				effects.enter(literalMarkerType);
+				effects.consume(code);
+				effects.exit(literalMarkerType);
+				effects.exit(literalType);
+				effects.exit(type);
+				return ok;
+			}
+			effects.enter(stringType);
+			effects.enter("chunkString", { contentType: "string" });
+			return destinationEnclosed(code);
+		}
+		function destinationEnclosed(code) {
+			if (code === 62) {
+				effects.exit("chunkString");
+				effects.exit(stringType);
+				return destinationEnclosedBefore(code);
+			}
+			if (code === null || code === 60 || markdownLineEnding(code)) return nok(code);
+			effects.consume(code);
+			return code === 92 ? destinationEnclosedEscape : destinationEnclosed;
+		}
+		function destinationEnclosedEscape(code) {
+			if (code === 60 || code === 62 || code === 92) {
+				effects.consume(code);
+				return destinationEnclosed;
+			}
+			return destinationEnclosed(code);
+		}
+		function destinationRaw(code) {
+			if (code === 40) {
+				if (++balance > limit) return nok(code);
+				effects.consume(code);
+				return destinationRaw;
+			}
+			if (code === 41) {
+				if (!balance--) {
+					effects.exit("chunkString");
+					effects.exit(stringType);
+					effects.exit(rawType);
+					effects.exit(type);
+					return ok(code);
+				}
+				effects.consume(code);
+				return destinationRaw;
+			}
+			if (code === null || markdownLineEndingOrSpace(code)) {
+				if (balance) return nok(code);
+				effects.exit("chunkString");
+				effects.exit(stringType);
+				effects.exit(rawType);
+				effects.exit(type);
+				return ok(code);
+			}
+			if (asciiControl(code)) return nok(code);
+			effects.consume(code);
+			return code === 92 ? destinationRawEscape : destinationRaw;
+		}
+		function destinationRawEscape(code) {
+			if (code === 40 || code === 41 || code === 92) {
+				effects.consume(code);
+				return destinationRaw;
+			}
+			return destinationRaw(code);
+		}
+	}
+	module.exports = destinationFactory;
+}));
+//#endregion
+//#region node_modules/micromark/dist/tokenize/factory-label.js
+var require_factory_label = /* @__PURE__ */ __commonJSMin(((exports, module) => {
+	var markdownLineEnding = require_markdown_line_ending();
+	var markdownSpace = require_markdown_space();
+	function labelFactory(effects, ok, nok, type, markerType, stringType) {
+		var self = this;
+		var size = 0;
+		var data;
+		return start;
+		function start(code) {
+			effects.enter(type);
+			effects.enter(markerType);
+			effects.consume(code);
+			effects.exit(markerType);
+			effects.enter(stringType);
+			return atBreak;
+		}
+		function atBreak(code) {
+			if (code === null || code === 91 || code === 93 && !data || code === 94 && !size && "_hiddenFootnoteSupport" in self.parser.constructs || size > 999) return nok(code);
+			if (code === 93) {
+				effects.exit(stringType);
+				effects.enter(markerType);
+				effects.consume(code);
+				effects.exit(markerType);
+				effects.exit(type);
+				return ok;
+			}
+			if (markdownLineEnding(code)) {
+				effects.enter("lineEnding");
+				effects.consume(code);
+				effects.exit("lineEnding");
+				return atBreak;
+			}
+			effects.enter("chunkString", { contentType: "string" });
+			return label(code);
+		}
+		function label(code) {
+			if (code === null || code === 91 || code === 93 || markdownLineEnding(code) || size++ > 999) {
+				effects.exit("chunkString");
+				return atBreak(code);
+			}
+			effects.consume(code);
+			data = data || !markdownSpace(code);
+			return code === 92 ? labelEscape : label;
+		}
+		function labelEscape(code) {
+			if (code === 91 || code === 92 || code === 93) {
+				effects.consume(code);
+				size++;
+				return label;
+			}
+			return label(code);
+		}
+	}
+	module.exports = labelFactory;
+}));
+//#endregion
+//#region node_modules/micromark/dist/tokenize/factory-whitespace.js
+var require_factory_whitespace = /* @__PURE__ */ __commonJSMin(((exports, module) => {
+	var markdownLineEnding = require_markdown_line_ending();
+	var markdownSpace = require_markdown_space();
+	var factorySpace = require_factory_space();
+	function whitespaceFactory(effects, ok) {
+		var seen;
+		return start;
+		function start(code) {
+			if (markdownLineEnding(code)) {
+				effects.enter("lineEnding");
+				effects.consume(code);
+				effects.exit("lineEnding");
+				seen = true;
+				return start;
+			}
+			if (markdownSpace(code)) return factorySpace(effects, start, seen ? "linePrefix" : "lineSuffix")(code);
+			return ok(code);
+		}
+	}
+	module.exports = whitespaceFactory;
+}));
+//#endregion
+//#region node_modules/micromark/dist/tokenize/factory-title.js
+var require_factory_title = /* @__PURE__ */ __commonJSMin(((exports, module) => {
+	var markdownLineEnding = require_markdown_line_ending();
+	var factorySpace = require_factory_space();
+	function titleFactory(effects, ok, nok, type, markerType, stringType) {
+		var marker;
+		return start;
+		function start(code) {
+			effects.enter(type);
+			effects.enter(markerType);
+			effects.consume(code);
+			effects.exit(markerType);
+			marker = code === 40 ? 41 : code;
+			return atFirstTitleBreak;
+		}
+		function atFirstTitleBreak(code) {
+			if (code === marker) {
+				effects.enter(markerType);
+				effects.consume(code);
+				effects.exit(markerType);
+				effects.exit(type);
+				return ok;
+			}
+			effects.enter(stringType);
+			return atTitleBreak(code);
+		}
+		function atTitleBreak(code) {
+			if (code === marker) {
+				effects.exit(stringType);
+				return atFirstTitleBreak(marker);
+			}
+			if (code === null) return nok(code);
+			if (markdownLineEnding(code)) {
+				effects.enter("lineEnding");
+				effects.consume(code);
+				effects.exit("lineEnding");
+				return factorySpace(effects, atTitleBreak, "linePrefix");
+			}
+			effects.enter("chunkString", { contentType: "string" });
+			return title(code);
+		}
+		function title(code) {
+			if (code === marker || code === null || markdownLineEnding(code)) {
+				effects.exit("chunkString");
+				return atTitleBreak(code);
+			}
+			effects.consume(code);
+			return code === 92 ? titleEscape : title;
+		}
+		function titleEscape(code) {
+			if (code === marker || code === 92) {
+				effects.consume(code);
+				return title;
+			}
+			return title(code);
+		}
+	}
+	module.exports = titleFactory;
+}));
+//#endregion
+//#region node_modules/micromark/dist/tokenize/definition.js
+var require_definition$1 = /* @__PURE__ */ __commonJSMin(((exports, module) => {
+	var markdownLineEnding = require_markdown_line_ending();
+	var markdownLineEndingOrSpace = require_markdown_line_ending_or_space();
+	var normalizeIdentifier = require_normalize_identifier();
+	var factoryDestination = require_factory_destination();
+	var factoryLabel = require_factory_label();
+	var factorySpace = require_factory_space();
+	var factoryWhitespace = require_factory_whitespace();
+	var factoryTitle = require_factory_title();
+	var definition = {
+		name: "definition",
+		tokenize: tokenizeDefinition
+	};
+	var titleConstruct = {
+		tokenize: tokenizeTitle,
+		partial: true
+	};
+	function tokenizeDefinition(effects, ok, nok) {
+		var self = this;
+		var identifier;
+		return start;
+		function start(code) {
+			effects.enter("definition");
+			return factoryLabel.call(self, effects, labelAfter, nok, "definitionLabel", "definitionLabelMarker", "definitionLabelString")(code);
+		}
+		function labelAfter(code) {
+			identifier = normalizeIdentifier(self.sliceSerialize(self.events[self.events.length - 1][1]).slice(1, -1));
+			if (code === 58) {
+				effects.enter("definitionMarker");
+				effects.consume(code);
+				effects.exit("definitionMarker");
+				return factoryWhitespace(effects, factoryDestination(effects, effects.attempt(titleConstruct, factorySpace(effects, after, "whitespace"), factorySpace(effects, after, "whitespace")), nok, "definitionDestination", "definitionDestinationLiteral", "definitionDestinationLiteralMarker", "definitionDestinationRaw", "definitionDestinationString"));
+			}
+			return nok(code);
+		}
+		function after(code) {
+			if (code === null || markdownLineEnding(code)) {
+				effects.exit("definition");
+				if (self.parser.defined.indexOf(identifier) < 0) self.parser.defined.push(identifier);
+				return ok(code);
+			}
+			return nok(code);
+		}
+	}
+	function tokenizeTitle(effects, ok, nok) {
+		return start;
+		function start(code) {
+			return markdownLineEndingOrSpace(code) ? factoryWhitespace(effects, before)(code) : nok(code);
+		}
+		function before(code) {
+			if (code === 34 || code === 39 || code === 40) return factoryTitle(effects, factorySpace(effects, after, "whitespace"), nok, "definitionTitle", "definitionTitleMarker", "definitionTitleString")(code);
+			return nok(code);
+		}
+		function after(code) {
+			return code === null || markdownLineEnding(code) ? ok(code) : nok(code);
+		}
+	}
+	module.exports = definition;
+}));
+//#endregion
+//#region node_modules/micromark/dist/tokenize/hard-break-escape.js
+var require_hard_break_escape = /* @__PURE__ */ __commonJSMin(((exports, module) => {
+	var markdownLineEnding = require_markdown_line_ending();
+	var hardBreakEscape = {
+		name: "hardBreakEscape",
+		tokenize: tokenizeHardBreakEscape
+	};
+	function tokenizeHardBreakEscape(effects, ok, nok) {
+		return start;
+		function start(code) {
+			effects.enter("hardBreakEscape");
+			effects.enter("escapeMarker");
+			effects.consume(code);
+			return open;
+		}
+		function open(code) {
+			if (markdownLineEnding(code)) {
+				effects.exit("escapeMarker");
+				effects.exit("hardBreakEscape");
+				return ok(code);
+			}
+			return nok(code);
+		}
+	}
+	module.exports = hardBreakEscape;
+}));
+//#endregion
+//#region node_modules/micromark/dist/tokenize/heading-atx.js
+var require_heading_atx = /* @__PURE__ */ __commonJSMin(((exports, module) => {
+	var markdownLineEnding = require_markdown_line_ending();
+	var markdownLineEndingOrSpace = require_markdown_line_ending_or_space();
+	var markdownSpace = require_markdown_space();
+	var chunkedSplice = require_chunked_splice();
+	var factorySpace = require_factory_space();
+	var headingAtx = {
+		name: "headingAtx",
+		tokenize: tokenizeHeadingAtx,
+		resolve: resolveHeadingAtx
+	};
+	function resolveHeadingAtx(events, context) {
+		var contentEnd = events.length - 2;
+		var contentStart = 3;
+		var content;
+		var text;
+		if (events[contentStart][1].type === "whitespace") contentStart += 2;
+		if (contentEnd - 2 > contentStart && events[contentEnd][1].type === "whitespace") contentEnd -= 2;
+		if (events[contentEnd][1].type === "atxHeadingSequence" && (contentStart === contentEnd - 1 || contentEnd - 4 > contentStart && events[contentEnd - 2][1].type === "whitespace")) contentEnd -= contentStart + 1 === contentEnd ? 2 : 4;
+		if (contentEnd > contentStart) {
+			content = {
+				type: "atxHeadingText",
+				start: events[contentStart][1].start,
+				end: events[contentEnd][1].end
+			};
+			text = {
+				type: "chunkText",
+				start: events[contentStart][1].start,
+				end: events[contentEnd][1].end,
+				contentType: "text"
+			};
+			chunkedSplice(events, contentStart, contentEnd - contentStart + 1, [
+				[
+					"enter",
+					content,
+					context
+				],
+				[
+					"enter",
+					text,
+					context
+				],
+				[
+					"exit",
+					text,
+					context
+				],
+				[
+					"exit",
+					content,
+					context
+				]
+			]);
+		}
+		return events;
+	}
+	function tokenizeHeadingAtx(effects, ok, nok) {
+		var self = this;
+		var size = 0;
+		return start;
+		function start(code) {
+			effects.enter("atxHeading");
+			effects.enter("atxHeadingSequence");
+			return fenceOpenInside(code);
+		}
+		function fenceOpenInside(code) {
+			if (code === 35 && size++ < 6) {
+				effects.consume(code);
+				return fenceOpenInside;
+			}
+			if (code === null || markdownLineEndingOrSpace(code)) {
+				effects.exit("atxHeadingSequence");
+				return self.interrupt ? ok(code) : headingBreak(code);
+			}
+			return nok(code);
+		}
+		function headingBreak(code) {
+			if (code === 35) {
+				effects.enter("atxHeadingSequence");
+				return sequence(code);
+			}
+			if (code === null || markdownLineEnding(code)) {
+				effects.exit("atxHeading");
+				return ok(code);
+			}
+			if (markdownSpace(code)) return factorySpace(effects, headingBreak, "whitespace")(code);
+			effects.enter("atxHeadingText");
+			return data(code);
+		}
+		function sequence(code) {
+			if (code === 35) {
+				effects.consume(code);
+				return sequence;
+			}
+			effects.exit("atxHeadingSequence");
+			return headingBreak(code);
+		}
+		function data(code) {
+			if (code === null || code === 35 || markdownLineEndingOrSpace(code)) {
+				effects.exit("atxHeadingText");
+				return headingBreak(code);
+			}
+			effects.consume(code);
+			return data;
+		}
+	}
+	module.exports = headingAtx;
+}));
+//#endregion
+//#region node_modules/micromark/dist/constant/html-block-names.js
+var require_html_block_names = /* @__PURE__ */ __commonJSMin(((exports, module) => {
+	module.exports = [
+		"address",
+		"article",
+		"aside",
+		"base",
+		"basefont",
+		"blockquote",
+		"body",
+		"caption",
+		"center",
+		"col",
+		"colgroup",
+		"dd",
+		"details",
+		"dialog",
+		"dir",
+		"div",
+		"dl",
+		"dt",
+		"fieldset",
+		"figcaption",
+		"figure",
+		"footer",
+		"form",
+		"frame",
+		"frameset",
+		"h1",
+		"h2",
+		"h3",
+		"h4",
+		"h5",
+		"h6",
+		"head",
+		"header",
+		"hr",
+		"html",
+		"iframe",
+		"legend",
+		"li",
+		"link",
+		"main",
+		"menu",
+		"menuitem",
+		"nav",
+		"noframes",
+		"ol",
+		"optgroup",
+		"option",
+		"p",
+		"param",
+		"section",
+		"source",
+		"summary",
+		"table",
+		"tbody",
+		"td",
+		"tfoot",
+		"th",
+		"thead",
+		"title",
+		"tr",
+		"track",
+		"ul"
+	];
+}));
+//#endregion
+//#region node_modules/micromark/dist/constant/html-raw-names.js
+var require_html_raw_names = /* @__PURE__ */ __commonJSMin(((exports, module) => {
+	module.exports = [
+		"pre",
+		"script",
+		"style",
+		"textarea"
+	];
+}));
+//#endregion
+//#region node_modules/micromark/dist/tokenize/html-flow.js
+var require_html_flow = /* @__PURE__ */ __commonJSMin(((exports, module) => {
+	var asciiAlpha = require_ascii_alpha();
+	var asciiAlphanumeric = require_ascii_alphanumeric();
+	var markdownLineEnding = require_markdown_line_ending();
+	var markdownLineEndingOrSpace = require_markdown_line_ending_or_space();
+	var markdownSpace = require_markdown_space();
+	var fromCharCode = require_from_char_code();
+	var htmlBlockNames = require_html_block_names();
+	var htmlRawNames = require_html_raw_names();
+	var partialBlankLine = require_partial_blank_line();
+	var htmlFlow = {
+		name: "htmlFlow",
+		tokenize: tokenizeHtmlFlow,
+		resolveTo: resolveToHtmlFlow,
+		concrete: true
+	};
+	var nextBlankConstruct = {
+		tokenize: tokenizeNextBlank,
+		partial: true
+	};
+	function resolveToHtmlFlow(events) {
+		var index = events.length;
+		while (index--) if (events[index][0] === "enter" && events[index][1].type === "htmlFlow") break;
+		if (index > 1 && events[index - 2][1].type === "linePrefix") {
+			events[index][1].start = events[index - 2][1].start;
+			events[index + 1][1].start = events[index - 2][1].start;
+			events.splice(index - 2, 2);
+		}
+		return events;
+	}
+	function tokenizeHtmlFlow(effects, ok, nok) {
+		var self = this;
+		var kind;
+		var startTag;
+		var buffer;
+		var index;
+		var marker;
+		return start;
+		function start(code) {
+			effects.enter("htmlFlow");
+			effects.enter("htmlFlowData");
+			effects.consume(code);
+			return open;
+		}
+		function open(code) {
+			if (code === 33) {
+				effects.consume(code);
+				return declarationStart;
+			}
+			if (code === 47) {
+				effects.consume(code);
+				return tagCloseStart;
+			}
+			if (code === 63) {
+				effects.consume(code);
+				kind = 3;
+				return self.interrupt ? ok : continuationDeclarationInside;
+			}
+			if (asciiAlpha(code)) {
+				effects.consume(code);
+				buffer = fromCharCode(code);
+				startTag = true;
+				return tagName;
+			}
+			return nok(code);
+		}
+		function declarationStart(code) {
+			if (code === 45) {
+				effects.consume(code);
+				kind = 2;
+				return commentOpenInside;
+			}
+			if (code === 91) {
+				effects.consume(code);
+				kind = 5;
+				buffer = "CDATA[";
+				index = 0;
+				return cdataOpenInside;
+			}
+			if (asciiAlpha(code)) {
+				effects.consume(code);
+				kind = 4;
+				return self.interrupt ? ok : continuationDeclarationInside;
+			}
+			return nok(code);
+		}
+		function commentOpenInside(code) {
+			if (code === 45) {
+				effects.consume(code);
+				return self.interrupt ? ok : continuationDeclarationInside;
+			}
+			return nok(code);
+		}
+		function cdataOpenInside(code) {
+			if (code === buffer.charCodeAt(index++)) {
+				effects.consume(code);
+				return index === buffer.length ? self.interrupt ? ok : continuation : cdataOpenInside;
+			}
+			return nok(code);
+		}
+		function tagCloseStart(code) {
+			if (asciiAlpha(code)) {
+				effects.consume(code);
+				buffer = fromCharCode(code);
+				return tagName;
+			}
+			return nok(code);
+		}
+		function tagName(code) {
+			if (code === null || code === 47 || code === 62 || markdownLineEndingOrSpace(code)) {
+				if (code !== 47 && startTag && htmlRawNames.indexOf(buffer.toLowerCase()) > -1) {
+					kind = 1;
+					return self.interrupt ? ok(code) : continuation(code);
+				}
+				if (htmlBlockNames.indexOf(buffer.toLowerCase()) > -1) {
+					kind = 6;
+					if (code === 47) {
+						effects.consume(code);
+						return basicSelfClosing;
+					}
+					return self.interrupt ? ok(code) : continuation(code);
+				}
+				kind = 7;
+				return self.interrupt ? nok(code) : startTag ? completeAttributeNameBefore(code) : completeClosingTagAfter(code);
+			}
+			if (code === 45 || asciiAlphanumeric(code)) {
+				effects.consume(code);
+				buffer += fromCharCode(code);
+				return tagName;
+			}
+			return nok(code);
+		}
+		function basicSelfClosing(code) {
+			if (code === 62) {
+				effects.consume(code);
+				return self.interrupt ? ok : continuation;
+			}
+			return nok(code);
+		}
+		function completeClosingTagAfter(code) {
+			if (markdownSpace(code)) {
+				effects.consume(code);
+				return completeClosingTagAfter;
+			}
+			return completeEnd(code);
+		}
+		function completeAttributeNameBefore(code) {
+			if (code === 47) {
+				effects.consume(code);
+				return completeEnd;
+			}
+			if (code === 58 || code === 95 || asciiAlpha(code)) {
+				effects.consume(code);
+				return completeAttributeName;
+			}
+			if (markdownSpace(code)) {
+				effects.consume(code);
+				return completeAttributeNameBefore;
+			}
+			return completeEnd(code);
+		}
+		function completeAttributeName(code) {
+			if (code === 45 || code === 46 || code === 58 || code === 95 || asciiAlphanumeric(code)) {
+				effects.consume(code);
+				return completeAttributeName;
+			}
+			return completeAttributeNameAfter(code);
+		}
+		function completeAttributeNameAfter(code) {
+			if (code === 61) {
+				effects.consume(code);
+				return completeAttributeValueBefore;
+			}
+			if (markdownSpace(code)) {
+				effects.consume(code);
+				return completeAttributeNameAfter;
+			}
+			return completeAttributeNameBefore(code);
+		}
+		function completeAttributeValueBefore(code) {
+			if (code === null || code === 60 || code === 61 || code === 62 || code === 96) return nok(code);
+			if (code === 34 || code === 39) {
+				effects.consume(code);
+				marker = code;
+				return completeAttributeValueQuoted;
+			}
+			if (markdownSpace(code)) {
+				effects.consume(code);
+				return completeAttributeValueBefore;
+			}
+			marker = void 0;
+			return completeAttributeValueUnquoted(code);
+		}
+		function completeAttributeValueQuoted(code) {
+			if (code === marker) {
+				effects.consume(code);
+				return completeAttributeValueQuotedAfter;
+			}
+			if (code === null || markdownLineEnding(code)) return nok(code);
+			effects.consume(code);
+			return completeAttributeValueQuoted;
+		}
+		function completeAttributeValueUnquoted(code) {
+			if (code === null || code === 34 || code === 39 || code === 60 || code === 61 || code === 62 || code === 96 || markdownLineEndingOrSpace(code)) return completeAttributeNameAfter(code);
+			effects.consume(code);
+			return completeAttributeValueUnquoted;
+		}
+		function completeAttributeValueQuotedAfter(code) {
+			if (code === 47 || code === 62 || markdownSpace(code)) return completeAttributeNameBefore(code);
+			return nok(code);
+		}
+		function completeEnd(code) {
+			if (code === 62) {
+				effects.consume(code);
+				return completeAfter;
+			}
+			return nok(code);
+		}
+		function completeAfter(code) {
+			if (markdownSpace(code)) {
+				effects.consume(code);
+				return completeAfter;
+			}
+			return code === null || markdownLineEnding(code) ? continuation(code) : nok(code);
+		}
+		function continuation(code) {
+			if (code === 45 && kind === 2) {
+				effects.consume(code);
+				return continuationCommentInside;
+			}
+			if (code === 60 && kind === 1) {
+				effects.consume(code);
+				return continuationRawTagOpen;
+			}
+			if (code === 62 && kind === 4) {
+				effects.consume(code);
+				return continuationClose;
+			}
+			if (code === 63 && kind === 3) {
+				effects.consume(code);
+				return continuationDeclarationInside;
+			}
+			if (code === 93 && kind === 5) {
+				effects.consume(code);
+				return continuationCharacterDataInside;
+			}
+			if (markdownLineEnding(code) && (kind === 6 || kind === 7)) return effects.check(nextBlankConstruct, continuationClose, continuationAtLineEnding)(code);
+			if (code === null || markdownLineEnding(code)) return continuationAtLineEnding(code);
+			effects.consume(code);
+			return continuation;
+		}
+		function continuationAtLineEnding(code) {
+			effects.exit("htmlFlowData");
+			return htmlContinueStart(code);
+		}
+		function htmlContinueStart(code) {
+			if (code === null) return done(code);
+			if (markdownLineEnding(code)) {
+				effects.enter("lineEnding");
+				effects.consume(code);
+				effects.exit("lineEnding");
+				return htmlContinueStart;
+			}
+			effects.enter("htmlFlowData");
+			return continuation(code);
+		}
+		function continuationCommentInside(code) {
+			if (code === 45) {
+				effects.consume(code);
+				return continuationDeclarationInside;
+			}
+			return continuation(code);
+		}
+		function continuationRawTagOpen(code) {
+			if (code === 47) {
+				effects.consume(code);
+				buffer = "";
+				return continuationRawEndTag;
+			}
+			return continuation(code);
+		}
+		function continuationRawEndTag(code) {
+			if (code === 62 && htmlRawNames.indexOf(buffer.toLowerCase()) > -1) {
+				effects.consume(code);
+				return continuationClose;
+			}
+			if (asciiAlpha(code) && buffer.length < 8) {
+				effects.consume(code);
+				buffer += fromCharCode(code);
+				return continuationRawEndTag;
+			}
+			return continuation(code);
+		}
+		function continuationCharacterDataInside(code) {
+			if (code === 93) {
+				effects.consume(code);
+				return continuationDeclarationInside;
+			}
+			return continuation(code);
+		}
+		function continuationDeclarationInside(code) {
+			if (code === 62) {
+				effects.consume(code);
+				return continuationClose;
+			}
+			return continuation(code);
+		}
+		function continuationClose(code) {
+			if (code === null || markdownLineEnding(code)) {
+				effects.exit("htmlFlowData");
+				return done(code);
+			}
+			effects.consume(code);
+			return continuationClose;
+		}
+		function done(code) {
+			effects.exit("htmlFlow");
+			return ok(code);
+		}
+	}
+	function tokenizeNextBlank(effects, ok, nok) {
+		return start;
+		function start(code) {
+			effects.exit("htmlFlowData");
+			effects.enter("lineEndingBlank");
+			effects.consume(code);
+			effects.exit("lineEndingBlank");
+			return effects.attempt(partialBlankLine, ok, nok);
+		}
+	}
+	module.exports = htmlFlow;
+}));
+//#endregion
+//#region node_modules/micromark/dist/tokenize/html-text.js
+var require_html_text = /* @__PURE__ */ __commonJSMin(((exports, module) => {
+	var asciiAlpha = require_ascii_alpha();
+	var asciiAlphanumeric = require_ascii_alphanumeric();
+	var markdownLineEnding = require_markdown_line_ending();
+	var markdownLineEndingOrSpace = require_markdown_line_ending_or_space();
+	var markdownSpace = require_markdown_space();
+	var factorySpace = require_factory_space();
+	var htmlText = {
+		name: "htmlText",
+		tokenize: tokenizeHtmlText
+	};
+	function tokenizeHtmlText(effects, ok, nok) {
+		var self = this;
+		var marker;
+		var buffer;
+		var index;
+		var returnState;
+		return start;
+		function start(code) {
+			effects.enter("htmlText");
+			effects.enter("htmlTextData");
+			effects.consume(code);
+			return open;
+		}
+		function open(code) {
+			if (code === 33) {
+				effects.consume(code);
+				return declarationOpen;
+			}
+			if (code === 47) {
+				effects.consume(code);
+				return tagCloseStart;
+			}
+			if (code === 63) {
+				effects.consume(code);
+				return instruction;
+			}
+			if (asciiAlpha(code)) {
+				effects.consume(code);
+				return tagOpen;
+			}
+			return nok(code);
+		}
+		function declarationOpen(code) {
+			if (code === 45) {
+				effects.consume(code);
+				return commentOpen;
+			}
+			if (code === 91) {
+				effects.consume(code);
+				buffer = "CDATA[";
+				index = 0;
+				return cdataOpen;
+			}
+			if (asciiAlpha(code)) {
+				effects.consume(code);
+				return declaration;
+			}
+			return nok(code);
+		}
+		function commentOpen(code) {
+			if (code === 45) {
+				effects.consume(code);
+				return commentStart;
+			}
+			return nok(code);
+		}
+		function commentStart(code) {
+			if (code === null || code === 62) return nok(code);
+			if (code === 45) {
+				effects.consume(code);
+				return commentStartDash;
+			}
+			return comment(code);
+		}
+		function commentStartDash(code) {
+			if (code === null || code === 62) return nok(code);
+			return comment(code);
+		}
+		function comment(code) {
+			if (code === null) return nok(code);
+			if (code === 45) {
+				effects.consume(code);
+				return commentClose;
+			}
+			if (markdownLineEnding(code)) {
+				returnState = comment;
+				return atLineEnding(code);
+			}
+			effects.consume(code);
+			return comment;
+		}
+		function commentClose(code) {
+			if (code === 45) {
+				effects.consume(code);
+				return end;
+			}
+			return comment(code);
+		}
+		function cdataOpen(code) {
+			if (code === buffer.charCodeAt(index++)) {
+				effects.consume(code);
+				return index === buffer.length ? cdata : cdataOpen;
+			}
+			return nok(code);
+		}
+		function cdata(code) {
+			if (code === null) return nok(code);
+			if (code === 93) {
+				effects.consume(code);
+				return cdataClose;
+			}
+			if (markdownLineEnding(code)) {
+				returnState = cdata;
+				return atLineEnding(code);
+			}
+			effects.consume(code);
+			return cdata;
+		}
+		function cdataClose(code) {
+			if (code === 93) {
+				effects.consume(code);
+				return cdataEnd;
+			}
+			return cdata(code);
+		}
+		function cdataEnd(code) {
+			if (code === 62) return end(code);
+			if (code === 93) {
+				effects.consume(code);
+				return cdataEnd;
+			}
+			return cdata(code);
+		}
+		function declaration(code) {
+			if (code === null || code === 62) return end(code);
+			if (markdownLineEnding(code)) {
+				returnState = declaration;
+				return atLineEnding(code);
+			}
+			effects.consume(code);
+			return declaration;
+		}
+		function instruction(code) {
+			if (code === null) return nok(code);
+			if (code === 63) {
+				effects.consume(code);
+				return instructionClose;
+			}
+			if (markdownLineEnding(code)) {
+				returnState = instruction;
+				return atLineEnding(code);
+			}
+			effects.consume(code);
+			return instruction;
+		}
+		function instructionClose(code) {
+			return code === 62 ? end(code) : instruction(code);
+		}
+		function tagCloseStart(code) {
+			if (asciiAlpha(code)) {
+				effects.consume(code);
+				return tagClose;
+			}
+			return nok(code);
+		}
+		function tagClose(code) {
+			if (code === 45 || asciiAlphanumeric(code)) {
+				effects.consume(code);
+				return tagClose;
+			}
+			return tagCloseBetween(code);
+		}
+		function tagCloseBetween(code) {
+			if (markdownLineEnding(code)) {
+				returnState = tagCloseBetween;
+				return atLineEnding(code);
+			}
+			if (markdownSpace(code)) {
+				effects.consume(code);
+				return tagCloseBetween;
+			}
+			return end(code);
+		}
+		function tagOpen(code) {
+			if (code === 45 || asciiAlphanumeric(code)) {
+				effects.consume(code);
+				return tagOpen;
+			}
+			if (code === 47 || code === 62 || markdownLineEndingOrSpace(code)) return tagOpenBetween(code);
+			return nok(code);
+		}
+		function tagOpenBetween(code) {
+			if (code === 47) {
+				effects.consume(code);
+				return end;
+			}
+			if (code === 58 || code === 95 || asciiAlpha(code)) {
+				effects.consume(code);
+				return tagOpenAttributeName;
+			}
+			if (markdownLineEnding(code)) {
+				returnState = tagOpenBetween;
+				return atLineEnding(code);
+			}
+			if (markdownSpace(code)) {
+				effects.consume(code);
+				return tagOpenBetween;
+			}
+			return end(code);
+		}
+		function tagOpenAttributeName(code) {
+			if (code === 45 || code === 46 || code === 58 || code === 95 || asciiAlphanumeric(code)) {
+				effects.consume(code);
+				return tagOpenAttributeName;
+			}
+			return tagOpenAttributeNameAfter(code);
+		}
+		function tagOpenAttributeNameAfter(code) {
+			if (code === 61) {
+				effects.consume(code);
+				return tagOpenAttributeValueBefore;
+			}
+			if (markdownLineEnding(code)) {
+				returnState = tagOpenAttributeNameAfter;
+				return atLineEnding(code);
+			}
+			if (markdownSpace(code)) {
+				effects.consume(code);
+				return tagOpenAttributeNameAfter;
+			}
+			return tagOpenBetween(code);
+		}
+		function tagOpenAttributeValueBefore(code) {
+			if (code === null || code === 60 || code === 61 || code === 62 || code === 96) return nok(code);
+			if (code === 34 || code === 39) {
+				effects.consume(code);
+				marker = code;
+				return tagOpenAttributeValueQuoted;
+			}
+			if (markdownLineEnding(code)) {
+				returnState = tagOpenAttributeValueBefore;
+				return atLineEnding(code);
+			}
+			if (markdownSpace(code)) {
+				effects.consume(code);
+				return tagOpenAttributeValueBefore;
+			}
+			effects.consume(code);
+			marker = void 0;
+			return tagOpenAttributeValueUnquoted;
+		}
+		function tagOpenAttributeValueQuoted(code) {
+			if (code === marker) {
+				effects.consume(code);
+				return tagOpenAttributeValueQuotedAfter;
+			}
+			if (code === null) return nok(code);
+			if (markdownLineEnding(code)) {
+				returnState = tagOpenAttributeValueQuoted;
+				return atLineEnding(code);
+			}
+			effects.consume(code);
+			return tagOpenAttributeValueQuoted;
+		}
+		function tagOpenAttributeValueQuotedAfter(code) {
+			if (code === 62 || code === 47 || markdownLineEndingOrSpace(code)) return tagOpenBetween(code);
+			return nok(code);
+		}
+		function tagOpenAttributeValueUnquoted(code) {
+			if (code === null || code === 34 || code === 39 || code === 60 || code === 61 || code === 96) return nok(code);
+			if (code === 62 || markdownLineEndingOrSpace(code)) return tagOpenBetween(code);
+			effects.consume(code);
+			return tagOpenAttributeValueUnquoted;
+		}
+		function atLineEnding(code) {
+			effects.exit("htmlTextData");
+			effects.enter("lineEnding");
+			effects.consume(code);
+			effects.exit("lineEnding");
+			return factorySpace(effects, afterPrefix, "linePrefix", self.parser.constructs.disable.null.indexOf("codeIndented") > -1 ? void 0 : 4);
+		}
+		function afterPrefix(code) {
+			effects.enter("htmlTextData");
+			return returnState(code);
+		}
+		function end(code) {
+			if (code === 62) {
+				effects.consume(code);
+				effects.exit("htmlTextData");
+				effects.exit("htmlText");
+				return ok;
+			}
+			return nok(code);
+		}
+	}
+	module.exports = htmlText;
+}));
+//#endregion
+//#region node_modules/micromark/dist/tokenize/label-end.js
+var require_label_end = /* @__PURE__ */ __commonJSMin(((exports, module) => {
+	var markdownLineEndingOrSpace = require_markdown_line_ending_or_space();
+	var chunkedPush = require_chunked_push();
+	var chunkedSplice = require_chunked_splice();
+	var normalizeIdentifier = require_normalize_identifier();
+	var resolveAll = require_resolve_all();
+	var shallow = require_shallow();
+	var factoryDestination = require_factory_destination();
+	var factoryLabel = require_factory_label();
+	var factoryTitle = require_factory_title();
+	var factoryWhitespace = require_factory_whitespace();
+	var labelEnd = {
+		name: "labelEnd",
+		tokenize: tokenizeLabelEnd,
+		resolveTo: resolveToLabelEnd,
+		resolveAll: resolveAllLabelEnd
+	};
+	var resourceConstruct = { tokenize: tokenizeResource };
+	var fullReferenceConstruct = { tokenize: tokenizeFullReference };
+	var collapsedReferenceConstruct = { tokenize: tokenizeCollapsedReference };
+	function resolveAllLabelEnd(events) {
+		var index = -1;
+		var token;
+		while (++index < events.length) {
+			token = events[index][1];
+			if (!token._used && (token.type === "labelImage" || token.type === "labelLink" || token.type === "labelEnd")) {
+				events.splice(index + 1, token.type === "labelImage" ? 4 : 2);
+				token.type = "data";
+				index++;
+			}
+		}
+		return events;
+	}
+	function resolveToLabelEnd(events, context) {
+		var index = events.length;
+		var offset = 0;
+		var group;
+		var label;
+		var text;
+		var token;
+		var open;
+		var close;
+		var media;
+		while (index--) {
+			token = events[index][1];
+			if (open) {
+				if (token.type === "link" || token.type === "labelLink" && token._inactive) break;
+				if (events[index][0] === "enter" && token.type === "labelLink") token._inactive = true;
+			} else if (close) {
+				if (events[index][0] === "enter" && (token.type === "labelImage" || token.type === "labelLink") && !token._balanced) {
+					open = index;
+					if (token.type !== "labelLink") {
+						offset = 2;
+						break;
+					}
+				}
+			} else if (token.type === "labelEnd") close = index;
+		}
+		group = {
+			type: events[open][1].type === "labelLink" ? "link" : "image",
+			start: shallow(events[open][1].start),
+			end: shallow(events[events.length - 1][1].end)
+		};
+		label = {
+			type: "label",
+			start: shallow(events[open][1].start),
+			end: shallow(events[close][1].end)
+		};
+		text = {
+			type: "labelText",
+			start: shallow(events[open + offset + 2][1].end),
+			end: shallow(events[close - 2][1].start)
+		};
+		media = [[
+			"enter",
+			group,
+			context
+		], [
+			"enter",
+			label,
+			context
+		]];
+		media = chunkedPush(media, events.slice(open + 1, open + offset + 3));
+		media = chunkedPush(media, [[
+			"enter",
+			text,
+			context
+		]]);
+		media = chunkedPush(media, resolveAll(context.parser.constructs.insideSpan.null, events.slice(open + offset + 4, close - 3), context));
+		media = chunkedPush(media, [
+			[
+				"exit",
+				text,
+				context
+			],
+			events[close - 2],
+			events[close - 1],
+			[
+				"exit",
+				label,
+				context
+			]
+		]);
+		media = chunkedPush(media, events.slice(close + 1));
+		media = chunkedPush(media, [[
+			"exit",
+			group,
+			context
+		]]);
+		chunkedSplice(events, open, events.length, media);
+		return events;
+	}
+	function tokenizeLabelEnd(effects, ok, nok) {
+		var self = this;
+		var index = self.events.length;
+		var labelStart;
+		var defined;
+		while (index--) if ((self.events[index][1].type === "labelImage" || self.events[index][1].type === "labelLink") && !self.events[index][1]._balanced) {
+			labelStart = self.events[index][1];
+			break;
+		}
+		return start;
+		function start(code) {
+			if (!labelStart) return nok(code);
+			if (labelStart._inactive) return balanced(code);
+			defined = self.parser.defined.indexOf(normalizeIdentifier(self.sliceSerialize({
+				start: labelStart.end,
+				end: self.now()
+			}))) > -1;
+			effects.enter("labelEnd");
+			effects.enter("labelMarker");
+			effects.consume(code);
+			effects.exit("labelMarker");
+			effects.exit("labelEnd");
+			return afterLabelEnd;
+		}
+		function afterLabelEnd(code) {
+			if (code === 40) return effects.attempt(resourceConstruct, ok, defined ? ok : balanced)(code);
+			if (code === 91) return effects.attempt(fullReferenceConstruct, ok, defined ? effects.attempt(collapsedReferenceConstruct, ok, balanced) : balanced)(code);
+			return defined ? ok(code) : balanced(code);
+		}
+		function balanced(code) {
+			labelStart._balanced = true;
+			return nok(code);
+		}
+	}
+	function tokenizeResource(effects, ok, nok) {
+		return start;
+		function start(code) {
+			effects.enter("resource");
+			effects.enter("resourceMarker");
+			effects.consume(code);
+			effects.exit("resourceMarker");
+			return factoryWhitespace(effects, open);
+		}
+		function open(code) {
+			if (code === 41) return end(code);
+			return factoryDestination(effects, destinationAfter, nok, "resourceDestination", "resourceDestinationLiteral", "resourceDestinationLiteralMarker", "resourceDestinationRaw", "resourceDestinationString", 3)(code);
+		}
+		function destinationAfter(code) {
+			return markdownLineEndingOrSpace(code) ? factoryWhitespace(effects, between)(code) : end(code);
+		}
+		function between(code) {
+			if (code === 34 || code === 39 || code === 40) return factoryTitle(effects, factoryWhitespace(effects, end), nok, "resourceTitle", "resourceTitleMarker", "resourceTitleString")(code);
+			return end(code);
+		}
+		function end(code) {
+			if (code === 41) {
+				effects.enter("resourceMarker");
+				effects.consume(code);
+				effects.exit("resourceMarker");
+				effects.exit("resource");
+				return ok;
+			}
+			return nok(code);
+		}
+	}
+	function tokenizeFullReference(effects, ok, nok) {
+		var self = this;
+		return start;
+		function start(code) {
+			return factoryLabel.call(self, effects, afterLabel, nok, "reference", "referenceMarker", "referenceString")(code);
+		}
+		function afterLabel(code) {
+			return self.parser.defined.indexOf(normalizeIdentifier(self.sliceSerialize(self.events[self.events.length - 1][1]).slice(1, -1))) < 0 ? nok(code) : ok(code);
+		}
+	}
+	function tokenizeCollapsedReference(effects, ok, nok) {
+		return start;
+		function start(code) {
+			effects.enter("reference");
+			effects.enter("referenceMarker");
+			effects.consume(code);
+			effects.exit("referenceMarker");
+			return open;
+		}
+		function open(code) {
+			if (code === 93) {
+				effects.enter("referenceMarker");
+				effects.consume(code);
+				effects.exit("referenceMarker");
+				effects.exit("reference");
+				return ok;
+			}
+			return nok(code);
+		}
+	}
+	module.exports = labelEnd;
+}));
+//#endregion
+//#region node_modules/micromark/dist/tokenize/label-start-image.js
+var require_label_start_image = /* @__PURE__ */ __commonJSMin(((exports, module) => {
+	var labelStartImage = {
+		name: "labelStartImage",
+		tokenize: tokenizeLabelStartImage,
+		resolveAll: require_label_end().resolveAll
+	};
+	function tokenizeLabelStartImage(effects, ok, nok) {
+		var self = this;
+		return start;
+		function start(code) {
+			effects.enter("labelImage");
+			effects.enter("labelImageMarker");
+			effects.consume(code);
+			effects.exit("labelImageMarker");
+			return open;
+		}
+		function open(code) {
+			if (code === 91) {
+				effects.enter("labelMarker");
+				effects.consume(code);
+				effects.exit("labelMarker");
+				effects.exit("labelImage");
+				return after;
+			}
+			return nok(code);
+		}
+		function after(code) {
+			/* c8 ignore next */
+			return code === 94 && "_hiddenFootnoteSupport" in self.parser.constructs ? nok(code) : ok(code);
+		}
+	}
+	module.exports = labelStartImage;
+}));
+//#endregion
+//#region node_modules/micromark/dist/tokenize/label-start-link.js
+var require_label_start_link = /* @__PURE__ */ __commonJSMin(((exports, module) => {
+	var labelStartLink = {
+		name: "labelStartLink",
+		tokenize: tokenizeLabelStartLink,
+		resolveAll: require_label_end().resolveAll
+	};
+	function tokenizeLabelStartLink(effects, ok, nok) {
+		var self = this;
+		return start;
+		function start(code) {
+			effects.enter("labelLink");
+			effects.enter("labelMarker");
+			effects.consume(code);
+			effects.exit("labelMarker");
+			effects.exit("labelLink");
+			return after;
+		}
+		function after(code) {
+			/* c8 ignore next */
+			return code === 94 && "_hiddenFootnoteSupport" in self.parser.constructs ? nok(code) : ok(code);
+		}
+	}
+	module.exports = labelStartLink;
+}));
+//#endregion
+//#region node_modules/micromark/dist/tokenize/line-ending.js
+var require_line_ending = /* @__PURE__ */ __commonJSMin(((exports, module) => {
+	var factorySpace = require_factory_space();
+	var lineEnding = {
+		name: "lineEnding",
+		tokenize: tokenizeLineEnding
+	};
+	function tokenizeLineEnding(effects, ok) {
+		return start;
+		function start(code) {
+			effects.enter("lineEnding");
+			effects.consume(code);
+			effects.exit("lineEnding");
+			return factorySpace(effects, ok, "linePrefix");
+		}
+	}
+	module.exports = lineEnding;
+}));
+//#endregion
+//#region node_modules/micromark/dist/tokenize/thematic-break.js
+var require_thematic_break$1 = /* @__PURE__ */ __commonJSMin(((exports, module) => {
+	var markdownLineEnding = require_markdown_line_ending();
+	var markdownSpace = require_markdown_space();
+	var factorySpace = require_factory_space();
+	var thematicBreak = {
+		name: "thematicBreak",
+		tokenize: tokenizeThematicBreak
+	};
+	function tokenizeThematicBreak(effects, ok, nok) {
+		var size = 0;
+		var marker;
+		return start;
+		function start(code) {
+			effects.enter("thematicBreak");
+			marker = code;
+			return atBreak(code);
+		}
+		function atBreak(code) {
+			if (code === marker) {
+				effects.enter("thematicBreakSequence");
+				return sequence(code);
+			}
+			if (markdownSpace(code)) return factorySpace(effects, atBreak, "whitespace")(code);
+			if (size < 3 || code !== null && !markdownLineEnding(code)) return nok(code);
+			effects.exit("thematicBreak");
+			return ok(code);
+		}
+		function sequence(code) {
+			if (code === marker) {
+				effects.consume(code);
+				size++;
+				return sequence;
+			}
+			effects.exit("thematicBreakSequence");
+			return atBreak(code);
+		}
+	}
+	module.exports = thematicBreak;
+}));
+//#endregion
+//#region node_modules/micromark/dist/tokenize/list.js
+var require_list$1 = /* @__PURE__ */ __commonJSMin(((exports, module) => {
+	var asciiDigit = require_ascii_digit();
+	var markdownSpace = require_markdown_space();
+	var prefixSize = require_prefix_size();
+	var sizeChunks = require_size_chunks();
+	var factorySpace = require_factory_space();
+	var partialBlankLine = require_partial_blank_line();
+	var thematicBreak = require_thematic_break$1();
+	var list = {
+		name: "list",
+		tokenize: tokenizeListStart,
+		continuation: { tokenize: tokenizeListContinuation },
+		exit: tokenizeListEnd
+	};
+	var listItemPrefixWhitespaceConstruct = {
+		tokenize: tokenizeListItemPrefixWhitespace,
+		partial: true
+	};
+	var indentConstruct = {
+		tokenize: tokenizeIndent,
+		partial: true
+	};
+	function tokenizeListStart(effects, ok, nok) {
+		var self = this;
+		var initialSize = prefixSize(self.events, "linePrefix");
+		var size = 0;
+		return start;
+		function start(code) {
+			var kind = self.containerState.type || (code === 42 || code === 43 || code === 45 ? "listUnordered" : "listOrdered");
+			if (kind === "listUnordered" ? !self.containerState.marker || code === self.containerState.marker : asciiDigit(code)) {
+				if (!self.containerState.type) {
+					self.containerState.type = kind;
+					effects.enter(kind, { _container: true });
+				}
+				if (kind === "listUnordered") {
+					effects.enter("listItemPrefix");
+					return code === 42 || code === 45 ? effects.check(thematicBreak, nok, atMarker)(code) : atMarker(code);
+				}
+				if (!self.interrupt || code === 49) {
+					effects.enter("listItemPrefix");
+					effects.enter("listItemValue");
+					return inside(code);
+				}
+			}
+			return nok(code);
+		}
+		function inside(code) {
+			if (asciiDigit(code) && ++size < 10) {
+				effects.consume(code);
+				return inside;
+			}
+			if ((!self.interrupt || size < 2) && (self.containerState.marker ? code === self.containerState.marker : code === 41 || code === 46)) {
+				effects.exit("listItemValue");
+				return atMarker(code);
+			}
+			return nok(code);
+		}
+		function atMarker(code) {
+			effects.enter("listItemMarker");
+			effects.consume(code);
+			effects.exit("listItemMarker");
+			self.containerState.marker = self.containerState.marker || code;
+			return effects.check(partialBlankLine, self.interrupt ? nok : onBlank, effects.attempt(listItemPrefixWhitespaceConstruct, endOfPrefix, otherPrefix));
+		}
+		function onBlank(code) {
+			self.containerState.initialBlankLine = true;
+			initialSize++;
+			return endOfPrefix(code);
+		}
+		function otherPrefix(code) {
+			if (markdownSpace(code)) {
+				effects.enter("listItemPrefixWhitespace");
+				effects.consume(code);
+				effects.exit("listItemPrefixWhitespace");
+				return endOfPrefix;
+			}
+			return nok(code);
+		}
+		function endOfPrefix(code) {
+			self.containerState.size = initialSize + sizeChunks(self.sliceStream(effects.exit("listItemPrefix")));
+			return ok(code);
+		}
+	}
+	function tokenizeListContinuation(effects, ok, nok) {
+		var self = this;
+		self.containerState._closeFlow = void 0;
+		return effects.check(partialBlankLine, onBlank, notBlank);
+		function onBlank(code) {
+			self.containerState.furtherBlankLines = self.containerState.furtherBlankLines || self.containerState.initialBlankLine;
+			return factorySpace(effects, ok, "listItemIndent", self.containerState.size + 1)(code);
+		}
+		function notBlank(code) {
+			if (self.containerState.furtherBlankLines || !markdownSpace(code)) {
+				self.containerState.furtherBlankLines = self.containerState.initialBlankLine = void 0;
+				return notInCurrentItem(code);
+			}
+			self.containerState.furtherBlankLines = self.containerState.initialBlankLine = void 0;
+			return effects.attempt(indentConstruct, ok, notInCurrentItem)(code);
+		}
+		function notInCurrentItem(code) {
+			self.containerState._closeFlow = true;
+			self.interrupt = void 0;
+			return factorySpace(effects, effects.attempt(list, ok, nok), "linePrefix", self.parser.constructs.disable.null.indexOf("codeIndented") > -1 ? void 0 : 4)(code);
+		}
+	}
+	function tokenizeIndent(effects, ok, nok) {
+		var self = this;
+		return factorySpace(effects, afterPrefix, "listItemIndent", self.containerState.size + 1);
+		function afterPrefix(code) {
+			return prefixSize(self.events, "listItemIndent") === self.containerState.size ? ok(code) : nok(code);
+		}
+	}
+	function tokenizeListEnd(effects) {
+		effects.exit(this.containerState.type);
+	}
+	function tokenizeListItemPrefixWhitespace(effects, ok, nok) {
+		var self = this;
+		return factorySpace(effects, afterPrefix, "listItemPrefixWhitespace", self.parser.constructs.disable.null.indexOf("codeIndented") > -1 ? void 0 : 5);
+		function afterPrefix(code) {
+			return markdownSpace(code) || !prefixSize(self.events, "listItemPrefixWhitespace") ? nok(code) : ok(code);
+		}
+	}
+	module.exports = list;
+}));
+//#endregion
+//#region node_modules/micromark/dist/tokenize/setext-underline.js
+var require_setext_underline = /* @__PURE__ */ __commonJSMin(((exports, module) => {
+	var markdownLineEnding = require_markdown_line_ending();
+	var shallow = require_shallow();
+	var factorySpace = require_factory_space();
+	var setextUnderline = {
+		name: "setextUnderline",
+		tokenize: tokenizeSetextUnderline,
+		resolveTo: resolveToSetextUnderline
+	};
+	function resolveToSetextUnderline(events, context) {
+		var index = events.length;
+		var content;
+		var text;
+		var definition;
+		var heading;
+		while (index--) if (events[index][0] === "enter") {
+			if (events[index][1].type === "content") {
+				content = index;
+				break;
+			}
+			if (events[index][1].type === "paragraph") text = index;
+		} else {
+			if (events[index][1].type === "content") events.splice(index, 1);
+			if (!definition && events[index][1].type === "definition") definition = index;
+		}
+		heading = {
+			type: "setextHeading",
+			start: shallow(events[text][1].start),
+			end: shallow(events[events.length - 1][1].end)
+		};
+		events[text][1].type = "setextHeadingText";
+		if (definition) {
+			events.splice(text, 0, [
+				"enter",
+				heading,
+				context
+			]);
+			events.splice(definition + 1, 0, [
+				"exit",
+				events[content][1],
+				context
+			]);
+			events[content][1].end = shallow(events[definition][1].end);
+		} else events[content][1] = heading;
+		events.push([
+			"exit",
+			heading,
+			context
+		]);
+		return events;
+	}
+	function tokenizeSetextUnderline(effects, ok, nok) {
+		var self = this;
+		var index = self.events.length;
+		var marker;
+		var paragraph;
+		while (index--) if (self.events[index][1].type !== "lineEnding" && self.events[index][1].type !== "linePrefix" && self.events[index][1].type !== "content") {
+			paragraph = self.events[index][1].type === "paragraph";
+			break;
+		}
+		return start;
+		function start(code) {
+			if (!self.lazy && (self.interrupt || paragraph)) {
+				effects.enter("setextHeadingLine");
+				effects.enter("setextHeadingLineSequence");
+				marker = code;
+				return closingSequence(code);
+			}
+			return nok(code);
+		}
+		function closingSequence(code) {
+			if (code === marker) {
+				effects.consume(code);
+				return closingSequence;
+			}
+			effects.exit("setextHeadingLineSequence");
+			return factorySpace(effects, closingSequenceEnd, "lineSuffix")(code);
+		}
+		function closingSequenceEnd(code) {
+			if (code === null || markdownLineEnding(code)) {
+				effects.exit("setextHeadingLine");
+				return ok(code);
+			}
+			return nok(code);
+		}
+	}
+	module.exports = setextUnderline;
+}));
+//#endregion
+//#region node_modules/micromark/dist/constructs.js
+var require_constructs = /* @__PURE__ */ __commonJSMin(((exports) => {
+	Object.defineProperty(exports, "__esModule", { value: true });
+	var text$1 = require_text$1();
+	var attention = require_attention();
+	var autolink = require_autolink();
+	var blockQuote = require_block_quote();
+	var characterEscape = require_character_escape();
+	var characterReference = require_character_reference();
+	var codeFenced = require_code_fenced();
+	var codeIndented = require_code_indented();
+	var codeText = require_code_text();
+	var definition = require_definition$1();
+	var hardBreakEscape = require_hard_break_escape();
+	var headingAtx = require_heading_atx();
+	var htmlFlow = require_html_flow();
+	var htmlText = require_html_text();
+	var labelEnd = require_label_end();
+	var labelStartImage = require_label_start_image();
+	var labelStartLink = require_label_start_link();
+	var lineEnding = require_line_ending();
+	var list = require_list$1();
+	var setextUnderline = require_setext_underline();
+	var thematicBreak = require_thematic_break$1();
+	var document = {
+		42: list,
+		43: list,
+		45: list,
+		48: list,
+		49: list,
+		50: list,
+		51: list,
+		52: list,
+		53: list,
+		54: list,
+		55: list,
+		56: list,
+		57: list,
+		62: blockQuote
+	};
+	var contentInitial = { 91: definition };
+	var flowInitial = {
+		"-2": codeIndented,
+		"-1": codeIndented,
+		32: codeIndented
+	};
+	var flow = {
+		35: headingAtx,
+		42: thematicBreak,
+		45: [setextUnderline, thematicBreak],
+		60: htmlFlow,
+		61: setextUnderline,
+		95: thematicBreak,
+		96: codeFenced,
+		126: codeFenced
+	};
+	var string = {
+		38: characterReference,
+		92: characterEscape
+	};
+	var text = {
+		"-5": lineEnding,
+		"-4": lineEnding,
+		"-3": lineEnding,
+		33: labelStartImage,
+		38: characterReference,
+		42: attention,
+		60: [autolink, htmlText],
+		91: labelStartLink,
+		92: [hardBreakEscape, characterEscape],
+		93: labelEnd,
+		95: attention,
+		96: codeText
+	};
+	var insideSpan = { null: [attention, text$1.resolver] };
+	var disable = { null: [] };
+	exports.contentInitial = contentInitial;
+	exports.disable = disable;
+	exports.document = document;
+	exports.flow = flow;
+	exports.flowInitial = flowInitial;
+	exports.insideSpan = insideSpan;
+	exports.string = string;
+	exports.text = text;
+}));
+//#endregion
+//#region node_modules/micromark/dist/parse.js
+var require_parse = /* @__PURE__ */ __commonJSMin(((exports, module) => {
+	var content = require_content$1();
+	var document = require_document();
+	var flow = require_flow();
+	var text = require_text$1();
+	var combineExtensions = require_combine_extensions();
+	var createTokenizer = require_create_tokenizer();
+	var miniflat = require_miniflat();
+	var constructs = require_constructs();
+	function parse(options) {
+		var settings = options || {};
+		var parser = {
+			defined: [],
+			constructs: combineExtensions([constructs].concat(miniflat(settings.extensions))),
+			content: create(content),
+			document: create(document),
+			flow: create(flow),
+			string: create(text.string),
+			text: create(text.text)
+		};
+		return parser;
+		function create(initializer) {
+			return creator;
+			function creator(from) {
+				return createTokenizer(parser, initializer, from);
+			}
+		}
+	}
+	module.exports = parse;
+}));
+//#endregion
+//#region node_modules/micromark/dist/preprocess.js
+var require_preprocess = /* @__PURE__ */ __commonJSMin(((exports, module) => {
+	var search = /[\0\t\n\r]/g;
+	function preprocess() {
+		var start = true;
+		var column = 1;
+		var buffer = "";
+		var atCarriageReturn;
+		return preprocessor;
+		function preprocessor(value, encoding, end) {
+			var chunks = [];
+			var match;
+			var next;
+			var startPosition;
+			var endPosition;
+			var code;
+			value = buffer + value.toString(encoding);
+			startPosition = 0;
+			buffer = "";
+			if (start) {
+				if (value.charCodeAt(0) === 65279) startPosition++;
+				start = void 0;
+			}
+			while (startPosition < value.length) {
+				search.lastIndex = startPosition;
+				match = search.exec(value);
+				endPosition = match ? match.index : value.length;
+				code = value.charCodeAt(endPosition);
+				if (!match) {
+					buffer = value.slice(startPosition);
+					break;
+				}
+				if (code === 10 && startPosition === endPosition && atCarriageReturn) {
+					chunks.push(-3);
+					atCarriageReturn = void 0;
+				} else {
+					if (atCarriageReturn) {
+						chunks.push(-5);
+						atCarriageReturn = void 0;
+					}
+					if (startPosition < endPosition) {
+						chunks.push(value.slice(startPosition, endPosition));
+						column += endPosition - startPosition;
+					}
+					if (code === 0) {
+						chunks.push(65533);
+						column++;
+					} else if (code === 9) {
+						next = Math.ceil(column / 4) * 4;
+						chunks.push(-2);
+						while (column++ < next) chunks.push(-1);
+					} else if (code === 10) {
+						chunks.push(-4);
+						column = 1;
+					} else {
+						atCarriageReturn = true;
+						column = 1;
+					}
+				}
+				startPosition = endPosition + 1;
+			}
+			if (end) {
+				if (atCarriageReturn) chunks.push(-5);
+				if (buffer) chunks.push(buffer);
+				chunks.push(null);
+			}
+			return chunks;
+		}
+	}
+	module.exports = preprocess;
+}));
+//#endregion
+//#region node_modules/micromark/dist/postprocess.js
+var require_postprocess = /* @__PURE__ */ __commonJSMin(((exports, module) => {
+	var subtokenize = require_subtokenize();
+	function postprocess(events) {
+		while (!subtokenize(events));
+		return events;
+	}
+	module.exports = postprocess;
+}));
+//#endregion
+//#region node_modules/unist-util-stringify-position/index.js
+var require_unist_util_stringify_position = /* @__PURE__ */ __commonJSMin(((exports, module) => {
+	var own = {}.hasOwnProperty;
+	module.exports = stringify;
+	function stringify(value) {
+		if (!value || typeof value !== "object") return "";
+		if (own.call(value, "position") || own.call(value, "type")) return position(value.position);
+		if (own.call(value, "start") || own.call(value, "end")) return position(value);
+		if (own.call(value, "line") || own.call(value, "column")) return point(value);
+		return "";
+	}
+	function point(point) {
+		if (!point || typeof point !== "object") point = {};
+		return index(point.line) + ":" + index(point.column);
+	}
+	function position(pos) {
+		if (!pos || typeof pos !== "object") pos = {};
+		return point(pos.start) + "-" + point(pos.end);
+	}
+	function index(value) {
+		return value && typeof value === "number" ? value : 1;
+	}
+}));
+//#endregion
+//#region node_modules/mdast-util-from-markdown/dist/index.js
+var require_dist = /* @__PURE__ */ __commonJSMin(((exports, module) => {
+	module.exports = fromMarkdown;
+	var toString = require_mdast_util_to_string();
+	var assign = require_assign();
+	var own = require_has_own_property();
+	var normalizeIdentifier = require_normalize_identifier();
+	var safeFromInt = require_safe_from_int();
+	var parser = require_parse();
+	var preprocessor = require_preprocess();
+	var postprocess = require_postprocess();
+	var decode = require_decode_entity();
+	var stringifyPosition = require_unist_util_stringify_position();
+	function fromMarkdown(value, encoding, options) {
+		if (typeof encoding !== "string") {
+			options = encoding;
+			encoding = void 0;
+		}
+		return compiler(options)(postprocess(parser(options).document().write(preprocessor()(value, encoding, true))));
+	}
+	function compiler(options) {
+		var settings = options || {};
+		var config = configure({
+			transforms: [],
+			canContainEols: [
+				"emphasis",
+				"fragment",
+				"heading",
+				"paragraph",
+				"strong"
+			],
+			enter: {
+				autolink: opener(link),
+				autolinkProtocol: onenterdata,
+				autolinkEmail: onenterdata,
+				atxHeading: opener(heading),
+				blockQuote: opener(blockQuote),
+				characterEscape: onenterdata,
+				characterReference: onenterdata,
+				codeFenced: opener(codeFlow),
+				codeFencedFenceInfo: buffer,
+				codeFencedFenceMeta: buffer,
+				codeIndented: opener(codeFlow, buffer),
+				codeText: opener(codeText, buffer),
+				codeTextData: onenterdata,
+				data: onenterdata,
+				codeFlowValue: onenterdata,
+				definition: opener(definition),
+				definitionDestinationString: buffer,
+				definitionLabelString: buffer,
+				definitionTitleString: buffer,
+				emphasis: opener(emphasis),
+				hardBreakEscape: opener(hardBreak),
+				hardBreakTrailing: opener(hardBreak),
+				htmlFlow: opener(html, buffer),
+				htmlFlowData: onenterdata,
+				htmlText: opener(html, buffer),
+				htmlTextData: onenterdata,
+				image: opener(image),
+				label: buffer,
+				link: opener(link),
+				listItem: opener(listItem),
+				listItemValue: onenterlistitemvalue,
+				listOrdered: opener(list, onenterlistordered),
+				listUnordered: opener(list),
+				paragraph: opener(paragraph),
+				reference: onenterreference,
+				referenceString: buffer,
+				resourceDestinationString: buffer,
+				resourceTitleString: buffer,
+				setextHeading: opener(heading),
+				strong: opener(strong),
+				thematicBreak: opener(thematicBreak)
+			},
+			exit: {
+				atxHeading: closer(),
+				atxHeadingSequence: onexitatxheadingsequence,
+				autolink: closer(),
+				autolinkEmail: onexitautolinkemail,
+				autolinkProtocol: onexitautolinkprotocol,
+				blockQuote: closer(),
+				characterEscapeValue: onexitdata,
+				characterReferenceMarkerHexadecimal: onexitcharacterreferencemarker,
+				characterReferenceMarkerNumeric: onexitcharacterreferencemarker,
+				characterReferenceValue: onexitcharacterreferencevalue,
+				codeFenced: closer(onexitcodefenced),
+				codeFencedFence: onexitcodefencedfence,
+				codeFencedFenceInfo: onexitcodefencedfenceinfo,
+				codeFencedFenceMeta: onexitcodefencedfencemeta,
+				codeFlowValue: onexitdata,
+				codeIndented: closer(onexitcodeindented),
+				codeText: closer(onexitcodetext),
+				codeTextData: onexitdata,
+				data: onexitdata,
+				definition: closer(),
+				definitionDestinationString: onexitdefinitiondestinationstring,
+				definitionLabelString: onexitdefinitionlabelstring,
+				definitionTitleString: onexitdefinitiontitlestring,
+				emphasis: closer(),
+				hardBreakEscape: closer(onexithardbreak),
+				hardBreakTrailing: closer(onexithardbreak),
+				htmlFlow: closer(onexithtmlflow),
+				htmlFlowData: onexitdata,
+				htmlText: closer(onexithtmltext),
+				htmlTextData: onexitdata,
+				image: closer(onexitimage),
+				label: onexitlabel,
+				labelText: onexitlabeltext,
+				lineEnding: onexitlineending,
+				link: closer(onexitlink),
+				listItem: closer(),
+				listOrdered: closer(),
+				listUnordered: closer(),
+				paragraph: closer(),
+				referenceString: onexitreferencestring,
+				resourceDestinationString: onexitresourcedestinationstring,
+				resourceTitleString: onexitresourcetitlestring,
+				resource: onexitresource,
+				setextHeading: closer(onexitsetextheading),
+				setextHeadingLineSequence: onexitsetextheadinglinesequence,
+				setextHeadingText: onexitsetextheadingtext,
+				strong: closer(),
+				thematicBreak: closer()
+			}
+		}, settings.mdastExtensions || []);
+		var data = {};
+		return compile;
+		function compile(events) {
+			var tree = {
+				type: "root",
+				children: []
+			};
+			var stack = [tree];
+			var tokenStack = [];
+			var listStack = [];
+			var index = -1;
+			var handler;
+			var listStart;
+			var context = {
+				stack,
+				tokenStack,
+				config,
+				enter,
+				exit,
+				buffer,
+				resume,
+				setData,
+				getData
+			};
+			while (++index < events.length) if (events[index][1].type === "listOrdered" || events[index][1].type === "listUnordered") if (events[index][0] === "enter") listStack.push(index);
+			else {
+				listStart = listStack.pop(index);
+				index = prepareList(events, listStart, index);
+			}
+			index = -1;
+			while (++index < events.length) {
+				handler = config[events[index][0]];
+				if (own.call(handler, events[index][1].type)) handler[events[index][1].type].call(assign({ sliceSerialize: events[index][2].sliceSerialize }, context), events[index][1]);
+			}
+			if (tokenStack.length) throw new Error("Cannot close document, a token (`" + tokenStack[tokenStack.length - 1].type + "`, " + stringifyPosition({
+				start: tokenStack[tokenStack.length - 1].start,
+				end: tokenStack[tokenStack.length - 1].end
+			}) + ") is still open");
+			tree.position = {
+				start: point(events.length ? events[0][1].start : {
+					line: 1,
+					column: 1,
+					offset: 0
+				}),
+				end: point(events.length ? events[events.length - 2][1].end : {
+					line: 1,
+					column: 1,
+					offset: 0
+				})
+			};
+			index = -1;
+			while (++index < config.transforms.length) tree = config.transforms[index](tree) || tree;
+			return tree;
+		}
+		function prepareList(events, start, length) {
+			var index = start - 1;
+			var containerBalance = -1;
+			var listSpread = false;
+			var listItem;
+			var tailIndex;
+			var lineIndex;
+			var tailEvent;
+			var event;
+			var firstBlankLineIndex;
+			var atMarker;
+			while (++index <= length) {
+				event = events[index];
+				if (event[1].type === "listUnordered" || event[1].type === "listOrdered" || event[1].type === "blockQuote") {
+					if (event[0] === "enter") containerBalance++;
+					else containerBalance--;
+					atMarker = void 0;
+				} else if (event[1].type === "lineEndingBlank") {
+					if (event[0] === "enter") {
+						if (listItem && !atMarker && !containerBalance && !firstBlankLineIndex) firstBlankLineIndex = index;
+						atMarker = void 0;
+					}
+				} else if (event[1].type === "linePrefix" || event[1].type === "listItemValue" || event[1].type === "listItemMarker" || event[1].type === "listItemPrefix" || event[1].type === "listItemPrefixWhitespace") {} else atMarker = void 0;
+				if (!containerBalance && event[0] === "enter" && event[1].type === "listItemPrefix" || containerBalance === -1 && event[0] === "exit" && (event[1].type === "listUnordered" || event[1].type === "listOrdered")) {
+					if (listItem) {
+						tailIndex = index;
+						lineIndex = void 0;
+						while (tailIndex--) {
+							tailEvent = events[tailIndex];
+							if (tailEvent[1].type === "lineEnding" || tailEvent[1].type === "lineEndingBlank") {
+								if (tailEvent[0] === "exit") continue;
+								if (lineIndex) {
+									events[lineIndex][1].type = "lineEndingBlank";
+									listSpread = true;
+								}
+								tailEvent[1].type = "lineEnding";
+								lineIndex = tailIndex;
+							} else if (tailEvent[1].type === "linePrefix" || tailEvent[1].type === "blockQuotePrefix" || tailEvent[1].type === "blockQuotePrefixWhitespace" || tailEvent[1].type === "blockQuoteMarker" || tailEvent[1].type === "listItemIndent") {} else break;
+						}
+						if (firstBlankLineIndex && (!lineIndex || firstBlankLineIndex < lineIndex)) listItem._spread = true;
+						listItem.end = point(lineIndex ? events[lineIndex][1].start : event[1].end);
+						events.splice(lineIndex || index, 0, [
+							"exit",
+							listItem,
+							event[2]
+						]);
+						index++;
+						length++;
+					}
+					if (event[1].type === "listItemPrefix") {
+						listItem = {
+							type: "listItem",
+							_spread: false,
+							start: point(event[1].start)
+						};
+						events.splice(index, 0, [
+							"enter",
+							listItem,
+							event[2]
+						]);
+						index++;
+						length++;
+						firstBlankLineIndex = void 0;
+						atMarker = true;
+					}
+				}
+			}
+			events[start][1]._spread = listSpread;
+			return length;
+		}
+		function setData(key, value) {
+			data[key] = value;
+		}
+		function getData(key) {
+			return data[key];
+		}
+		function point(d) {
+			return {
+				line: d.line,
+				column: d.column,
+				offset: d.offset
+			};
+		}
+		function opener(create, and) {
+			return open;
+			function open(token) {
+				enter.call(this, create(token), token);
+				if (and) and.call(this, token);
+			}
+		}
+		function buffer() {
+			this.stack.push({
+				type: "fragment",
+				children: []
+			});
+		}
+		function enter(node, token) {
+			this.stack[this.stack.length - 1].children.push(node);
+			this.stack.push(node);
+			this.tokenStack.push(token);
+			node.position = { start: point(token.start) };
+			return node;
+		}
+		function closer(and) {
+			return close;
+			function close(token) {
+				if (and) and.call(this, token);
+				exit.call(this, token);
+			}
+		}
+		function exit(token) {
+			var node = this.stack.pop();
+			var open = this.tokenStack.pop();
+			if (!open) throw new Error("Cannot close `" + token.type + "` (" + stringifyPosition({
+				start: token.start,
+				end: token.end
+			}) + "): it’s not open");
+			else if (open.type !== token.type) throw new Error("Cannot close `" + token.type + "` (" + stringifyPosition({
+				start: token.start,
+				end: token.end
+			}) + "): a different token (`" + open.type + "`, " + stringifyPosition({
+				start: open.start,
+				end: open.end
+			}) + ") is open");
+			node.position.end = point(token.end);
+			return node;
+		}
+		function resume() {
+			return toString(this.stack.pop());
+		}
+		function onenterlistordered() {
+			setData("expectingFirstListItemValue", true);
+		}
+		function onenterlistitemvalue(token) {
+			if (getData("expectingFirstListItemValue")) {
+				this.stack[this.stack.length - 2].start = parseInt(this.sliceSerialize(token), 10);
+				setData("expectingFirstListItemValue");
+			}
+		}
+		function onexitcodefencedfenceinfo() {
+			var data = this.resume();
+			this.stack[this.stack.length - 1].lang = data;
+		}
+		function onexitcodefencedfencemeta() {
+			var data = this.resume();
+			this.stack[this.stack.length - 1].meta = data;
+		}
+		function onexitcodefencedfence() {
+			if (getData("flowCodeInside")) return;
+			this.buffer();
+			setData("flowCodeInside", true);
+		}
+		function onexitcodefenced() {
+			var data = this.resume();
+			this.stack[this.stack.length - 1].value = data.replace(/^(\r?\n|\r)|(\r?\n|\r)$/g, "");
+			setData("flowCodeInside");
+		}
+		function onexitcodeindented() {
+			var data = this.resume();
+			this.stack[this.stack.length - 1].value = data;
+		}
+		function onexitdefinitionlabelstring(token) {
+			var label = this.resume();
+			this.stack[this.stack.length - 1].label = label;
+			this.stack[this.stack.length - 1].identifier = normalizeIdentifier(this.sliceSerialize(token)).toLowerCase();
+		}
+		function onexitdefinitiontitlestring() {
+			var data = this.resume();
+			this.stack[this.stack.length - 1].title = data;
+		}
+		function onexitdefinitiondestinationstring() {
+			var data = this.resume();
+			this.stack[this.stack.length - 1].url = data;
+		}
+		function onexitatxheadingsequence(token) {
+			if (!this.stack[this.stack.length - 1].depth) this.stack[this.stack.length - 1].depth = this.sliceSerialize(token).length;
+		}
+		function onexitsetextheadingtext() {
+			setData("setextHeadingSlurpLineEnding", true);
+		}
+		function onexitsetextheadinglinesequence(token) {
+			this.stack[this.stack.length - 1].depth = this.sliceSerialize(token).charCodeAt(0) === 61 ? 1 : 2;
+		}
+		function onexitsetextheading() {
+			setData("setextHeadingSlurpLineEnding");
+		}
+		function onenterdata(token) {
+			var siblings = this.stack[this.stack.length - 1].children;
+			var tail = siblings[siblings.length - 1];
+			if (!tail || tail.type !== "text") {
+				tail = text();
+				tail.position = { start: point(token.start) };
+				this.stack[this.stack.length - 1].children.push(tail);
+			}
+			this.stack.push(tail);
+		}
+		function onexitdata(token) {
+			var tail = this.stack.pop();
+			tail.value += this.sliceSerialize(token);
+			tail.position.end = point(token.end);
+		}
+		function onexitlineending(token) {
+			var context = this.stack[this.stack.length - 1];
+			if (getData("atHardBreak")) {
+				context.children[context.children.length - 1].position.end = point(token.end);
+				setData("atHardBreak");
+				return;
+			}
+			if (!getData("setextHeadingSlurpLineEnding") && config.canContainEols.indexOf(context.type) > -1) {
+				onenterdata.call(this, token);
+				onexitdata.call(this, token);
+			}
+		}
+		function onexithardbreak() {
+			setData("atHardBreak", true);
+		}
+		function onexithtmlflow() {
+			var data = this.resume();
+			this.stack[this.stack.length - 1].value = data;
+		}
+		function onexithtmltext() {
+			var data = this.resume();
+			this.stack[this.stack.length - 1].value = data;
+		}
+		function onexitcodetext() {
+			var data = this.resume();
+			this.stack[this.stack.length - 1].value = data;
+		}
+		function onexitlink() {
+			var context = this.stack[this.stack.length - 1];
+			if (getData("inReference")) {
+				context.type += "Reference";
+				context.referenceType = getData("referenceType") || "shortcut";
+				delete context.url;
+				delete context.title;
+			} else {
+				delete context.identifier;
+				delete context.label;
+				delete context.referenceType;
+			}
+			setData("referenceType");
+		}
+		function onexitimage() {
+			var context = this.stack[this.stack.length - 1];
+			if (getData("inReference")) {
+				context.type += "Reference";
+				context.referenceType = getData("referenceType") || "shortcut";
+				delete context.url;
+				delete context.title;
+			} else {
+				delete context.identifier;
+				delete context.label;
+				delete context.referenceType;
+			}
+			setData("referenceType");
+		}
+		function onexitlabeltext(token) {
+			this.stack[this.stack.length - 2].identifier = normalizeIdentifier(this.sliceSerialize(token)).toLowerCase();
+		}
+		function onexitlabel() {
+			var fragment = this.stack[this.stack.length - 1];
+			var value = this.resume();
+			this.stack[this.stack.length - 1].label = value;
+			setData("inReference", true);
+			if (this.stack[this.stack.length - 1].type === "link") this.stack[this.stack.length - 1].children = fragment.children;
+			else this.stack[this.stack.length - 1].alt = value;
+		}
+		function onexitresourcedestinationstring() {
+			var data = this.resume();
+			this.stack[this.stack.length - 1].url = data;
+		}
+		function onexitresourcetitlestring() {
+			var data = this.resume();
+			this.stack[this.stack.length - 1].title = data;
+		}
+		function onexitresource() {
+			setData("inReference");
+		}
+		function onenterreference() {
+			setData("referenceType", "collapsed");
+		}
+		function onexitreferencestring(token) {
+			var label = this.resume();
+			this.stack[this.stack.length - 1].label = label;
+			this.stack[this.stack.length - 1].identifier = normalizeIdentifier(this.sliceSerialize(token)).toLowerCase();
+			setData("referenceType", "full");
+		}
+		function onexitcharacterreferencemarker(token) {
+			setData("characterReferenceType", token.type);
+		}
+		function onexitcharacterreferencevalue(token) {
+			var data = this.sliceSerialize(token);
+			var type = getData("characterReferenceType");
+			var value;
+			var tail;
+			if (type) {
+				value = safeFromInt(data, type === "characterReferenceMarkerNumeric" ? 10 : 16);
+				setData("characterReferenceType");
+			} else value = decode(data);
+			tail = this.stack.pop();
+			tail.value += value;
+			tail.position.end = point(token.end);
+		}
+		function onexitautolinkprotocol(token) {
+			onexitdata.call(this, token);
+			this.stack[this.stack.length - 1].url = this.sliceSerialize(token);
+		}
+		function onexitautolinkemail(token) {
+			onexitdata.call(this, token);
+			this.stack[this.stack.length - 1].url = "mailto:" + this.sliceSerialize(token);
+		}
+		function blockQuote() {
+			return {
+				type: "blockquote",
+				children: []
+			};
+		}
+		function codeFlow() {
+			return {
+				type: "code",
+				lang: null,
+				meta: null,
+				value: ""
+			};
+		}
+		function codeText() {
+			return {
+				type: "inlineCode",
+				value: ""
+			};
+		}
+		function definition() {
+			return {
+				type: "definition",
+				identifier: "",
+				label: null,
+				title: null,
+				url: ""
+			};
+		}
+		function emphasis() {
+			return {
+				type: "emphasis",
+				children: []
+			};
+		}
+		function heading() {
+			return {
+				type: "heading",
+				depth: void 0,
+				children: []
+			};
+		}
+		function hardBreak() {
+			return { type: "break" };
+		}
+		function html() {
+			return {
+				type: "html",
+				value: ""
+			};
+		}
+		function image() {
+			return {
+				type: "image",
+				title: null,
+				url: "",
+				alt: null
+			};
+		}
+		function link() {
+			return {
+				type: "link",
+				title: null,
+				url: "",
+				children: []
+			};
+		}
+		function list(token) {
+			return {
+				type: "list",
+				ordered: token.type === "listOrdered",
+				start: null,
+				spread: token._spread,
+				children: []
+			};
+		}
+		function listItem(token) {
+			return {
+				type: "listItem",
+				spread: token._spread,
+				checked: null,
+				children: []
+			};
+		}
+		function paragraph() {
+			return {
+				type: "paragraph",
+				children: []
+			};
+		}
+		function strong() {
+			return {
+				type: "strong",
+				children: []
+			};
+		}
+		function text() {
+			return {
+				type: "text",
+				value: ""
+			};
+		}
+		function thematicBreak() {
+			return { type: "thematicBreak" };
+		}
+	}
+	function configure(config, extensions) {
+		var index = -1;
+		while (++index < extensions.length) extension(config, extensions[index]);
+		return config;
+	}
+	function extension(config, extension) {
+		var key;
+		var left;
+		for (key in extension) {
+			left = own.call(config, key) ? config[key] : config[key] = {};
+			if (key === "canContainEols" || key === "transforms") config[key] = [].concat(left, extension[key]);
+			else Object.assign(left, extension[key]);
+		}
+	}
+}));
+//#endregion
+//#region node_modules/mdast-util-from-markdown/index.js
+var require_mdast_util_from_markdown = /* @__PURE__ */ __commonJSMin(((exports, module) => {
+	module.exports = require_dist();
+}));
+//#endregion
+//#region node_modules/remark-parse/index.js
+var require_remark_parse = /* @__PURE__ */ __commonJSMin(((exports, module) => {
+	module.exports = parse;
+	var fromMarkdown = require_mdast_util_from_markdown();
+	function parse(options) {
+		var self = this;
+		this.Parser = parse;
+		function parse(doc) {
+			return fromMarkdown(doc, Object.assign({}, self.data("settings"), options, {
+				extensions: self.data("micromarkExtensions") || [],
+				mdastExtensions: self.data("fromMarkdownExtensions") || []
+			}));
+		}
+	}
+}));
+//#endregion
+//#region node_modules/zwitch/index.js
+var require_zwitch = /* @__PURE__ */ __commonJSMin(((exports, module) => {
+	module.exports = factory;
+	var noop = Function.prototype;
+	var own = {}.hasOwnProperty;
+	function factory(key, options) {
+		var settings = options || {};
+		function one(value) {
+			var fn = one.invalid;
+			var handlers = one.handlers;
+			if (value && own.call(value, key)) fn = own.call(handlers, value[key]) ? handlers[value[key]] : one.unknown;
+			return (fn || noop).apply(this, arguments);
+		}
+		one.handlers = settings.handlers || {};
+		one.invalid = settings.invalid;
+		one.unknown = settings.unknown;
+		return one;
+	}
+}));
+//#endregion
+//#region node_modules/mdast-util-to-markdown/lib/handle/blockquote.js
+var require_blockquote = /* @__PURE__ */ __commonJSMin(((exports, module) => {
+	module.exports = blockquote;
+	var flow = require_container_flow();
+	var indentLines = require_indent_lines();
+	function blockquote(node, _, context) {
+		var exit = context.enter("blockquote");
+		var value = indentLines(flow(node, context), map);
+		exit();
+		return value;
+	}
+	function map(line, index, blank) {
+		return ">" + (blank ? "" : " ") + line;
+	}
+}));
+//#endregion
+//#region node_modules/mdast-util-to-markdown/lib/util/pattern-in-scope.js
+var require_pattern_in_scope = /* @__PURE__ */ __commonJSMin(((exports, module) => {
+	module.exports = patternInScope;
+	function patternInScope(stack, pattern) {
+		return listInScope(stack, pattern.inConstruct, true) && !listInScope(stack, pattern.notInConstruct);
+	}
+	function listInScope(stack, list, none) {
+		var index;
+		if (!list) return none;
+		if (typeof list === "string") list = [list];
+		index = -1;
+		while (++index < list.length) if (stack.indexOf(list[index]) !== -1) return true;
+		return false;
+	}
+}));
+//#endregion
+//#region node_modules/mdast-util-to-markdown/lib/handle/break.js
+var require_break = /* @__PURE__ */ __commonJSMin(((exports, module) => {
+	module.exports = hardBreak;
+	var patternInScope = require_pattern_in_scope();
+	function hardBreak(node, _, context, safe) {
+		var index = -1;
+		while (++index < context.unsafe.length) if (context.unsafe[index].character === "\n" && patternInScope(context.stack, context.unsafe[index])) return /[ \t]/.test(safe.before) ? "" : " ";
+		return "\\\n";
+	}
+}));
+//#endregion
+//#region node_modules/longest-streak/index.js
+var require_longest_streak = /* @__PURE__ */ __commonJSMin(((exports, module) => {
+	module.exports = longestStreak;
+	function longestStreak(value, character) {
+		var count = 0;
+		var maximum = 0;
+		var expected;
+		var index;
+		if (typeof character !== "string" || character.length !== 1) throw new Error("Expected character");
+		value = String(value);
+		index = value.indexOf(character);
+		expected = index;
+		while (index !== -1) {
+			count++;
+			if (index === expected) {
+				if (count > maximum) maximum = count;
+			} else count = 1;
+			expected = index + 1;
+			index = value.indexOf(character, expected);
+		}
+		return maximum;
+	}
+}));
+//#endregion
+//#region node_modules/mdast-util-to-markdown/lib/util/format-code-as-indented.js
+var require_format_code_as_indented = /* @__PURE__ */ __commonJSMin(((exports, module) => {
+	module.exports = formatCodeAsIndented;
+	function formatCodeAsIndented(node, context) {
+		return !context.options.fences && node.value && !node.lang && /[^ \r\n]/.test(node.value) && !/^[\t ]*(?:[\r\n]|$)|(?:^|[\r\n])[\t ]*$/.test(node.value);
+	}
+}));
+//#endregion
+//#region node_modules/mdast-util-to-markdown/lib/util/check-fence.js
+var require_check_fence = /* @__PURE__ */ __commonJSMin(((exports, module) => {
+	module.exports = checkFence;
+	function checkFence(context) {
+		var marker = context.options.fence || "`";
+		if (marker !== "`" && marker !== "~") throw new Error("Cannot serialize code with `" + marker + "` for `options.fence`, expected `` ` `` or `~`");
+		return marker;
+	}
+}));
+//#endregion
+//#region node_modules/mdast-util-to-markdown/lib/util/safe.js
+var require_safe = /* @__PURE__ */ __commonJSMin(((exports, module) => {
+	module.exports = safe;
+	var patternCompile = require_pattern_compile();
+	var patternInScope = require_pattern_in_scope();
+	function safe(context, input, config) {
+		var value = (config.before || "") + (input || "") + (config.after || "");
+		var positions = [];
+		var result = [];
+		var infos = {};
+		var index = -1;
+		var before;
+		var after;
+		var position;
+		var pattern;
+		var expression;
+		var match;
+		var start;
+		var end;
+		while (++index < context.unsafe.length) {
+			pattern = context.unsafe[index];
+			if (!patternInScope(context.stack, pattern)) continue;
+			expression = patternCompile(pattern);
+			while (match = expression.exec(value)) {
+				before = "before" in pattern || pattern.atBreak;
+				after = "after" in pattern;
+				position = match.index + (before ? match[1].length : 0);
+				if (positions.indexOf(position) === -1) {
+					positions.push(position);
+					infos[position] = {
+						before,
+						after
+					};
+				} else {
+					if (infos[position].before && !before) infos[position].before = false;
+					if (infos[position].after && !after) infos[position].after = false;
+				}
+			}
+		}
+		positions.sort(numerical);
+		start = config.before ? config.before.length : 0;
+		end = value.length - (config.after ? config.after.length : 0);
+		index = -1;
+		while (++index < positions.length) {
+			position = positions[index];
+			if (position < start || position >= end) continue;
+			if (position + 1 < end && positions[index + 1] === position + 1 && infos[position].after && !infos[position + 1].before && !infos[position + 1].after) continue;
+			if (start !== position) result.push(escapeBackslashes(value.slice(start, position), "\\"));
+			start = position;
+			if (/[!-/:-@[-`{-~]/.test(value.charAt(position)) && (!config.encode || config.encode.indexOf(value.charAt(position)) === -1)) result.push("\\");
+			else {
+				result.push("&#x" + value.charCodeAt(position).toString(16).toUpperCase() + ";");
+				start++;
+			}
+		}
+		result.push(escapeBackslashes(value.slice(start, end), config.after));
+		return result.join("");
+	}
+	function numerical(a, b) {
+		return a - b;
+	}
+	function escapeBackslashes(value, after) {
+		var expression = /\\(?=[!-/:-@[-`{-~])/g;
+		var positions = [];
+		var results = [];
+		var index = -1;
+		var start = 0;
+		var whole = value + after;
+		var match;
+		while (match = expression.exec(whole)) positions.push(match.index);
+		while (++index < positions.length) {
+			if (start !== positions[index]) results.push(value.slice(start, positions[index]));
+			results.push("\\");
+			start = positions[index];
+		}
+		results.push(value.slice(start));
+		return results.join("");
+	}
+}));
+//#endregion
+//#region node_modules/mdast-util-to-markdown/lib/handle/code.js
+var require_code = /* @__PURE__ */ __commonJSMin(((exports, module) => {
+	module.exports = code;
+	var repeat = require_repeat_string();
+	var streak = require_longest_streak();
+	var formatCodeAsIndented = require_format_code_as_indented();
+	var checkFence = require_check_fence();
+	var indentLines = require_indent_lines();
+	var safe = require_safe();
+	function code(node, _, context) {
+		var marker = checkFence(context);
+		var raw = node.value || "";
+		var suffix = marker === "`" ? "GraveAccent" : "Tilde";
+		var value;
+		var sequence;
+		var exit;
+		var subexit;
+		if (formatCodeAsIndented(node, context)) {
+			exit = context.enter("codeIndented");
+			value = indentLines(raw, map);
+		} else {
+			sequence = repeat(marker, Math.max(streak(raw, marker) + 1, 3));
+			exit = context.enter("codeFenced");
+			value = sequence;
+			if (node.lang) {
+				subexit = context.enter("codeFencedLang" + suffix);
+				value += safe(context, node.lang, {
+					before: "`",
+					after: " ",
+					encode: ["`"]
+				});
+				subexit();
+			}
+			if (node.lang && node.meta) {
+				subexit = context.enter("codeFencedMeta" + suffix);
+				value += " " + safe(context, node.meta, {
+					before: " ",
+					after: "\n",
+					encode: ["`"]
+				});
+				subexit();
+			}
+			value += "\n";
+			if (raw) value += raw + "\n";
+			value += sequence;
+		}
+		exit();
+		return value;
+	}
+	function map(line, _, blank) {
+		return (blank ? "" : "    ") + line;
+	}
+}));
+//#endregion
+//#region node_modules/mdast-util-to-markdown/lib/util/association.js
+var require_association = /* @__PURE__ */ __commonJSMin(((exports, module) => {
+	module.exports = association;
+	var decode = require_decode_entity();
+	var characterEscape = /\\([!-/:-@[-`{-~])/g;
+	var characterReference = /&(#(\d{1,7}|x[\da-f]{1,6})|[\da-z]{1,31});/gi;
+	function association(node) {
+		if (node.label || !node.identifier) return node.label || "";
+		return node.identifier.replace(characterEscape, "$1").replace(characterReference, decodeIfPossible);
+	}
+	function decodeIfPossible($0, $1) {
+		return decode($1) || $0;
+	}
+}));
+//#endregion
+//#region node_modules/mdast-util-to-markdown/lib/util/check-quote.js
+var require_check_quote = /* @__PURE__ */ __commonJSMin(((exports, module) => {
+	module.exports = checkQuote;
+	function checkQuote(context) {
+		var marker = context.options.quote || "\"";
+		if (marker !== "\"" && marker !== "'") throw new Error("Cannot serialize title with `" + marker + "` for `options.quote`, expected `\"`, or `'`");
+		return marker;
+	}
+}));
+//#endregion
+//#region node_modules/mdast-util-to-markdown/lib/handle/definition.js
+var require_definition = /* @__PURE__ */ __commonJSMin(((exports, module) => {
+	module.exports = definition;
+	var association = require_association();
+	var checkQuote = require_check_quote();
+	var safe = require_safe();
+	function definition(node, _, context) {
+		var marker = checkQuote(context);
+		var suffix = marker === "\"" ? "Quote" : "Apostrophe";
+		var exit = context.enter("definition");
+		var subexit = context.enter("label");
+		var value = "[" + safe(context, association(node), {
+			before: "[",
+			after: "]"
+		}) + "]: ";
+		subexit();
+		if (!node.url || /[ \t\r\n]/.test(node.url)) {
+			subexit = context.enter("destinationLiteral");
+			value += "<" + safe(context, node.url, {
+				before: "<",
+				after: ">"
+			}) + ">";
+		} else {
+			subexit = context.enter("destinationRaw");
+			value += safe(context, node.url, {
+				before: " ",
+				after: " "
+			});
+		}
+		subexit();
+		if (node.title) {
+			subexit = context.enter("title" + suffix);
+			value += " " + marker + safe(context, node.title, {
+				before: marker,
+				after: marker
+			}) + marker;
+			subexit();
+		}
+		exit();
+		return value;
+	}
+}));
+//#endregion
+//#region node_modules/mdast-util-to-markdown/lib/util/check-emphasis.js
+var require_check_emphasis = /* @__PURE__ */ __commonJSMin(((exports, module) => {
+	module.exports = checkEmphasis;
+	function checkEmphasis(context) {
+		var marker = context.options.emphasis || "*";
+		if (marker !== "*" && marker !== "_") throw new Error("Cannot serialize emphasis with `" + marker + "` for `options.emphasis`, expected `*`, or `_`");
+		return marker;
+	}
+}));
+//#endregion
+//#region node_modules/mdast-util-to-markdown/lib/handle/emphasis.js
+var require_emphasis = /* @__PURE__ */ __commonJSMin(((exports, module) => {
+	module.exports = emphasis;
+	emphasis.peek = emphasisPeek;
+	var checkEmphasis = require_check_emphasis();
+	var phrasing = require_container_phrasing();
+	function emphasis(node, _, context) {
+		var marker = checkEmphasis(context);
+		var exit = context.enter("emphasis");
+		var value = phrasing(node, context, {
+			before: marker,
+			after: marker
+		});
+		exit();
+		return marker + value + marker;
+	}
+	function emphasisPeek(node, _, context) {
+		return context.options.emphasis || "*";
+	}
+}));
+//#endregion
+//#region node_modules/mdast-util-to-markdown/lib/util/format-heading-as-setext.js
+var require_format_heading_as_setext = /* @__PURE__ */ __commonJSMin(((exports, module) => {
+	module.exports = formatHeadingAsSetext;
+	var toString = require_mdast_util_to_string();
+	function formatHeadingAsSetext(node, context) {
+		return context.options.setext && (!node.depth || node.depth < 3) && toString(node);
+	}
+}));
+//#endregion
+//#region node_modules/mdast-util-to-markdown/lib/handle/heading.js
+var require_heading = /* @__PURE__ */ __commonJSMin(((exports, module) => {
+	module.exports = heading;
+	var repeat = require_repeat_string();
+	var formatHeadingAsSetext = require_format_heading_as_setext();
+	var phrasing = require_container_phrasing();
+	function heading(node, _, context) {
+		var rank = Math.max(Math.min(6, node.depth || 1), 1);
+		var exit;
+		var subexit;
+		var value;
+		var sequence;
+		if (formatHeadingAsSetext(node, context)) {
+			exit = context.enter("headingSetext");
+			subexit = context.enter("phrasing");
+			value = phrasing(node, context, {
+				before: "\n",
+				after: "\n"
+			});
+			subexit();
+			exit();
+			return value + "\n" + repeat(rank === 1 ? "=" : "-", value.length - (Math.max(value.lastIndexOf("\r"), value.lastIndexOf("\n")) + 1));
+		}
+		sequence = repeat("#", rank);
+		exit = context.enter("headingAtx");
+		subexit = context.enter("phrasing");
+		value = phrasing(node, context, {
+			before: "# ",
+			after: "\n"
+		});
+		value = value ? sequence + " " + value : sequence;
+		if (context.options.closeAtx) value += " " + sequence;
+		subexit();
+		exit();
+		return value;
+	}
+}));
+//#endregion
+//#region node_modules/mdast-util-to-markdown/lib/handle/html.js
+var require_html = /* @__PURE__ */ __commonJSMin(((exports, module) => {
+	module.exports = html;
+	html.peek = htmlPeek;
+	function html(node) {
+		return node.value || "";
+	}
+	function htmlPeek() {
+		return "<";
+	}
+}));
+//#endregion
+//#region node_modules/mdast-util-to-markdown/lib/handle/image.js
+var require_image = /* @__PURE__ */ __commonJSMin(((exports, module) => {
+	module.exports = image;
+	image.peek = imagePeek;
+	var checkQuote = require_check_quote();
+	var safe = require_safe();
+	function image(node, _, context) {
+		var quote = checkQuote(context);
+		var suffix = quote === "\"" ? "Quote" : "Apostrophe";
+		var exit = context.enter("image");
+		var subexit = context.enter("label");
+		var value = "![" + safe(context, node.alt, {
+			before: "[",
+			after: "]"
+		}) + "](";
+		subexit();
+		if (!node.url && node.title || /[ \t\r\n]/.test(node.url)) {
+			subexit = context.enter("destinationLiteral");
+			value += "<" + safe(context, node.url, {
+				before: "<",
+				after: ">"
+			}) + ">";
+		} else {
+			subexit = context.enter("destinationRaw");
+			value += safe(context, node.url, {
+				before: "(",
+				after: node.title ? " " : ")"
+			});
+		}
+		subexit();
+		if (node.title) {
+			subexit = context.enter("title" + suffix);
+			value += " " + quote + safe(context, node.title, {
+				before: quote,
+				after: quote
+			}) + quote;
+			subexit();
+		}
+		value += ")";
+		exit();
+		return value;
+	}
+	function imagePeek() {
+		return "!";
+	}
+}));
+//#endregion
+//#region node_modules/mdast-util-to-markdown/lib/handle/image-reference.js
+var require_image_reference = /* @__PURE__ */ __commonJSMin(((exports, module) => {
+	module.exports = imageReference;
+	imageReference.peek = imageReferencePeek;
+	var association = require_association();
+	var safe = require_safe();
+	function imageReference(node, _, context) {
+		var type = node.referenceType;
+		var exit = context.enter("imageReference");
+		var subexit = context.enter("label");
+		var alt = safe(context, node.alt, {
+			before: "[",
+			after: "]"
+		});
+		var value = "![" + alt + "]";
+		var reference;
+		var stack;
+		subexit();
+		stack = context.stack;
+		context.stack = [];
+		subexit = context.enter("reference");
+		reference = safe(context, association(node), {
+			before: "[",
+			after: "]"
+		});
+		subexit();
+		context.stack = stack;
+		exit();
+		if (type === "full" || !alt || alt !== reference) value += "[" + reference + "]";
+		else if (type !== "shortcut") value += "[]";
+		return value;
+	}
+	function imageReferencePeek() {
+		return "!";
+	}
+}));
+//#endregion
+//#region node_modules/mdast-util-to-markdown/lib/util/format-link-as-autolink.js
+var require_format_link_as_autolink = /* @__PURE__ */ __commonJSMin(((exports, module) => {
+	module.exports = formatLinkAsAutolink;
+	var toString = require_mdast_util_to_string();
+	function formatLinkAsAutolink(node, context) {
+		var raw = toString(node);
+		return !context.options.resourceLink && node.url && !node.title && node.children && node.children.length === 1 && node.children[0].type === "text" && (raw === node.url || "mailto:" + raw === node.url) && /^[a-z][a-z+.-]+:/i.test(node.url) && !/[\0- <>\u007F]/.test(node.url);
+	}
+}));
+//#endregion
+//#region node_modules/mdast-util-to-markdown/lib/handle/link.js
+var require_link = /* @__PURE__ */ __commonJSMin(((exports, module) => {
+	module.exports = link;
+	link.peek = linkPeek;
+	var checkQuote = require_check_quote();
+	var formatLinkAsAutolink = require_format_link_as_autolink();
+	var phrasing = require_container_phrasing();
+	var safe = require_safe();
+	function link(node, _, context) {
+		var quote = checkQuote(context);
+		var suffix = quote === "\"" ? "Quote" : "Apostrophe";
+		var exit;
+		var subexit;
+		var value;
+		var stack;
+		if (formatLinkAsAutolink(node, context)) {
+			stack = context.stack;
+			context.stack = [];
+			exit = context.enter("autolink");
+			value = "<" + phrasing(node, context, {
+				before: "<",
+				after: ">"
+			}) + ">";
+			exit();
+			context.stack = stack;
+			return value;
+		}
+		exit = context.enter("link");
+		subexit = context.enter("label");
+		value = "[" + phrasing(node, context, {
+			before: "[",
+			after: "]"
+		}) + "](";
+		subexit();
+		if (!node.url && node.title || /[ \t\r\n]/.test(node.url)) {
+			subexit = context.enter("destinationLiteral");
+			value += "<" + safe(context, node.url, {
+				before: "<",
+				after: ">"
+			}) + ">";
+		} else {
+			subexit = context.enter("destinationRaw");
+			value += safe(context, node.url, {
+				before: "(",
+				after: node.title ? " " : ")"
+			});
+		}
+		subexit();
+		if (node.title) {
+			subexit = context.enter("title" + suffix);
+			value += " " + quote + safe(context, node.title, {
+				before: quote,
+				after: quote
+			}) + quote;
+			subexit();
+		}
+		value += ")";
+		exit();
+		return value;
+	}
+	function linkPeek(node, _, context) {
+		return formatLinkAsAutolink(node, context) ? "<" : "[";
+	}
+}));
+//#endregion
+//#region node_modules/mdast-util-to-markdown/lib/handle/link-reference.js
+var require_link_reference = /* @__PURE__ */ __commonJSMin(((exports, module) => {
+	module.exports = linkReference;
+	linkReference.peek = linkReferencePeek;
+	var association = require_association();
+	var phrasing = require_container_phrasing();
+	var safe = require_safe();
+	function linkReference(node, _, context) {
+		var type = node.referenceType;
+		var exit = context.enter("linkReference");
+		var subexit = context.enter("label");
+		var text = phrasing(node, context, {
+			before: "[",
+			after: "]"
+		});
+		var value = "[" + text + "]";
+		var reference;
+		var stack;
+		subexit();
+		stack = context.stack;
+		context.stack = [];
+		subexit = context.enter("reference");
+		reference = safe(context, association(node), {
+			before: "[",
+			after: "]"
+		});
+		subexit();
+		context.stack = stack;
+		exit();
+		if (type === "full" || !text || text !== reference) value += "[" + reference + "]";
+		else if (type !== "shortcut") value += "[]";
+		return value;
+	}
+	function linkReferencePeek() {
+		return "[";
+	}
+}));
+//#endregion
+//#region node_modules/mdast-util-to-markdown/lib/handle/list.js
+var require_list = /* @__PURE__ */ __commonJSMin(((exports, module) => {
+	module.exports = list;
+	var flow = require_container_flow();
+	function list(node, _, context) {
+		var exit = context.enter("list");
+		var value = flow(node, context);
+		exit();
+		return value;
+	}
+}));
+//#endregion
+//#region node_modules/mdast-util-to-markdown/lib/handle/paragraph.js
+var require_paragraph = /* @__PURE__ */ __commonJSMin(((exports, module) => {
+	module.exports = paragraph;
+	var phrasing = require_container_phrasing();
+	function paragraph(node, _, context) {
+		var exit = context.enter("paragraph");
+		var subexit = context.enter("phrasing");
+		var value = phrasing(node, context, {
+			before: "\n",
+			after: "\n"
+		});
+		subexit();
+		exit();
+		return value;
+	}
+}));
+//#endregion
+//#region node_modules/mdast-util-to-markdown/lib/handle/root.js
+var require_root = /* @__PURE__ */ __commonJSMin(((exports, module) => {
+	module.exports = root;
+	var flow = require_container_flow();
+	function root(node, _, context) {
+		return flow(node, context);
+	}
+}));
+//#endregion
+//#region node_modules/mdast-util-to-markdown/lib/util/check-strong.js
+var require_check_strong = /* @__PURE__ */ __commonJSMin(((exports, module) => {
+	module.exports = checkStrong;
+	function checkStrong(context) {
+		var marker = context.options.strong || "*";
+		if (marker !== "*" && marker !== "_") throw new Error("Cannot serialize strong with `" + marker + "` for `options.strong`, expected `*`, or `_`");
+		return marker;
+	}
+}));
+//#endregion
+//#region node_modules/mdast-util-to-markdown/lib/handle/strong.js
+var require_strong = /* @__PURE__ */ __commonJSMin(((exports, module) => {
+	module.exports = strong;
+	strong.peek = strongPeek;
+	var checkStrong = require_check_strong();
+	var phrasing = require_container_phrasing();
+	function strong(node, _, context) {
+		var marker = checkStrong(context);
+		var exit = context.enter("strong");
+		var value = phrasing(node, context, {
+			before: marker,
+			after: marker
+		});
+		exit();
+		return marker + marker + value + marker + marker;
+	}
+	function strongPeek(node, _, context) {
+		return context.options.strong || "*";
+	}
+}));
+//#endregion
+//#region node_modules/mdast-util-to-markdown/lib/handle/text.js
+var require_text = /* @__PURE__ */ __commonJSMin(((exports, module) => {
+	module.exports = text;
+	var safe = require_safe();
+	function text(node, parent, context, safeOptions) {
+		return safe(context, node.value, safeOptions);
+	}
+}));
+//#endregion
+//#region node_modules/mdast-util-to-markdown/lib/util/check-rule-repeat.js
+var require_check_rule_repeat = /* @__PURE__ */ __commonJSMin(((exports, module) => {
+	module.exports = checkRule;
+	function checkRule(context) {
+		var repetition = context.options.ruleRepetition || 3;
+		if (repetition < 3) throw new Error("Cannot serialize rules with repetition `" + repetition + "` for `options.ruleRepetition`, expected `3` or more");
+		return repetition;
+	}
+}));
+//#endregion
+//#region node_modules/mdast-util-to-markdown/lib/util/check-rule.js
+var require_check_rule = /* @__PURE__ */ __commonJSMin(((exports, module) => {
+	module.exports = checkRule;
+	function checkRule(context) {
+		var marker = context.options.rule || "*";
+		if (marker !== "*" && marker !== "-" && marker !== "_") throw new Error("Cannot serialize rules with `" + marker + "` for `options.rule`, expected `*`, `-`, or `_`");
+		return marker;
+	}
+}));
+//#endregion
+//#region node_modules/mdast-util-to-markdown/lib/handle/thematic-break.js
+var require_thematic_break = /* @__PURE__ */ __commonJSMin(((exports, module) => {
+	module.exports = thematicBreak;
+	var repeat = require_repeat_string();
+	var checkRepeat = require_check_rule_repeat();
+	var checkRule = require_check_rule();
+	function thematicBreak(node, parent, context) {
+		var value = repeat(checkRule(context) + (context.options.ruleSpaces ? " " : ""), checkRepeat(context));
+		return context.options.ruleSpaces ? value.slice(0, -1) : value;
+	}
+}));
+//#endregion
+//#region node_modules/mdast-util-to-markdown/lib/handle/index.js
+var require_handle = /* @__PURE__ */ __commonJSMin(((exports) => {
+	exports.blockquote = require_blockquote();
+	exports.break = require_break();
+	exports.code = require_code();
+	exports.definition = require_definition();
+	exports.emphasis = require_emphasis();
+	exports.hardBreak = require_break();
+	exports.heading = require_heading();
+	exports.html = require_html();
+	exports.image = require_image();
+	exports.imageReference = require_image_reference();
+	exports.inlineCode = require_inline_code();
+	exports.link = require_link();
+	exports.linkReference = require_link_reference();
+	exports.list = require_list();
+	exports.listItem = require_list_item();
+	exports.paragraph = require_paragraph();
+	exports.root = require_root();
+	exports.strong = require_strong();
+	exports.text = require_text();
+	exports.thematicBreak = require_thematic_break();
+}));
+//#endregion
+//#region node_modules/mdast-util-to-markdown/lib/join.js
+var require_join = /* @__PURE__ */ __commonJSMin(((exports, module) => {
+	module.exports = [joinDefaults];
+	var formatCodeAsIndented = require_format_code_as_indented();
+	var formatHeadingAsSetext = require_format_heading_as_setext();
+	function joinDefaults(left, right, parent, context) {
+		if (right.type === "list" && right.type === left.type && Boolean(left.ordered) === Boolean(right.ordered) || right.type === "code" && formatCodeAsIndented(right, context) && (left.type === "list" || left.type === right.type && formatCodeAsIndented(left, context))) return false;
+		if (typeof parent.spread === "boolean") {
+			if (left.type === "paragraph" && (left.type === right.type || right.type === "definition" || right.type === "heading" && formatHeadingAsSetext(right, context))) return;
+			return parent.spread ? 1 : 0;
+		}
+	}
+}));
+//#endregion
+//#region node_modules/mdast-util-to-markdown/lib/unsafe.js
+var require_unsafe = /* @__PURE__ */ __commonJSMin(((exports, module) => {
+	module.exports = [
+		{
+			character: "	",
+			inConstruct: ["codeFencedLangGraveAccent", "codeFencedLangTilde"]
+		},
+		{
+			character: "\r",
+			inConstruct: [
+				"codeFencedLangGraveAccent",
+				"codeFencedLangTilde",
+				"codeFencedMetaGraveAccent",
+				"codeFencedMetaTilde",
+				"destinationLiteral",
+				"headingAtx"
+			]
+		},
+		{
+			character: "\n",
+			inConstruct: [
+				"codeFencedLangGraveAccent",
+				"codeFencedLangTilde",
+				"codeFencedMetaGraveAccent",
+				"codeFencedMetaTilde",
+				"destinationLiteral",
+				"headingAtx"
+			]
+		},
+		{
+			character: " ",
+			inConstruct: ["codeFencedLangGraveAccent", "codeFencedLangTilde"]
+		},
+		{
+			character: "!",
+			after: "\\[",
+			inConstruct: "phrasing"
+		},
+		{
+			character: "\"",
+			inConstruct: "titleQuote"
+		},
+		{
+			atBreak: true,
+			character: "#"
+		},
+		{
+			character: "#",
+			inConstruct: "headingAtx",
+			after: "(?:[\r\n]|$)"
+		},
+		{
+			character: "&",
+			after: "[#A-Za-z]",
+			inConstruct: "phrasing"
+		},
+		{
+			character: "'",
+			inConstruct: "titleApostrophe"
+		},
+		{
+			character: "(",
+			inConstruct: "destinationRaw"
+		},
+		{
+			before: "\\]",
+			character: "(",
+			inConstruct: "phrasing"
+		},
+		{
+			atBreak: true,
+			before: "\\d+",
+			character: ")"
+		},
+		{
+			character: ")",
+			inConstruct: "destinationRaw"
+		},
+		{
+			atBreak: true,
+			character: "*"
+		},
+		{
+			character: "*",
+			inConstruct: "phrasing"
+		},
+		{
+			atBreak: true,
+			character: "+"
+		},
+		{
+			atBreak: true,
+			character: "-"
+		},
+		{
+			atBreak: true,
+			before: "\\d+",
+			character: ".",
+			after: "(?:[ 	\r\n]|$)"
+		},
+		{
+			atBreak: true,
+			character: "<",
+			after: "[!/?A-Za-z]"
+		},
+		{
+			character: "<",
+			after: "[!/?A-Za-z]",
+			inConstruct: "phrasing"
+		},
+		{
+			character: "<",
+			inConstruct: "destinationLiteral"
+		},
+		{
+			atBreak: true,
+			character: "="
+		},
+		{
+			atBreak: true,
+			character: ">"
+		},
+		{
+			character: ">",
+			inConstruct: "destinationLiteral"
+		},
+		{
+			atBreak: true,
+			character: "["
+		},
+		{
+			character: "[",
+			inConstruct: [
+				"phrasing",
+				"label",
+				"reference"
+			]
+		},
+		{
+			character: "\\",
+			after: "[\\r\\n]",
+			inConstruct: "phrasing"
+		},
+		{
+			character: "]",
+			inConstruct: ["label", "reference"]
+		},
+		{
+			atBreak: true,
+			character: "_"
+		},
+		{
+			before: "[^A-Za-z]",
+			character: "_",
+			inConstruct: "phrasing"
+		},
+		{
+			character: "_",
+			after: "[^A-Za-z]",
+			inConstruct: "phrasing"
+		},
+		{
+			atBreak: true,
+			character: "`"
+		},
+		{
+			character: "`",
+			inConstruct: [
+				"codeFencedLangGraveAccent",
+				"codeFencedMetaGraveAccent",
+				"phrasing"
+			]
+		},
+		{
+			atBreak: true,
+			character: "~"
+		}
+	];
+}));
+//#endregion
+//#region node_modules/mdast-util-to-markdown/lib/index.js
+var require_lib$1 = /* @__PURE__ */ __commonJSMin(((exports, module) => {
+	module.exports = toMarkdown;
+	var zwitch = require_zwitch();
+	var configure = require_configure();
+	var defaultHandlers = require_handle();
+	var defaultJoin = require_join();
+	var defaultUnsafe = require_unsafe();
+	function toMarkdown(tree, options) {
+		var settings = options || {};
+		var context = {
+			enter,
+			stack: [],
+			unsafe: [],
+			join: [],
+			handlers: {},
+			options: {}
+		};
+		var result;
+		configure(context, {
+			unsafe: defaultUnsafe,
+			join: defaultJoin,
+			handlers: defaultHandlers
+		});
+		configure(context, settings);
+		if (context.options.tightDefinitions) context.join = [joinDefinition].concat(context.join);
+		context.handle = zwitch("type", {
+			invalid,
+			unknown,
+			handlers: context.handlers
+		});
+		result = context.handle(tree, null, context, {
+			before: "\n",
+			after: "\n"
+		});
+		if (result && result.charCodeAt(result.length - 1) !== 10 && result.charCodeAt(result.length - 1) !== 13) result += "\n";
+		return result;
+		function enter(name) {
+			context.stack.push(name);
+			return exit;
+			function exit() {
+				context.stack.pop();
+			}
+		}
+	}
+	function invalid(value) {
+		throw new Error("Cannot handle value `" + value + "`, expected node");
+	}
+	function unknown(node) {
+		throw new Error("Cannot handle unknown node `" + node.type + "`");
+	}
+	function joinDefinition(left, right) {
+		if (left.type === "definition" && left.type === right.type) return 0;
+	}
+}));
+//#endregion
+//#region node_modules/mdast-util-to-markdown/index.js
+var require_mdast_util_to_markdown = /* @__PURE__ */ __commonJSMin(((exports, module) => {
+	module.exports = require_lib$1();
+}));
+//#endregion
+//#region node_modules/remark-stringify/index.js
+var require_remark_stringify = /* @__PURE__ */ __commonJSMin(((exports, module) => {
+	module.exports = stringify;
+	var toMarkdown = require_mdast_util_to_markdown();
+	function stringify(options) {
+		var self = this;
+		this.Compiler = compile;
+		function compile(tree) {
+			return toMarkdown(tree, Object.assign({}, self.data("settings"), options, { extensions: self.data("toMarkdownExtensions") || [] }));
+		}
+	}
+}));
+//#endregion
+//#region node_modules/unist-util-visit/index.js
+var require_unist_util_visit = /* @__PURE__ */ __commonJSMin(((exports, module) => {
+	module.exports = visit;
+	var visitParents = require_unist_util_visit_parents();
+	var CONTINUE = visitParents.CONTINUE;
+	var SKIP = visitParents.SKIP;
+	var EXIT = visitParents.EXIT;
+	visit.CONTINUE = CONTINUE;
+	visit.SKIP = SKIP;
+	visit.EXIT = EXIT;
+	function visit(tree, test, visitor, reverse) {
+		if (typeof test === "function" && typeof visitor !== "function") {
+			reverse = visitor;
+			visitor = test;
+			test = null;
+		}
+		visitParents(tree, test, overload, reverse);
+		function overload(node, parents) {
+			var parent = parents[parents.length - 1];
+			var index = parent ? parent.children.indexOf(node) : null;
+			return visitor(node, index, parent);
+		}
+	}
+}));
+//#endregion
+//#region node_modules/html-comment-regex/index.js
+var require_html_comment_regex = /* @__PURE__ */ __commonJSMin(((exports, module) => {
+	module.exports = /<!--([\s\S]*?)-->/g;
+}));
+//#endregion
+//#region node_modules/remark-remove-comments/transformer.js
+var require_transformer = /* @__PURE__ */ __commonJSMin(((exports, module) => {
+	const visit = require_unist_util_visit();
+	const htmlCommentRegex = require_html_comment_regex();
+	const removeComments = (tree, file) => {
+		const handler = (node, index, parent) => {
+			if (node.value.match(htmlCommentRegex)) {
+				parent.children.splice(index, 1);
+				return [visit.SKIP, index];
+			}
+		};
+		visit(tree, "html", handler);
+		visit(tree, "jsx", handler);
+	};
+	module.exports = removeComments;
+}));
+//#endregion
+//#region node_modules/remark-remove-comments/index.js
+var require_remark_remove_comments = /* @__PURE__ */ __commonJSMin(((exports, module) => {
+	const transformer = require_transformer();
+	function attacher() {
+		return transformer;
+	}
+	module.exports = attacher;
+}));
+//#endregion
+//#region node_modules/bail/index.js
+var require_bail = /* @__PURE__ */ __commonJSMin(((exports, module) => {
+	module.exports = bail;
+	function bail(err) {
+		if (err) throw err;
+	}
+}));
+//#endregion
+//#region node_modules/is-buffer/index.js
+var require_is_buffer = /* @__PURE__ */ __commonJSMin(((exports, module) => {
+	/*!
+	* Determine if an object is a Buffer
+	*
+	* @author   Feross Aboukhadijeh <https://feross.org>
+	* @license  MIT
+	*/
+	module.exports = function isBuffer(obj) {
+		return obj != null && obj.constructor != null && typeof obj.constructor.isBuffer === "function" && obj.constructor.isBuffer(obj);
+	};
+}));
+//#endregion
+//#region node_modules/extend/index.js
+var require_extend = /* @__PURE__ */ __commonJSMin(((exports, module) => {
+	var hasOwn = Object.prototype.hasOwnProperty;
+	var toStr = Object.prototype.toString;
+	var defineProperty = Object.defineProperty;
+	var gOPD = Object.getOwnPropertyDescriptor;
+	var isArray = function isArray(arr) {
+		if (typeof Array.isArray === "function") return Array.isArray(arr);
+		return toStr.call(arr) === "[object Array]";
+	};
+	var isPlainObject = function isPlainObject(obj) {
+		if (!obj || toStr.call(obj) !== "[object Object]") return false;
+		var hasOwnConstructor = hasOwn.call(obj, "constructor");
+		var hasIsPrototypeOf = obj.constructor && obj.constructor.prototype && hasOwn.call(obj.constructor.prototype, "isPrototypeOf");
+		if (obj.constructor && !hasOwnConstructor && !hasIsPrototypeOf) return false;
+		var key;
+		for (key in obj);
+		return typeof key === "undefined" || hasOwn.call(obj, key);
+	};
+	var setProperty = function setProperty(target, options) {
+		if (defineProperty && options.name === "__proto__") defineProperty(target, options.name, {
+			enumerable: true,
+			configurable: true,
+			value: options.newValue,
+			writable: true
+		});
+		else target[options.name] = options.newValue;
+	};
+	var getProperty = function getProperty(obj, name) {
+		if (name === "__proto__") {
+			if (!hasOwn.call(obj, name)) return;
+			else if (gOPD) return gOPD(obj, name).value;
+		}
+		return obj[name];
+	};
+	module.exports = function extend() {
+		var options, name, src, copy, copyIsArray, clone;
+		var target = arguments[0];
+		var i = 1;
+		var length = arguments.length;
+		var deep = false;
+		if (typeof target === "boolean") {
+			deep = target;
+			target = arguments[1] || {};
+			i = 2;
+		}
+		if (target == null || typeof target !== "object" && typeof target !== "function") target = {};
+		for (; i < length; ++i) {
+			options = arguments[i];
+			if (options != null) for (name in options) {
+				src = getProperty(target, name);
+				copy = getProperty(options, name);
+				if (target !== copy) {
+					if (deep && copy && (isPlainObject(copy) || (copyIsArray = isArray(copy)))) {
+						if (copyIsArray) {
+							copyIsArray = false;
+							clone = src && isArray(src) ? src : [];
+						} else clone = src && isPlainObject(src) ? src : {};
+						setProperty(target, {
+							name,
+							newValue: extend(deep, clone, copy)
+						});
+					} else if (typeof copy !== "undefined") setProperty(target, {
+						name,
+						newValue: copy
+					});
+				}
+			}
+		}
+		return target;
+	};
+}));
+//#endregion
+//#region node_modules/is-plain-obj/index.js
+var require_is_plain_obj = /* @__PURE__ */ __commonJSMin(((exports, module) => {
+	module.exports = (value) => {
+		if (Object.prototype.toString.call(value) !== "[object Object]") return false;
+		const prototype = Object.getPrototypeOf(value);
+		return prototype === null || prototype === Object.prototype;
+	};
+}));
+//#endregion
+//#region node_modules/trough/wrap.js
+var require_wrap = /* @__PURE__ */ __commonJSMin(((exports, module) => {
+	var slice = [].slice;
+	module.exports = wrap;
+	function wrap(fn, callback) {
+		var invoked;
+		return wrapped;
+		function wrapped() {
+			var params = slice.call(arguments, 0);
+			var callback = fn.length > params.length;
+			var result;
+			if (callback) params.push(done);
+			try {
+				result = fn.apply(null, params);
+			} catch (error) {
+				if (callback && invoked) throw error;
+				return done(error);
+			}
+			if (!callback) if (result && typeof result.then === "function") result.then(then, done);
+			else if (result instanceof Error) done(result);
+			else then(result);
+		}
+		function done() {
+			if (!invoked) {
+				invoked = true;
+				callback.apply(null, arguments);
+			}
+		}
+		function then(value) {
+			done(null, value);
+		}
+	}
+}));
+//#endregion
+//#region node_modules/trough/index.js
+var require_trough = /* @__PURE__ */ __commonJSMin(((exports, module) => {
+	var wrap = require_wrap();
+	module.exports = trough;
+	trough.wrap = wrap;
+	var slice = [].slice;
+	function trough() {
+		var fns = [];
+		var middleware = {};
+		middleware.run = run;
+		middleware.use = use;
+		return middleware;
+		function run() {
+			var index = -1;
+			var input = slice.call(arguments, 0, -1);
+			var done = arguments[arguments.length - 1];
+			if (typeof done !== "function") throw new Error("Expected function as last argument, not " + done);
+			next.apply(null, [null].concat(input));
+			function next(err) {
+				var fn = fns[++index];
+				var values = slice.call(arguments, 0).slice(1);
+				var length = input.length;
+				var pos = -1;
+				if (err) {
+					done(err);
+					return;
+				}
+				while (++pos < length) if (values[pos] === null || values[pos] === void 0) values[pos] = input[pos];
+				input = values;
+				if (fn) wrap(fn, next).apply(null, input);
+				else done.apply(null, [null].concat(input));
+			}
+		}
+		function use(fn) {
+			if (typeof fn !== "function") throw new Error("Expected `fn` to be a function, not " + fn);
+			fns.push(fn);
+			return middleware;
+		}
+	}
+}));
+//#endregion
+//#region node_modules/vfile-message/index.js
+var require_vfile_message = /* @__PURE__ */ __commonJSMin(((exports, module) => {
+	var stringify = require_unist_util_stringify_position();
+	module.exports = VMessage;
+	function VMessagePrototype() {}
+	VMessagePrototype.prototype = Error.prototype;
+	VMessage.prototype = new VMessagePrototype();
+	var proto = VMessage.prototype;
+	proto.file = "";
+	proto.name = "";
+	proto.reason = "";
+	proto.message = "";
+	proto.stack = "";
+	proto.fatal = null;
+	proto.column = null;
+	proto.line = null;
+	function VMessage(reason, position, origin) {
+		var parts;
+		var range;
+		var location;
+		if (typeof position === "string") {
+			origin = position;
+			position = null;
+		}
+		parts = parseOrigin(origin);
+		range = stringify(position) || "1:1";
+		location = {
+			start: {
+				line: null,
+				column: null
+			},
+			end: {
+				line: null,
+				column: null
+			}
+		};
+		if (position && position.position) position = position.position;
+		if (position) if (position.start) {
+			location = position;
+			position = position.start;
+		} else location.start = position;
+		if (reason.stack) {
+			this.stack = reason.stack;
+			reason = reason.message;
+		}
+		this.message = reason;
+		this.name = range;
+		this.reason = reason;
+		this.line = position ? position.line : null;
+		this.column = position ? position.column : null;
+		this.location = location;
+		this.source = parts[0];
+		this.ruleId = parts[1];
+	}
+	function parseOrigin(origin) {
+		var result = [null, null];
+		var index;
+		if (typeof origin === "string") {
+			index = origin.indexOf(":");
+			if (index === -1) result[1] = origin;
+			else {
+				result[0] = origin.slice(0, index);
+				result[1] = origin.slice(index + 1);
+			}
+		}
+		return result;
+	}
+}));
+//#endregion
+//#region node_modules/vfile/lib/minpath.js
+var require_minpath = /* @__PURE__ */ __commonJSMin(((exports, module) => {
+	module.exports = __require("path");
+}));
+//#endregion
+//#region node_modules/vfile/lib/minproc.js
+var require_minproc = /* @__PURE__ */ __commonJSMin(((exports, module) => {
+	module.exports = process;
+}));
+//#endregion
+//#region node_modules/vfile/lib/core.js
+var require_core = /* @__PURE__ */ __commonJSMin(((exports, module) => {
+	var p = require_minpath();
+	var proc = require_minproc();
+	var buffer = require_is_buffer();
+	module.exports = VFile;
+	var own = {}.hasOwnProperty;
+	var order = [
+		"history",
+		"path",
+		"basename",
+		"stem",
+		"extname",
+		"dirname"
+	];
+	VFile.prototype.toString = toString;
+	Object.defineProperty(VFile.prototype, "path", {
+		get: getPath,
+		set: setPath
+	});
+	Object.defineProperty(VFile.prototype, "dirname", {
+		get: getDirname,
+		set: setDirname
+	});
+	Object.defineProperty(VFile.prototype, "basename", {
+		get: getBasename,
+		set: setBasename
+	});
+	Object.defineProperty(VFile.prototype, "extname", {
+		get: getExtname,
+		set: setExtname
+	});
+	Object.defineProperty(VFile.prototype, "stem", {
+		get: getStem,
+		set: setStem
+	});
+	function VFile(options) {
+		var prop;
+		var index;
+		if (!options) options = {};
+		else if (typeof options === "string" || buffer(options)) options = { contents: options };
+		else if ("message" in options && "messages" in options) return options;
+		if (!(this instanceof VFile)) return new VFile(options);
+		this.data = {};
+		this.messages = [];
+		this.history = [];
+		this.cwd = proc.cwd();
+		index = -1;
+		while (++index < order.length) {
+			prop = order[index];
+			if (own.call(options, prop)) this[prop] = options[prop];
+		}
+		for (prop in options) if (order.indexOf(prop) < 0) this[prop] = options[prop];
+	}
+	function getPath() {
+		return this.history[this.history.length - 1];
+	}
+	function setPath(path) {
+		assertNonEmpty(path, "path");
+		if (this.path !== path) this.history.push(path);
+	}
+	function getDirname() {
+		return typeof this.path === "string" ? p.dirname(this.path) : void 0;
+	}
+	function setDirname(dirname) {
+		assertPath(this.path, "dirname");
+		this.path = p.join(dirname || "", this.basename);
+	}
+	function getBasename() {
+		return typeof this.path === "string" ? p.basename(this.path) : void 0;
+	}
+	function setBasename(basename) {
+		assertNonEmpty(basename, "basename");
+		assertPart(basename, "basename");
+		this.path = p.join(this.dirname || "", basename);
+	}
+	function getExtname() {
+		return typeof this.path === "string" ? p.extname(this.path) : void 0;
+	}
+	function setExtname(extname) {
+		assertPart(extname, "extname");
+		assertPath(this.path, "extname");
+		if (extname) {
+			if (extname.charCodeAt(0) !== 46) throw new Error("`extname` must start with `.`");
+			if (extname.indexOf(".", 1) > -1) throw new Error("`extname` cannot contain multiple dots");
+		}
+		this.path = p.join(this.dirname, this.stem + (extname || ""));
+	}
+	function getStem() {
+		return typeof this.path === "string" ? p.basename(this.path, this.extname) : void 0;
+	}
+	function setStem(stem) {
+		assertNonEmpty(stem, "stem");
+		assertPart(stem, "stem");
+		this.path = p.join(this.dirname || "", stem + (this.extname || ""));
+	}
+	function toString(encoding) {
+		return (this.contents || "").toString(encoding);
+	}
+	function assertPart(part, name) {
+		if (part && part.indexOf(p.sep) > -1) throw new Error("`" + name + "` cannot be a path: did not expect `" + p.sep + "`");
+	}
+	function assertNonEmpty(part, name) {
+		if (!part) throw new Error("`" + name + "` cannot be empty");
+	}
+	function assertPath(path, name) {
+		if (!path) throw new Error("Setting `" + name + "` requires `path` to be set too");
+	}
+}));
+//#endregion
+//#region node_modules/vfile/lib/index.js
+var require_lib = /* @__PURE__ */ __commonJSMin(((exports, module) => {
+	var VMessage = require_vfile_message();
+	var VFile = require_core();
+	module.exports = VFile;
+	VFile.prototype.message = message;
+	VFile.prototype.info = info;
+	VFile.prototype.fail = fail;
+	function message(reason, position, origin) {
+		var message = new VMessage(reason, position, origin);
+		if (this.path) {
+			message.name = this.path + ":" + message.name;
+			message.file = this.path;
+		}
+		message.fatal = false;
+		this.messages.push(message);
+		return message;
+	}
+	function fail() {
+		var message = this.message.apply(this, arguments);
+		message.fatal = true;
+		throw message;
+	}
+	function info() {
+		var message = this.message.apply(this, arguments);
+		message.fatal = null;
+		return message;
+	}
+}));
+//#endregion
+//#region node_modules/vfile/index.js
+var require_vfile = /* @__PURE__ */ __commonJSMin(((exports, module) => {
+	module.exports = require_lib();
+}));
+//#endregion
+//#region node_modules/unified/index.js
+var require_unified = /* @__PURE__ */ __commonJSMin(((exports, module) => {
+	var bail = require_bail();
+	var buffer = require_is_buffer();
+	var extend = require_extend();
+	var plain = require_is_plain_obj();
+	var trough = require_trough();
+	var vfile = require_vfile();
+	module.exports = unified().freeze();
+	var slice = [].slice;
+	var own = {}.hasOwnProperty;
+	var pipeline = trough().use(pipelineParse).use(pipelineRun).use(pipelineStringify);
+	function pipelineParse(p, ctx) {
+		ctx.tree = p.parse(ctx.file);
+	}
+	function pipelineRun(p, ctx, next) {
+		p.run(ctx.tree, ctx.file, done);
+		function done(error, tree, file) {
+			if (error) next(error);
+			else {
+				ctx.tree = tree;
+				ctx.file = file;
+				next();
+			}
+		}
+	}
+	function pipelineStringify(p, ctx) {
+		var result = p.stringify(ctx.tree, ctx.file);
+		if (result === void 0 || result === null) {} else if (typeof result === "string" || buffer(result)) {
+			if ("value" in ctx.file) ctx.file.value = result;
+			ctx.file.contents = result;
+		} else ctx.file.result = result;
+	}
+	function unified() {
+		var attachers = [];
+		var transformers = trough();
+		var namespace = {};
+		var freezeIndex = -1;
+		var frozen;
+		processor.data = data;
+		processor.freeze = freeze;
+		processor.attachers = attachers;
+		processor.use = use;
+		processor.parse = parse;
+		processor.stringify = stringify;
+		processor.run = run;
+		processor.runSync = runSync;
+		processor.process = process;
+		processor.processSync = processSync;
+		return processor;
+		function processor() {
+			var destination = unified();
+			var index = -1;
+			while (++index < attachers.length) destination.use.apply(null, attachers[index]);
+			destination.data(extend(true, {}, namespace));
+			return destination;
+		}
+		function freeze() {
+			var values;
+			var transformer;
+			if (frozen) return processor;
+			while (++freezeIndex < attachers.length) {
+				values = attachers[freezeIndex];
+				if (values[1] === false) continue;
+				if (values[1] === true) values[1] = void 0;
+				transformer = values[0].apply(processor, values.slice(1));
+				if (typeof transformer === "function") transformers.use(transformer);
+			}
+			frozen = true;
+			freezeIndex = Infinity;
+			return processor;
+		}
+		function data(key, value) {
+			if (typeof key === "string") {
+				if (arguments.length === 2) {
+					assertUnfrozen("data", frozen);
+					namespace[key] = value;
+					return processor;
+				}
+				return own.call(namespace, key) && namespace[key] || null;
+			}
+			if (key) {
+				assertUnfrozen("data", frozen);
+				namespace = key;
+				return processor;
+			}
+			return namespace;
+		}
+		function use(value) {
+			var settings;
+			assertUnfrozen("use", frozen);
+			if (value === null || value === void 0) {} else if (typeof value === "function") addPlugin.apply(null, arguments);
+			else if (typeof value === "object") if ("length" in value) addList(value);
+			else addPreset(value);
+			else throw new Error("Expected usable value, not `" + value + "`");
+			if (settings) namespace.settings = extend(namespace.settings || {}, settings);
+			return processor;
+			function addPreset(result) {
+				addList(result.plugins);
+				if (result.settings) settings = extend(settings || {}, result.settings);
+			}
+			function add(value) {
+				if (typeof value === "function") addPlugin(value);
+				else if (typeof value === "object") if ("length" in value) addPlugin.apply(null, value);
+				else addPreset(value);
+				else throw new Error("Expected usable value, not `" + value + "`");
+			}
+			function addList(plugins) {
+				var index = -1;
+				if (plugins === null || plugins === void 0) {} else if (typeof plugins === "object" && "length" in plugins) while (++index < plugins.length) add(plugins[index]);
+				else throw new Error("Expected a list of plugins, not `" + plugins + "`");
+			}
+			function addPlugin(plugin, value) {
+				var entry = find(plugin);
+				if (entry) {
+					if (plain(entry[1]) && plain(value)) value = extend(true, entry[1], value);
+					entry[1] = value;
+				} else attachers.push(slice.call(arguments));
+			}
+		}
+		function find(plugin) {
+			var index = -1;
+			while (++index < attachers.length) if (attachers[index][0] === plugin) return attachers[index];
+		}
+		function parse(doc) {
+			var file = vfile(doc);
+			var Parser;
+			freeze();
+			Parser = processor.Parser;
+			assertParser("parse", Parser);
+			if (newable(Parser, "parse")) return new Parser(String(file), file).parse();
+			return Parser(String(file), file);
+		}
+		function run(node, file, cb) {
+			assertNode(node);
+			freeze();
+			if (!cb && typeof file === "function") {
+				cb = file;
+				file = null;
+			}
+			if (!cb) return new Promise(executor);
+			executor(null, cb);
+			function executor(resolve, reject) {
+				transformers.run(node, vfile(file), done);
+				function done(error, tree, file) {
+					tree = tree || node;
+					if (error) reject(error);
+					else if (resolve) resolve(tree);
+					else cb(null, tree, file);
+				}
+			}
+		}
+		function runSync(node, file) {
+			var result;
+			var complete;
+			run(node, file, done);
+			assertDone("runSync", "run", complete);
+			return result;
+			function done(error, tree) {
+				complete = true;
+				result = tree;
+				bail(error);
+			}
+		}
+		function stringify(node, doc) {
+			var file = vfile(doc);
+			var Compiler;
+			freeze();
+			Compiler = processor.Compiler;
+			assertCompiler("stringify", Compiler);
+			assertNode(node);
+			if (newable(Compiler, "compile")) return new Compiler(node, file).compile();
+			return Compiler(node, file);
+		}
+		function process(doc, cb) {
+			freeze();
+			assertParser("process", processor.Parser);
+			assertCompiler("process", processor.Compiler);
+			if (!cb) return new Promise(executor);
+			executor(null, cb);
+			function executor(resolve, reject) {
+				var file = vfile(doc);
+				pipeline.run(processor, { file }, done);
+				function done(error) {
+					if (error) reject(error);
+					else if (resolve) resolve(file);
+					else cb(null, file);
+				}
+			}
+		}
+		function processSync(doc) {
+			var file;
+			var complete;
+			freeze();
+			assertParser("processSync", processor.Parser);
+			assertCompiler("processSync", processor.Compiler);
+			file = vfile(doc);
+			process(file, done);
+			assertDone("processSync", "process", complete);
+			return file;
+			function done(error) {
+				complete = true;
+				bail(error);
+			}
+		}
+	}
+	function newable(value, name) {
+		return typeof value === "function" && value.prototype && (keys(value.prototype) || name in value.prototype);
+	}
+	function keys(value) {
+		var key;
+		for (key in value) return true;
+		return false;
+	}
+	function assertParser(name, Parser) {
+		if (typeof Parser !== "function") throw new Error("Cannot `" + name + "` without `Parser`");
+	}
+	function assertCompiler(name, Compiler) {
+		if (typeof Compiler !== "function") throw new Error("Cannot `" + name + "` without `Compiler`");
+	}
+	function assertUnfrozen(name, frozen) {
+		if (frozen) throw new Error("Cannot invoke `" + name + "` on a frozen processor.\nCreate a new processor first, by invoking it: use `processor()` instead of `processor`.");
+	}
+	function assertNode(node) {
+		if (!node || typeof node.type !== "string") throw new Error("Expected node, got `" + node + "`");
+	}
+	function assertDone(name, asyncName, complete) {
+		if (!complete) throw new Error("`" + name + "` finished async. Use `" + asyncName + "` instead");
+	}
+}));
+//#endregion
+//#region node_modules/unist-util-remove/index.js
+var require_unist_util_remove = /* @__PURE__ */ __commonJSMin(((exports, module) => {
+	var convert = require_convert$1();
+	module.exports = remove;
+	function remove(tree, options, test) {
+		var is = convert(test || options);
+		var cascade = options.cascade == null ? true : options.cascade;
+		return preorder(tree, null, null);
+		function preorder(node, index, parent) {
+			var children = node.children;
+			var childIndex = -1;
+			var position = 0;
+			if (is(node, index, parent)) return null;
+			if (children && children.length) {
+				while (++childIndex < children.length) if (preorder(children[childIndex], childIndex, node)) children[position++] = children[childIndex];
+				if (cascade && !position) return null;
+				children.length = position;
+			}
+			return node;
+		}
+	}
+}));
+//#endregion
+//#region node_modules/telegramify-markdown/lib/definitions.js
+var require_definitions = /* @__PURE__ */ __commonJSMin(((exports, module) => {
+	const remove = require_unist_util_remove();
+	const visit = require_unist_util_visit();
+	/**
+	* Fills the provided record with `Definition`s contained in the mdast.
+	* They are keyed by identifier for subsequent `Reference` lookups.
+	*
+	* @param {Record<string, { title: null | string, url: string }>} definitions
+	*/
+	const collectDefinitions = (definitions) => (tree) => {
+		visit(tree, "definition", (node) => {
+			definitions[node.identifier] = {
+				title: node.title,
+				url: node.url
+			};
+		});
+	};
+	/**
+	* Removes `Definition`s and their parent `Paragraph`s from the mdast.
+	* This avoids unwanted negative space in stringified output.
+	*/
+	const removeDefinitions = () => (tree) => {
+		remove(tree, { cascade: true }, "definition");
+	};
+	module.exports = {
+		collectDefinitions,
+		removeDefinitions
+	};
+}));
+//#endregion
+//#region node_modules/mdast-util-gfm-table/index.js
+var require_mdast_util_gfm_table = /* @__PURE__ */ __commonJSMin(((exports) => {
+	exports.fromMarkdown = require_from_markdown$2();
+	exports.toMarkdown = require_to_markdown$2();
+}));
+//#endregion
+//#region node_modules/telegramify-markdown/lib/utils.js
+var require_utils = /* @__PURE__ */ __commonJSMin(((exports, module) => {
+	const { URL: URL$1 } = __require("url");
+	function wrap(string, ...wrappers) {
+		return [
+			...wrappers,
+			string,
+			...wrappers.reverse()
+		].join("");
+	}
+	function isURL(string) {
+		try {
+			return Boolean(new URL$1(string));
+		} catch (error) {
+			return false;
+		}
+	}
+	function escapeSymbols(text, textType = "text") {
+		if (!text) return text;
+		switch (textType) {
+			case "code": return text.replace(/\\/g, "\\\\").replace(/`/g, "\\`");
+			case "link": return text.replace(/\\/g, "\\\\").replace(/\(/g, "\\(").replace(/\)/g, "\\)");
+			default: return text.replace(/_/g, "\\_").replace(/\*/g, "\\*").replace(/\[/g, "\\[").replace(/]/g, "\\]").replace(/\(/g, "\\(").replace(/\)/g, "\\)").replace(/~/g, "\\~").replace(/`/g, "\\`").replace(/>/g, "\\>").replace(/#/g, "\\#").replace(/\+/g, "\\+").replace(/-/g, "\\-").replace(/=/g, "\\=").replace(/\|/g, "\\|").replace(/{/g, "\\{").replace(/}/g, "\\}").replace(/\./g, "\\.").replace(/!/g, "\\!");
+		}
+	}
+	function processUnsupportedTags(content, strategy) {
+		switch (strategy) {
+			case "escape": return escapeSymbols(content);
+			case "remove": return "";
+			default: return content;
+		}
+	}
+	module.exports = {
+		wrap,
+		isURL,
+		escapeSymbols,
+		processUnsupportedTags
+	};
+}));
+//#endregion
+//#region node_modules/telegramify-markdown/lib/telegramify.js
+var require_telegramify = /* @__PURE__ */ __commonJSMin(((exports, module) => {
+	const defaultHandlers = require_handle();
+	const phrasing = require_container_phrasing();
+	const { toMarkdown: gfmTableToMarkdown } = require_mdast_util_gfm_table();
+	const { wrap, isURL, escapeSymbols, processUnsupportedTags } = require_utils();
+	/**
+	* Creates custom `mdast-util-to-markdown` handlers that tailor the output for
+	* Telegram Markdown.
+	*
+	* @param {Readonly<Record<string, { title: null | string, url: string }>>} definitions
+	* Record of `Definition`s in the Markdown document, keyed by identifier.
+	*
+	* @returns {import('mdast-util-to-markdown').Handlers}
+	*/
+	const createHandlers = (definitions, unsupportedTagsStrategy) => ({
+		heading: (node, _parent, context) => {
+			const marker = "*";
+			const exit = context.enter("heading");
+			const value = phrasing(node, context, {
+				before: marker,
+				after: marker
+			});
+			exit();
+			return wrap(value, marker);
+		},
+		strong: (node, _parent, context) => {
+			const marker = "*";
+			const exit = context.enter("strong");
+			const value = phrasing(node, context, {
+				before: marker,
+				after: marker
+			});
+			exit();
+			return wrap(value, marker);
+		},
+		delete(node, _parent, context) {
+			const marker = "~";
+			const exit = context.enter("delete");
+			const value = phrasing(node, context, {
+				before: marker,
+				after: marker
+			});
+			exit();
+			return wrap(value, marker);
+		},
+		emphasis: (node, _parent, context) => {
+			const marker = "_";
+			const exit = context.enter("emphasis");
+			const value = phrasing(node, context, {
+				before: marker,
+				after: marker
+			});
+			exit();
+			return wrap(value, marker);
+		},
+		list: (...args) => defaultHandlers.list(...args).replace(/^(\d+)./gm, "$1\\."),
+		listItem: (...args) => defaultHandlers.listItem(...args).replace(/^\*/, "•"),
+		code(node, _parent, context) {
+			const exit = context.enter("code");
+			const content = node.value.replace(/^#![a-z]+\n/, "");
+			exit();
+			return wrap(escapeSymbols(content, "code"), "```", "\n");
+		},
+		link: (node, _parent, context) => {
+			const exit = context.enter("link");
+			const text = phrasing(node, context, {
+				before: "|",
+				after: ">"
+			}) || escapeSymbols(node.title);
+			const url = decodeURI(node.url) !== node.url ? node.url : encodeURI(node.url);
+			exit();
+			if (!isURL(url)) return escapeSymbols(text) || escapeSymbols(url);
+			return text ? `[${text}](${escapeSymbols(url, "link")})` : `[${escapeSymbols(url)}](${escapeSymbols(url, "link")})`;
+		},
+		linkReference: (node, _parent, context) => {
+			const exit = context.enter("linkReference");
+			const definition = definitions[node.identifier];
+			const text = phrasing(node, context, {
+				before: "|",
+				after: ">"
+			}) || (definition ? definition.title : null);
+			exit();
+			if (!definition || !isURL(definition.url)) return escapeSymbols(text);
+			return text ? `[${text}](${escapeSymbols(definition.url, "link")})` : `[${escapeSymbols(definition.url)}](${escapeSymbols(definition.url, "link")})`;
+		},
+		image: (node, _parent, context) => {
+			const exit = context.enter("image");
+			const text = node.alt || node.title;
+			const url = node.url;
+			exit();
+			if (!isURL(url)) return escapeSymbols(text) || escapeSymbols(url);
+			return text ? `[${escapeSymbols(text)}](${escapeSymbols(url, "link")})` : `[${escapeSymbols(url)}](${escapeSymbols(url, "link")})`;
+		},
+		imageReference: (node, _parent, context) => {
+			const exit = context.enter("imageReference");
+			const definition = definitions[node.identifier];
+			const text = node.alt || (definition ? definition.title : null);
+			exit();
+			if (!definition || !isURL(definition.url)) return escapeSymbols(text);
+			return text ? `[${escapeSymbols(text)}](${escapeSymbols(definition.url, "link")})` : `[${escapeSymbols(definition.url)}](${escapeSymbols(definition.url, "link")})`;
+		},
+		text: (node, _parent, context) => {
+			const exit = context.enter("text");
+			const text = node.value;
+			exit();
+			return escapeSymbols(text);
+		},
+		blockquote: (node, _parent, context) => processUnsupportedTags(defaultHandlers.blockquote(node, _parent, context), unsupportedTagsStrategy),
+		html: (node, _parent, context) => processUnsupportedTags(defaultHandlers.html(node, _parent, context), unsupportedTagsStrategy),
+		table: (node, _parent, context) => processUnsupportedTags(gfmTableToMarkdown().handlers.table(node, _parent, context), unsupportedTagsStrategy),
+		thematicBreak: (_node, _parent, _context) => processUnsupportedTags("---", unsupportedTagsStrategy)
+	});
+	/**
+	* Creates options to be passed into a `remark-stringify` processor that tailor
+	* the output for Telegram Markdown.
+	*
+	* @param {Readonly<Record<string, { title: null | string, url: string }>>} definitions
+	* Record of `Definition`s in the Markdown document, keyed by identifier.
+	*
+	* @returns {import('remark-stringify').RemarkStringifyOptions}
+	*/
+	const createOptions = (definitions, unsupportedTagsStrategy) => ({
+		bullet: "*",
+		tightDefinitions: true,
+		handlers: createHandlers(definitions, unsupportedTagsStrategy)
+	});
+	module.exports = createOptions;
+}));
+//#endregion
+//#region node_modules/telegramify-markdown/lib/convert.js
+var require_convert = /* @__PURE__ */ __commonJSMin(((exports, module) => {
+	const gfm = require_remark_gfm();
+	const parse = require_remark_parse();
+	const stringify = require_remark_stringify();
+	const removeComments = require_remark_remove_comments();
+	const unified = require_unified();
+	const { collectDefinitions, removeDefinitions } = require_definitions();
+	const createTelegramifyOptions = require_telegramify();
+	module.exports = (markdown, unsupportedTagsStrategy) => {
+		const definitions = {};
+		const telegramifyOptions = createTelegramifyOptions(definitions, unsupportedTagsStrategy);
+		return unified().use(parse).use(gfm).use(removeComments).use(collectDefinitions, definitions).use(removeDefinitions).use(stringify, telegramifyOptions).processSync(markdown).toString().replace(/<!---->\n/gi, "");
+	};
+}));
+//#endregion
+//#region src/messages.ts
+var import_telegramify_markdown = /* @__PURE__ */ __toESM((/* @__PURE__ */ __commonJSMin(((exports, module) => {
+	module.exports = require_convert();
+})))(), 1);
+const TELEGRAM_MESSAGE_LIMIT = 4096;
+const TELEGRAM_CAPTION_LIMIT = 1024;
+function getMessageUrlOverride(messageUrl) {
+	const rawOverrides = process.env.TELEGRAM_ACTION_TEST_MESSAGE_URL_OVERRIDES;
+	if (!rawOverrides) return;
+	let overrides;
+	try {
+		overrides = JSON.parse(rawOverrides);
+	} catch (error) {
+		throw new Error(`TELEGRAM_ACTION_TEST_MESSAGE_URL_OVERRIDES must be valid JSON: ${error instanceof Error ? error.message : error}`);
+	}
+	if (typeof overrides !== "object" || overrides === null || Array.isArray(overrides)) throw new Error("TELEGRAM_ACTION_TEST_MESSAGE_URL_OVERRIDES must be a JSON object keyed by URL");
+	const override = overrides[messageUrl];
+	if (override === void 0) return;
+	if (typeof override !== "string") throw new Error(`message_url override for "${messageUrl}" must be a string`);
+	return override;
+}
+/**
+* Convert plain user input into Telegram MarkdownV2 while keeping current behavior.
+*/
+function formatTelegramMessage(message) {
+	return (0, import_telegramify_markdown.default)(message, "keep");
+}
+/**
+* Resolve message text from inline input, a local file, or a remote URL.
+*/
+async function resolveMessageText(options) {
+	if (options.message) return options.message;
+	if (options.messageFile) {
+		const resolvedPath = resolveWorkspacePath(options.messageFile);
+		if (!existsSync(resolvedPath)) throw new Error(`message_file path does not exist: ${options.messageFile}`);
+		return readFileSync(resolvedPath, "utf8");
+	}
+	if (options.messageUrl) {
+		if (!isRemoteUrl(options.messageUrl)) throw new Error("message_url must start with http:// or https://");
+		const override = getMessageUrlOverride(options.messageUrl);
+		if (override !== void 0) return override;
+		const response = await fetch(options.messageUrl);
+		if (!response.ok) throw new Error(`message_url request failed with status ${response.status}: ${options.messageUrl}`);
+		return await response.text();
+	}
+}
+function getFormattedLength(message) {
+	return formatTelegramMessage(message).length;
+}
+function findMaximumFittingPrefix(message, limit) {
+	let low = 1;
+	let high = message.length;
+	let best = 1;
+	while (low <= high) {
+		const middle = Math.floor((low + high) / 2);
+		if (getFormattedLength(message.slice(0, middle)) <= limit) {
+			best = middle;
+			low = middle + 1;
+		} else high = middle - 1;
+	}
+	return best;
+}
+function findPreferredSplit(message, limit) {
+	const maxPrefix = findMaximumFittingPrefix(message, limit);
+	const candidate = message.slice(0, maxPrefix);
+	for (const separator of [
+		"\n\n",
+		"\n",
+		" "
+	]) {
+		const separatorIndex = candidate.lastIndexOf(separator);
+		if (separatorIndex > 0) return separatorIndex + separator.length;
+	}
+	return maxPrefix;
+}
+/**
+* Split text into Telegram-safe MarkdownV2 chunks while preferring natural boundaries.
+*/
+function splitTelegramMessage(message, limit) {
+	if (!message) return [];
+	const chunks = [];
+	let remaining = message;
+	while (remaining.length > 0) {
+		if (getFormattedLength(remaining) <= limit) {
+			chunks.push(formatTelegramMessage(remaining));
+			break;
+		}
+		const splitIndex = findPreferredSplit(remaining, limit);
+		const chunk = remaining.slice(0, splitIndex);
+		if (!chunk) throw new Error(`failed to split message into Telegram-safe chunks (limit=${limit})`);
+		chunks.push(formatTelegramMessage(chunk));
+		remaining = remaining.slice(splitIndex);
+	}
+	return chunks;
+}
+//#endregion
 //#region src/inputs.ts
 /**
 * Read the raw GitHub Actions inputs without applying validation yet.
@@ -76307,10 +76408,13 @@ function readRawActionInputs() {
 		botToken: getRequiredEnv("TELEGRAM_BOT_TOKEN"),
 		chatId: getRequiredEnv("TELEGRAM_CHAT_ID"),
 		message: getInput("message", { required: false }),
+		messageFile: getInput("message_file", { required: false }),
+		messageUrl: getInput("message_url", { required: false }),
 		buttons: getInput("buttons", { required: false }),
 		replyToMessageId: getOptionalEnv("TELEGRAM_REPLY_TO_MESSAGE_ID"),
 		disableLinkPreview: getInput("disable_link_preview", { required: false }) || "true",
 		attachment: getInput("attachment", { required: false }),
+		attachments: getInput("attachments", { required: false }),
 		attachmentType: getInput("attachment_type", { required: false }),
 		attachmentFilename: getInput("attachment_filename", { required: false })
 	};
@@ -76378,41 +76482,81 @@ function parseOptionalAttachmentType(value) {
 	if (isAttachmentType(value)) return value;
 	throw new Error(`attachment_type must be one of: ${ATTACHMENT_TYPES.join(", ")}`);
 }
-/**
-* Convert the plain message input into Telegram MarkdownV2 while preserving the
-* existing user-facing Markdown behavior.
-*/
-function formatMessage(message) {
-	if (!message) return;
-	return (0, import_telegramify_markdown.default)(message, "keep");
+function assertRawAttachmentItem(input) {
+	if (typeof input !== "object" || input === null || Array.isArray(input)) throw new Error(`each attachments item must be a plain object, got: ${JSON.stringify(input)}`);
+	const item = input;
+	if (typeof item.type !== "string" || !isAttachmentType(item.type)) throw new Error(`attachments item must include a valid "type": ${JSON.stringify(input)}`);
+	if (typeof item.source !== "string" || !item.source) throw new Error(`attachments item must include a non-empty "source": ${JSON.stringify(input)}`);
+	if ("filename" in item && typeof item.filename !== "string") throw new Error(`attachments item "filename" must be a string: ${JSON.stringify(input)}`);
+	if ("caption" in item && typeof item.caption !== "string") throw new Error(`attachments item "caption" must be a string: ${JSON.stringify(input)}`);
+}
+function parseAttachments(input) {
+	let data;
+	try {
+		data = JSON.parse(input);
+	} catch (error) {
+		throw new Error(`attachments must be valid JSON: ${error instanceof Error ? error.message : error}`);
+	}
+	if (!Array.isArray(data) || data.length === 0) throw new Error("attachments must be a non-empty JSON array");
+	return data.map((item) => {
+		assertRawAttachmentItem(item);
+		const source = resolveAttachmentSource(item.source, item.filename);
+		if (item.filename && !source.isLocalFile) throw new Error("attachments item filename can only be used with a local attachment path");
+		const caption = item.caption ? formatTelegramMessage(item.caption) : void 0;
+		if (caption && caption.length > 1024) throw new Error(`attachments item caption exceeds Telegram limit (${TELEGRAM_CAPTION_LIMIT} characters after formatting)`);
+		return {
+			type: item.type,
+			source,
+			filename: item.filename,
+			caption
+		};
+	});
 }
 /**
 * Validate relationships between related inputs before building the final request.
 */
 function assertInputConsistency(rawInputs, attachmentType) {
-	if (!rawInputs.message && !rawInputs.attachment) throw new Error("either \"message\" or \"attachment\" must be provided");
-	if (rawInputs.attachment && !attachmentType) throw new Error("attachment_type is required when \"attachment\" is provided");
-	if (!rawInputs.attachment && attachmentType) throw new Error("\"attachment\" is required when attachment_type is provided");
+	const messageSourceCount = [
+		rawInputs.message,
+		rawInputs.messageFile,
+		rawInputs.messageUrl
+	].filter(Boolean).length;
+	const hasAttachment = Boolean(rawInputs.attachment);
+	const hasAttachments = Boolean(rawInputs.attachments);
+	if (messageSourceCount > 1) throw new Error("only one of \"message\", \"message_file\", or \"message_url\" may be provided");
+	if (hasAttachment && hasAttachments) throw new Error("\"attachment\" and \"attachments\" cannot be used together");
+	if (hasAttachments && (rawInputs.attachmentType || rawInputs.attachmentFilename)) throw new Error("\"attachment_type\" and \"attachment_filename\" cannot be used with \"attachments\"");
+	if (messageSourceCount === 0 && !hasAttachment && !hasAttachments) throw new Error("either a message source, \"attachment\", or \"attachments\" must be provided");
+	if (hasAttachment && !attachmentType) throw new Error("attachment_type is required when \"attachment\" is provided");
+	if (!hasAttachment && attachmentType) throw new Error("\"attachment\" is required when attachment_type is provided");
+	if (hasAttachments && rawInputs.buttons && messageSourceCount === 0) throw new Error("\"buttons\" with \"attachments\" requires a message source so the keyboard can be attached to a text message");
 }
 /**
 * Parse and validate raw action inputs into a normalized request object.
 */
-function parseActionInputs(rawInputs) {
+async function parseActionInputs(rawInputs) {
 	const attachmentType = parseOptionalAttachmentType(rawInputs.attachmentType);
 	assertInputConsistency(rawInputs, attachmentType);
 	const attachmentSource = rawInputs.attachment ? resolveAttachmentSource(rawInputs.attachment, rawInputs.attachmentFilename || void 0) : void 0;
+	const attachmentItems = rawInputs.attachments ? parseAttachments(rawInputs.attachments) : void 0;
 	if (rawInputs.attachmentFilename && attachmentSource && !attachmentSource.isLocalFile) throw new Error("attachment_filename can only be used with a local attachment path");
 	const replyMarkup = rawInputs.buttons ? { inline_keyboard: parseButtons(rawInputs.buttons) } : void 0;
+	const message = await resolveMessageText({
+		message: rawInputs.message,
+		messageFile: rawInputs.messageFile,
+		messageUrl: rawInputs.messageUrl
+	});
 	return {
 		scenarioId: rawInputs.scenarioId,
 		botToken: rawInputs.botToken,
 		chatId: rawInputs.chatId,
-		message: formatMessage(rawInputs.message),
+		message,
 		disableLinkPreview: parseBooleanInput("disable_link_preview", rawInputs.disableLinkPreview),
 		replyMessageId: parseOptionalIntegerInput("reply_to_message_id", rawInputs.replyToMessageId),
 		replyMarkup,
 		attachmentType,
-		attachmentSource
+		attachmentSource,
+		attachmentItems
 	};
 }
 //#endregion
@@ -76425,34 +76569,110 @@ function createReplyParameters(replyMessageId) {
 }
 /**
 * Build the shared attachment options in one place.
-*
-* Keeping this separate avoids repeating the caption, parse mode, reply markup,
-* and reply parameters logic across every attachment sender.
 */
-function createAttachmentOptions(request) {
-	const replyParameters = createReplyParameters(request.replyMessageId);
+function createAttachmentOptions(request, attachmentType, replyMessageId, caption, includeReplyMarkup = true) {
+	const replyParameters = createReplyParameters(replyMessageId);
 	return {
-		...request.message ? {
-			caption: request.message,
+		...caption ? {
+			caption,
 			parse_mode: "MarkdownV2"
 		} : {},
-		...request.replyMarkup ? { reply_markup: request.replyMarkup } : {},
+		...includeReplyMarkup && request.replyMarkup ? { reply_markup: request.replyMarkup } : {},
 		...replyParameters ? { reply_parameters: replyParameters } : {},
-		...request.attachmentType === "document" ? { disable_content_type_detection: true } : {}
+		...attachmentType === "document" ? { disable_content_type_detection: true } : {}
 	};
 }
 /**
-* Build `sendMessage` options separately because link preview settings only
-* apply to plain text messages.
+* Build `sendMessage` options separately because link preview settings only apply
+* to plain text messages.
 */
-function createMessageOptions(request) {
-	const replyParameters = createReplyParameters(request.replyMessageId);
+function createMessageOptions(request, replyMessageId, includeReplyMarkup = true) {
+	const replyParameters = createReplyParameters(replyMessageId);
 	return {
 		parse_mode: "MarkdownV2",
 		link_preview_options: { is_disabled: request.disableLinkPreview },
-		...request.replyMarkup ? { reply_markup: request.replyMarkup } : {},
+		...includeReplyMarkup && request.replyMarkup ? { reply_markup: request.replyMarkup } : {},
 		...replyParameters ? { reply_parameters: replyParameters } : {}
 	};
+}
+/**
+* Send a sequence of preformatted text chunks, optionally attaching buttons to the last one.
+*/
+async function sendMessageChunks(bot, request, chunks, initialReplyMessageId, attachReplyMarkupToLast = false) {
+	let replyMessageId = initialReplyMessageId;
+	let lastMessageId;
+	for (const [index, chunk] of chunks.entries()) {
+		const isLastChunk = index === chunks.length - 1;
+		const result = await bot.api.sendMessage(request.chatId, chunk, createMessageOptions(request, replyMessageId, attachReplyMarkupToLast && isLastChunk));
+		lastMessageId = result.message_id;
+		replyMessageId = result.message_id;
+	}
+	return lastMessageId;
+}
+function getAttachmentBatchKind(type) {
+	if (type === "photo" || type === "video") return "visual";
+	if (type === "audio") return "audio";
+	if (type === "document") return "document";
+	return "single";
+}
+function createMediaGroupBatches(items) {
+	const batches = [];
+	let currentBatch = [];
+	let currentKind;
+	for (const item of items) {
+		const itemKind = getAttachmentBatchKind(item.type);
+		if (currentBatch.length === 0 || currentKind === itemKind && currentKind !== "single" && currentBatch.length < 10) {
+			currentBatch.push(item);
+			currentKind = itemKind;
+			continue;
+		}
+		batches.push(currentBatch);
+		currentBatch = [item];
+		currentKind = itemKind;
+	}
+	if (currentBatch.length > 0) batches.push(currentBatch);
+	return batches;
+}
+function createMediaGroupItem(item) {
+	if (item.type === "animation") throw new Error("animation attachments are not supported inside Telegram media groups");
+	return MEDIA_GROUP_BUILDERS[item.type](item.source.value, {
+		...item.caption ? {
+			caption: item.caption,
+			parse_mode: "MarkdownV2"
+		} : {},
+		...item.type === "document" ? { disable_content_type_detection: true } : {}
+	});
+}
+async function sendAttachmentBatch(bot, request, items, replyMessageId) {
+	if (items.length === 1) {
+		const [item] = items;
+		return (await ATTACHMENT_SENDERS[item.type](bot, request.chatId, item.source.value, createAttachmentOptions(request, item.type, replyMessageId, item.caption, false))).message_id;
+	}
+	const lastMessage = (await bot.api.sendMediaGroup(request.chatId, items.map((item) => createMediaGroupItem(item)), { ...replyMessageId ? { reply_parameters: { message_id: replyMessageId } } : {} })).at(-1);
+	if (!lastMessage) throw new Error("Telegram sendMediaGroup returned no messages");
+	return lastMessage.message_id;
+}
+async function sendAttachmentItems(bot, request) {
+	let previousMessageId = await sendMessageChunks(bot, request, request.message ? splitTelegramMessage(request.message, 4096) : [], request.replyMessageId, Boolean(request.replyMarkup)) ?? request.replyMessageId;
+	const batches = createMediaGroupBatches(request.attachmentItems ?? []);
+	for (const batch of batches) previousMessageId = await sendAttachmentBatch(bot, request, batch, previousMessageId);
+	if (!previousMessageId) throw new Error("failed to send any attachment messages");
+	return { message_id: previousMessageId };
+}
+function buildAttachmentCaptionPlan(message) {
+	if (!message) return { leadingChunks: [] };
+	const formattedMessage = formatTelegramMessage(message);
+	if (formattedMessage.length <= 1024) return {
+		leadingChunks: [],
+		caption: formattedMessage
+	};
+	const messageChunks = splitTelegramMessage(message, TELEGRAM_MESSAGE_LIMIT);
+	const lastChunk = messageChunks.at(-1);
+	if (lastChunk && lastChunk.length <= 1024) return {
+		leadingChunks: messageChunks.slice(0, -1),
+		caption: lastChunk
+	};
+	return { leadingChunks: messageChunks };
 }
 /**
 * Send the normalized Telegram request.
@@ -76462,6 +76682,18 @@ function createMessageOptions(request) {
 */
 async function sendTelegramMessage(request) {
 	const bot = new import_out.Bot(request.botToken);
+	if (request.attachmentItems && request.attachmentItems.length > 0) {
+		logActRequestSummary({
+			scenarioId: request.scenarioId,
+			method: `sendMediaGroup/batch (${request.attachmentItems.length} items)`,
+			chatId: request.chatId,
+			message: request.message,
+			disableLinkPreview: request.disableLinkPreview,
+			replyMessageId: request.replyMessageId,
+			replyMarkup: request.replyMarkup
+		});
+		return sendAttachmentItems(bot, request);
+	}
 	if (request.attachmentSource && request.attachmentType) {
 		logActRequestSummary({
 			scenarioId: request.scenarioId,
@@ -76474,18 +76706,24 @@ async function sendTelegramMessage(request) {
 			attachmentType: request.attachmentType,
 			attachmentSource: request.attachmentSource
 		});
-		return ATTACHMENT_SENDERS[request.attachmentType](bot, request.chatId, request.attachmentSource.value, createAttachmentOptions(request));
+		const captionPlan = buildAttachmentCaptionPlan(request.message);
+		const attachReplyMarkupToText = Boolean(request.replyMarkup) && !captionPlan.caption;
+		const chainTailMessageId = await sendMessageChunks(bot, request, captionPlan.leadingChunks, request.replyMessageId, attachReplyMarkupToText);
+		return ATTACHMENT_SENDERS[request.attachmentType](bot, request.chatId, request.attachmentSource.value, createAttachmentOptions(request, request.attachmentType, chainTailMessageId ?? request.replyMessageId, captionPlan.caption, !attachReplyMarkupToText));
 	}
+	const messageChunks = splitTelegramMessage(request.message ?? "", TELEGRAM_MESSAGE_LIMIT);
 	logActRequestSummary({
 		scenarioId: request.scenarioId,
-		method: "sendMessage",
+		method: messageChunks.length > 1 ? `sendMessage x${messageChunks.length}` : "sendMessage",
 		chatId: request.chatId,
 		message: request.message,
 		disableLinkPreview: request.disableLinkPreview,
 		replyMessageId: request.replyMessageId,
 		replyMarkup: request.replyMarkup
 	});
-	return bot.api.sendMessage(request.chatId, request.message ?? "", createMessageOptions(request));
+	const lastMessageId = await sendMessageChunks(bot, request, messageChunks, request.replyMessageId, true);
+	if (!lastMessageId) throw new Error("failed to send any Telegram messages");
+	return { message_id: lastMessageId };
 }
 //#endregion
 //#region src/index.ts
@@ -76497,7 +76735,7 @@ async function sendTelegramMessage(request) {
 */
 async function run() {
 	try {
-		const result = await sendTelegramMessage(parseActionInputs(readRawActionInputs()));
+		const result = await sendTelegramMessage(await parseActionInputs(readRawActionInputs()));
 		setOutput("message_id", result.message_id.toString());
 		setOutput("status", "success");
 		if (isActRun()) info(`[act] Sent Telegram message successfully (message_id=${result.message_id})`);

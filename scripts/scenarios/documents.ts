@@ -16,5 +16,24 @@ export function createDocumentScenarios(): ScenarioDefinition[] {
         attachment_filename: "sample-document.txt",
       },
     }),
+    createScenario({
+      id: "media-group-documents",
+      description: "Send multiple documents in batched attachments mode",
+      inputs: {
+        attachments: JSON.stringify([
+          {
+            type: "document",
+            source: "scripts/fixtures/sample-document.txt",
+            filename: "sample-document.txt",
+            caption: "Document A",
+          },
+          {
+            type: "document",
+            source: "scripts/fixtures/sample-document.txt",
+            filename: "sample-document-copy.txt",
+          },
+        ]),
+      },
+    }),
   ];
 }

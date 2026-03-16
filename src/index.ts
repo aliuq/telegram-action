@@ -11,7 +11,7 @@ import { sendTelegramMessage } from "./telegram.js";
  */
 export async function run(): Promise<void> {
   try {
-    const request = parseActionInputs(readRawActionInputs());
+    const request = await parseActionInputs(readRawActionInputs());
     const result = await sendTelegramMessage(request);
 
     core.setOutput("message_id", result.message_id.toString());

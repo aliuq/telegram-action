@@ -1,30 +1,8 @@
 import { existsSync, readFileSync } from "node:fs";
-import { basename, resolve } from "node:path";
+import { basename } from "node:path";
 import { InputFile } from "grammy";
+import { isRemoteUrl, looksLikeLocalPath, resolveWorkspacePath } from "./source-utils.js";
 import type { ResolvedAttachmentSource } from "./types.js";
-
-/**
- * Distinguish path-like inputs from Telegram file ids.
- *
- * Repository-relative fixture paths often do not start with `./`, so a simple
- * prefix check would incorrectly treat missing local files as Telegram file ids.
- */
-function looksLikeLocalPath(input: string): boolean {
-  return (
-    input.startsWith("./") ||
-    input.startsWith("../") ||
-    input.startsWith("/") ||
-    input.includes("/") ||
-    input.includes("\\")
-  );
-}
-
-/**
- * Preserve remote attachment URLs so Telegram can fetch them directly.
- */
-function isRemoteUrl(input: string): boolean {
-  return /^https?:\/\//.test(input);
-}
 
 /**
  * Resolve local attachments eagerly and reject missing path-like values.
@@ -33,7 +11,7 @@ function isRemoteUrl(input: string): boolean {
  * paths such as `scripts/fixtures/sample-photo.webp` work as expected.
  */
 export function resolveAttachmentSource(input: string, filename?: string): ResolvedAttachmentSource {
-  const resolvedPath = resolve(process.cwd(), input);
+  const resolvedPath = resolveWorkspacePath(input);
   if (existsSync(resolvedPath)) {
     return {
       value: new InputFile(readFileSync(resolvedPath), filename || basename(resolvedPath)),

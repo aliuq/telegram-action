@@ -6,6 +6,14 @@ inputs:
     description: "Message text to send, or the caption when an attachment is provided"
     required: false
     default: ""
+  message_file:
+    description: "Repository-local file path whose UTF-8 contents become the message body."
+    required: false
+    default: ""
+  message_url:
+    description: "Remote HTTP(S) URL whose response body becomes the message body."
+    required: false
+    default: ""
   buttons:
     description: >
       Inline keyboard buttons in JSON. Supports two formats:
@@ -21,6 +29,12 @@ inputs:
     description: "Attachment source. Supports local file paths, public URLs, or Telegram file_ids."
     required: false
     default: ""
+  attachments:
+    description: >
+      JSON array of attachment objects for multi-media sends.
+      Each item supports: {"type":"photo|video|audio|animation|document","source":"...","filename":"optional","caption":"optional"}
+    required: false
+    default: ""
   attachment_type:
     description: 'Attachment type. Supported values: "photo", "video", "audio", "animation", and "document".'
     required: false
@@ -32,7 +46,7 @@ inputs:
 
 outputs:
   message_id:
-    description: "ID of the sent message"
+    description: "ID of the last sent message"
   status:
     description: "Status of the action ('success')"
 

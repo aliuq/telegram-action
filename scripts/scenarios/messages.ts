@@ -1,5 +1,5 @@
 import type { ScenarioDefinition } from "../../src/types.ts";
-import { createScenario } from "./shared.ts";
+import { createScenario, SAMPLE_MESSAGE_URL } from "./shared.ts";
 
 /**
  * Create the baseline text-message scenarios used by local and workflow tests.
@@ -19,6 +19,35 @@ export function createMessageScenarios(): ScenarioDefinition[] {
       inputs: {
         message: "🔗 Link preview test\n\nhttps://github.com",
         disable_link_preview: "false",
+      },
+    }),
+    createScenario({
+      id: "message-from-file",
+      description: "Message body loaded from a local file",
+      inputs: {
+        message_file: "scripts/fixtures/sample-message.md",
+      },
+    }),
+    createScenario({
+      id: "message-from-url",
+      description: "Message body loaded from a remote URL",
+      inputs: {
+        message_url: SAMPLE_MESSAGE_URL,
+      },
+    }),
+    createScenario({
+      id: "message-long-thread",
+      description: "Long text message should split into a reply chain",
+      inputs: {
+        message: `Long threaded message start\n\n${"A".repeat(5000)}`,
+      },
+    }),
+    createScenario({
+      id: "message-long-with-buttons",
+      description: "Long text message with buttons should keep buttons on the final chunk",
+      inputs: {
+        message: `Long message with buttons\n\n${"B".repeat(5000)}`,
+        buttons: '[{"text":"Open repository","url":"https://github.com/aliuq/telegram-action"}]',
       },
     }),
   ];

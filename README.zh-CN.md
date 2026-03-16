@@ -7,10 +7,14 @@
 ## 功能概览
 
 - 发送 MarkdownV2 格式的文本消息
+- 超长文本自动拆分为连续回复消息
 - 发送单行或多行 inline buttons
+- 支持从内联文本、本地文件、远程 URL 读取消息正文
 - 发送本地文件、公共 URL 或 Telegram `file_id` 附件
+- 支持通过 `attachments` 一次发送多个媒体文件
 - 回复群组话题或已有消息
 - 显式开启或关闭链接预览
+- 支持向已开启 discussion 的频道发送可评论的频道消息
 - 本地校验场景配置
 - 使用 `act` 做交互式集成验证
 
@@ -42,6 +46,30 @@
       🌿 Ref: ${{ github.ref }}
 ```
 
+### 从本地文件读取消息
+
+```yaml
+- name: Send changelog file
+  uses: aliuq/telegram-action@master
+  env:
+    TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
+    TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
+  with:
+    message_file: ".github/telegram/release-note.md"
+```
+
+### 从远程 URL 读取消息
+
+```yaml
+- name: Send release notes from URL
+  uses: aliuq/telegram-action@master
+  env:
+    TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
+    TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
+  with:
+    message_url: "https://example.com/release-notes.md"
+```
+
 ### 带按钮消息
 
 `buttons` 支持两种 JSON 结构：
@@ -50,6 +78,10 @@
 - 多行：`[[{...}], [{...}]]`
 
 每个按钮都必须包含 `text`，并且只能包含一个 Telegram 行为字段，例如 `url` 或 `callback_data`。
+
+### 超长消息
+
+当文本消息超过 Telegram 限制时，Action 会自动拆分并按顺序发送。后续每一段都会回复前一段消息，保证会话连续性。若设置了按钮，按钮只会附加在最后一段消息上。
 
 ### 带附件消息
 
@@ -67,6 +99,45 @@
 
 当设置了 `attachment` 时，`message` 会作为附件说明（caption）发送。
 
+### 一次发送多个附件
+
+当你需要一次发送多个媒体文件时，请使用 `attachments`。兼容的媒体会按 Telegram album 规则组合发送；不兼容的组合会自动拆成多个批次。
+
+```yaml
+- name: Send multiple media items
+  uses: aliuq/telegram-action@master
+  env:
+    TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
+    TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
+  with:
+    message: "Build artifacts"
+    attachments: |
+      [
+        {
+          "type": "photo",
+          "source": "scripts/fixtures/sample-photo.webp",
+          "filename": "sample-photo.webp",
+          "caption": "Preview image"
+        },
+        {
+          "type": "video",
+          "source": "https://samplelib.com/lib/preview/mp4/sample-5s.mp4"
+        }
+      ]
+```
+
+当使用 `attachments` 时，顶层 `message` 会先作为一条独立文本消息发送，这样既能安全拆分长文本，也能继续承载按钮。若需要媒体说明，请在 `attachments` 数组的单个条目中设置 `caption`。
+
+边界行为如下：
+
+- 1 个条目会退回普通单附件发送
+- 2 到 10 个兼容条目会作为一个 Telegram media group 发送
+- 超过 10 个条目会自动拆成多个批次，并保持原始顺序
+
+### 频道评论区
+
+Telegram 频道评论区不是单条消息级别的 Bot API 开关。如果 `TELEGRAM_CHAT_ID` 指向一个已经绑定 discussion group 的频道，那么消息发到该频道后，Telegram 会自动显示评论入口。这个 Action 负责发送消息，但“开启评论区”本身需要在 Telegram 频道设置里完成。
+
 ## 输入参数
 
 完整参数说明请以英文版 `README.md` 为准。常用字段如下：
@@ -75,15 +146,21 @@
 - `TELEGRAM_CHAT_ID`：聊天 / 群组 / 频道 ID，通过 `env` 传入，必填
 - `TELEGRAM_REPLY_TO_MESSAGE_ID`：回复目标消息 ID，通过 `env` 传入，可选
 - `message`：消息内容，可选
+- `message_file`：仓库内 UTF-8 文本文件路径，可选
+- `message_url`：远程 HTTP(S) URL，可选
 - `buttons`：按钮 JSON，可选
 - `disable_link_preview`：`"true"` 或 `"false"`
 - `attachment`：附件路径 / URL / Telegram `file_id`
+- `attachments`：多附件 JSON 数组；每项支持 `type`、`source`，可选 `filename`、`caption`
 - `attachment_type`：`photo`、`video`、`audio`、`animation`、`document`
 - `attachment_filename`：本地文件上传时可选文件名覆盖
 
+`message`、`message_file`、`message_url` 三者只能设置一个；同时你仍然需要至少提供一个消息来源或 `attachment`。
+`attachment` 与 `attachments` 不能同时使用；使用 `attachments` 时不要再设置 `attachment_type` 或 `attachment_filename`。
+
 ## 输出参数
 
-- `message_id`：发送成功后的 Telegram 消息 ID
+- `message_id`：最后一条已发送 Telegram 消息的 ID
 - `status`：执行状态，当前固定为 `"success"`
 
 ## 本地开发与验证

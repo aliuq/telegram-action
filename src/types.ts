@@ -1,5 +1,11 @@
 import type { Bot, InputFile } from "grammy";
-import type { InlineKeyboardMarkup } from "grammy/types";
+import type {
+  InlineKeyboardMarkup,
+  InputMediaAudio,
+  InputMediaDocument,
+  InputMediaPhoto,
+  InputMediaVideo,
+} from "grammy/types";
 
 export type AttachmentType = "photo" | "video" | "audio" | "animation" | "document";
 
@@ -35,10 +41,13 @@ export interface RawActionInputs {
   botToken: string;
   chatId: string;
   message: string;
+  messageFile: string;
+  messageUrl: string;
   buttons: string;
   replyToMessageId: string;
   disableLinkPreview: string;
   attachment: string;
+  attachments: string;
   attachmentType: string;
   attachmentFilename: string;
 }
@@ -64,17 +73,43 @@ export interface ParsedActionInputs {
   replyMarkup?: InlineKeyboardMarkup;
   attachmentType?: AttachmentType;
   attachmentSource?: ResolvedAttachmentSource;
+  attachmentItems?: ParsedAttachmentItem[];
 }
+
+/**
+ * Raw attachment item shape accepted by the `attachments` JSON input.
+ */
+export interface RawAttachmentItemInput {
+  type: AttachmentType;
+  source: string;
+  filename?: string;
+  caption?: string;
+}
+
+/**
+ * Parsed attachment item ready for single-send or media-group transport.
+ */
+export interface ParsedAttachmentItem {
+  type: AttachmentType;
+  source: ResolvedAttachmentSource;
+  filename?: string;
+  caption?: string;
+}
+
+export type TelegramMediaGroupItem = InputMediaAudio | InputMediaDocument | InputMediaPhoto | InputMediaVideo;
 
 /**
  * Raw scenario input shape used by local tooling and workflow helpers.
  */
 export interface ScenarioInputs {
   message: string;
+  message_file: string;
+  message_url: string;
   reply_to_message_id: string;
   disable_link_preview: string;
   buttons: string;
   attachment: string;
+  attachments: string;
   attachment_type: string;
   attachment_filename: string;
 }

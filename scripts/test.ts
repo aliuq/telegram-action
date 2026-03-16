@@ -18,6 +18,7 @@ import type {
   TestSelection,
 } from "../src/types.ts";
 import { findScenarioById, loadScenarios } from "./scenarios/index";
+import { TEST_MESSAGE_URL_OVERRIDES } from "./scenarios/shared.ts";
 
 const ROOT = new URL("..", import.meta.url).pathname;
 const SECRET_FILE_PATH = resolve(ROOT, ".env");
@@ -27,6 +28,7 @@ const HISTORY_FILE_PATH = resolve(HISTORY_DIR, "test-history.json");
 const TEST_BOT_TOKEN = "test-bot-token";
 const TEST_CHAT_ID = "123456";
 const TEST_REPLY_TO_MESSAGE_ID = "42";
+const TEST_MESSAGE_URL_OVERRIDES_JSON = JSON.stringify(TEST_MESSAGE_URL_OVERRIDES);
 const RUNNER_BANNER = [
   "████████╗███████╗██╗     ███████╗ ██████╗ ██████╗  █████╗ ███╗   ███╗",
   "╚══██╔══╝██╔════╝██║     ██╔════╝██╔════╝ ██╔══██╗██╔══██╗████╗ ████║",
@@ -83,6 +85,8 @@ function buildRawActionInputs(scenario: ScenarioDefinition, useRealEnv: boolean)
     botToken: useRealEnv ? getRequiredEnv("TELEGRAM_BOT_TOKEN") : TEST_BOT_TOKEN,
     chatId: useRealEnv ? getRequiredEnv("TELEGRAM_CHAT_ID") : TEST_CHAT_ID,
     message: scenario.inputs.message,
+    messageFile: scenario.inputs.message_file,
+    messageUrl: scenario.inputs.message_url,
     buttons: scenario.inputs.buttons,
     replyToMessageId: scenario.inputs.reply_to_message_id
       ? useRealEnv
@@ -91,6 +95,7 @@ function buildRawActionInputs(scenario: ScenarioDefinition, useRealEnv: boolean)
       : "",
     disableLinkPreview: scenario.inputs.disable_link_preview,
     attachment: scenario.inputs.attachment,
+    attachments: scenario.inputs.attachments,
     attachmentType: scenario.inputs.attachment_type,
     attachmentFilename: scenario.inputs.attachment_filename,
   };
@@ -114,7 +119,7 @@ function assertUniqueScenarioIds(scenarios: ScenarioDefinition[]): void {
 /**
  * Validate the scenario catalog against the shared action parser.
  */
-function validateScenarioCatalog(scenarios: ScenarioDefinition[]): void {
+async function validateScenarioCatalog(scenarios: ScenarioDefinition[]): Promise<void> {
   assertUniqueScenarioIds(scenarios);
 
   for (const scenario of scenarios) {
@@ -122,7 +127,7 @@ function validateScenarioCatalog(scenarios: ScenarioDefinition[]): void {
 
     if (scenario.expect_failure) {
       try {
-        runValidation();
+        await runValidation();
       } catch {
         continue;
       }
@@ -130,7 +135,7 @@ function validateScenarioCatalog(scenarios: ScenarioDefinition[]): void {
       throw new Error(`Scenario "${scenario.id}" is marked as expect_failure but the parser accepted it`);
     }
 
-    runValidation();
+    await runValidation();
   }
 }
 
@@ -269,9 +274,9 @@ async function promptScenarioSelection(allScenarios: ScenarioDefinition[], mode:
     message: "Choose the scenarios to run",
     required: true,
     initialValues: [],
-    options: allScenarios.map((scenario) => ({
+    options: allScenarios.map((scenario, index) => ({
       value: scenario.id,
-      label: scenario.id,
+      label: `${index + 1}. ${scenario.id}`,
       hint: [
         scenario.description,
         scenario.inputs.reply_to_message_id ? "requires reply target id" : undefined,
@@ -472,23 +477,22 @@ async function runSourceSelection(scenarios: ScenarioDefinition[], logFilePath: 
 
   try {
     for (const scenario of scenarios) {
-      const request = parseActionInputs(buildRawActionInputs(scenario, true));
-      const requestSummary = formatActRequestSummary({
-        scenarioId: request.scenarioId,
-        method: request.attachmentType ? ATTACHMENT_METHOD_NAMES[request.attachmentType] : "sendMessage",
-        chatId: request.chatId,
-        message: request.message,
-        disableLinkPreview: request.disableLinkPreview,
-        replyMessageId: request.replyMessageId,
-        replyMarkup: request.replyMarkup,
-        attachmentType: request.attachmentType,
-        attachmentSource: request.attachmentSource,
-      });
-      p.note(requestSummary, `[source] Send preview (${scenario.id})`);
-      logLines.push(`[debug:${scenario.id}]\n${requestSummary}`);
-
       if (scenario.expect_failure) {
         try {
+          const request = await parseActionInputs(buildRawActionInputs(scenario, true));
+          const requestSummary = formatActRequestSummary({
+            scenarioId: request.scenarioId,
+            method: request.attachmentType ? ATTACHMENT_METHOD_NAMES[request.attachmentType] : "sendMessage",
+            chatId: request.chatId,
+            message: request.message,
+            disableLinkPreview: request.disableLinkPreview,
+            replyMessageId: request.replyMessageId,
+            replyMarkup: request.replyMarkup,
+            attachmentType: request.attachmentType,
+            attachmentSource: request.attachmentSource,
+          });
+          p.note(requestSummary, `[source] Send preview (${scenario.id})`);
+          logLines.push(`[debug:${scenario.id}]\n${requestSummary}`);
           await sendTelegramMessage(request);
         } catch (error) {
           const details = formatActErrorDetails(error);
@@ -502,6 +506,21 @@ async function runSourceSelection(scenarios: ScenarioDefinition[], logFilePath: 
 
         throw new Error(`Scenario "${scenario.id}" is marked as expect_failure but completed successfully`);
       }
+
+      const request = await parseActionInputs(buildRawActionInputs(scenario, true));
+      const requestSummary = formatActRequestSummary({
+        scenarioId: request.scenarioId,
+        method: request.attachmentType ? ATTACHMENT_METHOD_NAMES[request.attachmentType] : "sendMessage",
+        chatId: request.chatId,
+        message: request.message,
+        disableLinkPreview: request.disableLinkPreview,
+        replyMessageId: request.replyMessageId,
+        replyMarkup: request.replyMarkup,
+        attachmentType: request.attachmentType,
+        attachmentSource: request.attachmentSource,
+      });
+      p.note(requestSummary, `[source] Send preview (${scenario.id})`);
+      logLines.push(`[debug:${scenario.id}]\n${requestSummary}`);
 
       const result = await sendTelegramMessage(request);
       const message = `Sent scenario "${scenario.id}" (message_id=${result.message_id})`;
@@ -522,7 +541,7 @@ async function runSourceSelection(scenarios: ScenarioDefinition[], logFilePath: 
 /**
  * Validate scenarios locally without sending any Telegram requests.
  */
-function runValidationSelection(scenarios: ScenarioDefinition[], logFilePath: string): void {
+async function runValidationSelection(scenarios: ScenarioDefinition[], logFilePath: string): Promise<void> {
   const logLines: string[] = [];
 
   for (const scenario of scenarios) {
@@ -530,7 +549,7 @@ function runValidationSelection(scenarios: ScenarioDefinition[], logFilePath: st
 
     if (scenario.expect_failure) {
       try {
-        runValidation();
+        await runValidation();
       } catch (error) {
         const message = `[expected failure] ${scenario.id}: ${error instanceof Error ? error.message : String(error)}`;
         p.log.step(message);
@@ -541,7 +560,7 @@ function runValidationSelection(scenarios: ScenarioDefinition[], logFilePath: st
       throw new Error(`Scenario "${scenario.id}" is marked as expect_failure but the parser accepted it`);
     }
 
-    runValidation();
+    await runValidation();
     const message = `Validated scenario "${scenario.id}" against the action parser`;
     p.log.success(message);
     logLines.push(message);
@@ -556,10 +575,12 @@ function runValidationSelection(scenarios: ScenarioDefinition[], logFilePath: st
 async function main(): Promise<void> {
   const cli = parseCliOptions(process.argv.slice(2));
 
+  process.env.TELEGRAM_ACTION_TEST_MESSAGE_URL_OVERRIDES = TEST_MESSAGE_URL_OVERRIDES_JSON;
+
   printBanner();
 
   const allScenarios = await loadScenarios();
-  validateScenarioCatalog(allScenarios);
+  await validateScenarioCatalog(allScenarios);
   const history = loadHistoryState();
   const selection = await resolveSelection(allScenarios, cli, history);
   const scenarios = resolveScenarios(allScenarios, selection);
@@ -574,7 +595,7 @@ async function main(): Promise<void> {
   } else if (selection.mode === "act") {
     await runActSelection(selection, logFilePath);
   } else {
-    runValidationSelection(scenarios, logFilePath);
+    await runValidationSelection(scenarios, logFilePath);
   }
 
   const historyEntry: TestHistoryEntry = {

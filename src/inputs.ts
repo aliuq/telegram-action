@@ -1,10 +1,17 @@
 import * as core from "@actions/core";
 import type { InlineKeyboardButton } from "grammy/types";
-import telegramifyMarkdown from "telegramify-markdown";
 import { resolveAttachmentSource } from "./attachments.js";
 import { ATTACHMENT_TYPES, BUTTON_ACTION_FIELDS } from "./constants.js";
 import { getOptionalEnv, getRequiredEnv } from "./env.js";
-import type { AttachmentType, InlineKeyboardMatrix, ParsedActionInputs, RawActionInputs } from "./types.js";
+import { formatTelegramMessage, resolveMessageText, TELEGRAM_CAPTION_LIMIT } from "./messages.js";
+import type {
+  AttachmentType,
+  InlineKeyboardMatrix,
+  ParsedActionInputs,
+  ParsedAttachmentItem,
+  RawActionInputs,
+  RawAttachmentItemInput,
+} from "./types.js";
 
 /**
  * Read the raw GitHub Actions inputs without applying validation yet.
@@ -18,10 +25,13 @@ export function readRawActionInputs(): RawActionInputs {
     botToken: getRequiredEnv("TELEGRAM_BOT_TOKEN"),
     chatId: getRequiredEnv("TELEGRAM_CHAT_ID"),
     message: core.getInput("message", { required: false }),
+    messageFile: core.getInput("message_file", { required: false }),
+    messageUrl: core.getInput("message_url", { required: false }),
     buttons: core.getInput("buttons", { required: false }),
     replyToMessageId: getOptionalEnv("TELEGRAM_REPLY_TO_MESSAGE_ID"),
     disableLinkPreview: core.getInput("disable_link_preview", { required: false }) || "true",
     attachment: core.getInput("attachment", { required: false }),
+    attachments: core.getInput("attachments", { required: false }),
     attachmentType: core.getInput("attachment_type", { required: false }),
     attachmentFilename: core.getInput("attachment_filename", { required: false }),
   };
@@ -137,61 +147,137 @@ function parseOptionalAttachmentType(value: string): AttachmentType | undefined 
   throw new Error(`attachment_type must be one of: ${ATTACHMENT_TYPES.join(", ")}`);
 }
 
-/**
- * Convert the plain message input into Telegram MarkdownV2 while preserving the
- * existing user-facing Markdown behavior.
- */
-function formatMessage(message: string): string | undefined {
-  if (!message) {
-    return undefined;
+function assertRawAttachmentItem(input: unknown): asserts input is RawAttachmentItemInput {
+  if (typeof input !== "object" || input === null || Array.isArray(input)) {
+    throw new Error(`each attachments item must be a plain object, got: ${JSON.stringify(input)}`);
   }
 
-  return telegramifyMarkdown(message, "keep");
+  const item = input as Record<string, unknown>;
+  if (typeof item.type !== "string" || !isAttachmentType(item.type)) {
+    throw new Error(`attachments item must include a valid "type": ${JSON.stringify(input)}`);
+  }
+
+  if (typeof item.source !== "string" || !item.source) {
+    throw new Error(`attachments item must include a non-empty "source": ${JSON.stringify(input)}`);
+  }
+
+  if ("filename" in item && typeof item.filename !== "string") {
+    throw new Error(`attachments item "filename" must be a string: ${JSON.stringify(input)}`);
+  }
+
+  if ("caption" in item && typeof item.caption !== "string") {
+    throw new Error(`attachments item "caption" must be a string: ${JSON.stringify(input)}`);
+  }
+}
+
+function parseAttachments(input: string): ParsedAttachmentItem[] {
+  let data: unknown;
+  try {
+    data = JSON.parse(input);
+  } catch (error) {
+    throw new Error(`attachments must be valid JSON: ${error instanceof Error ? error.message : error}`);
+  }
+
+  if (!Array.isArray(data) || data.length === 0) {
+    throw new Error("attachments must be a non-empty JSON array");
+  }
+
+  return data.map((item) => {
+    assertRawAttachmentItem(item);
+    const source = resolveAttachmentSource(item.source, item.filename);
+
+    if (item.filename && !source.isLocalFile) {
+      throw new Error("attachments item filename can only be used with a local attachment path");
+    }
+
+    const caption = item.caption ? formatTelegramMessage(item.caption) : undefined;
+    if (caption && caption.length > TELEGRAM_CAPTION_LIMIT) {
+      throw new Error(
+        `attachments item caption exceeds Telegram limit (${TELEGRAM_CAPTION_LIMIT} characters after formatting)`,
+      );
+    }
+
+    return {
+      type: item.type,
+      source,
+      filename: item.filename,
+      caption,
+    };
+  });
 }
 
 /**
  * Validate relationships between related inputs before building the final request.
  */
 function assertInputConsistency(rawInputs: RawActionInputs, attachmentType?: AttachmentType): void {
-  if (!rawInputs.message && !rawInputs.attachment) {
-    throw new Error('either "message" or "attachment" must be provided');
+  const messageSourceCount = [rawInputs.message, rawInputs.messageFile, rawInputs.messageUrl].filter(Boolean).length;
+  const hasAttachment = Boolean(rawInputs.attachment);
+  const hasAttachments = Boolean(rawInputs.attachments);
+
+  if (messageSourceCount > 1) {
+    throw new Error('only one of "message", "message_file", or "message_url" may be provided');
   }
 
-  if (rawInputs.attachment && !attachmentType) {
+  if (hasAttachment && hasAttachments) {
+    throw new Error('"attachment" and "attachments" cannot be used together');
+  }
+
+  if (hasAttachments && (rawInputs.attachmentType || rawInputs.attachmentFilename)) {
+    throw new Error('"attachment_type" and "attachment_filename" cannot be used with "attachments"');
+  }
+
+  if (messageSourceCount === 0 && !hasAttachment && !hasAttachments) {
+    throw new Error('either a message source, "attachment", or "attachments" must be provided');
+  }
+
+  if (hasAttachment && !attachmentType) {
     throw new Error('attachment_type is required when "attachment" is provided');
   }
 
-  if (!rawInputs.attachment && attachmentType) {
+  if (!hasAttachment && attachmentType) {
     throw new Error('"attachment" is required when attachment_type is provided');
+  }
+
+  if (hasAttachments && rawInputs.buttons && messageSourceCount === 0) {
+    throw new Error(
+      '"buttons" with "attachments" requires a message source so the keyboard can be attached to a text message',
+    );
   }
 }
 
 /**
  * Parse and validate raw action inputs into a normalized request object.
  */
-export function parseActionInputs(rawInputs: RawActionInputs): ParsedActionInputs {
+export async function parseActionInputs(rawInputs: RawActionInputs): Promise<ParsedActionInputs> {
   const attachmentType = parseOptionalAttachmentType(rawInputs.attachmentType);
   assertInputConsistency(rawInputs, attachmentType);
 
   const attachmentSource = rawInputs.attachment
     ? resolveAttachmentSource(rawInputs.attachment, rawInputs.attachmentFilename || undefined)
     : undefined;
+  const attachmentItems = rawInputs.attachments ? parseAttachments(rawInputs.attachments) : undefined;
 
   if (rawInputs.attachmentFilename && attachmentSource && !attachmentSource.isLocalFile) {
     throw new Error("attachment_filename can only be used with a local attachment path");
   }
 
   const replyMarkup = rawInputs.buttons ? { inline_keyboard: parseButtons(rawInputs.buttons) } : undefined;
+  const message = await resolveMessageText({
+    message: rawInputs.message,
+    messageFile: rawInputs.messageFile,
+    messageUrl: rawInputs.messageUrl,
+  });
 
   return {
     scenarioId: rawInputs.scenarioId,
     botToken: rawInputs.botToken,
     chatId: rawInputs.chatId,
-    message: formatMessage(rawInputs.message),
+    message,
     disableLinkPreview: parseBooleanInput("disable_link_preview", rawInputs.disableLinkPreview),
     replyMessageId: parseOptionalIntegerInput("reply_to_message_id", rawInputs.replyToMessageId),
     replyMarkup,
     attachmentType,
     attachmentSource,
+    attachmentItems,
   };
 }

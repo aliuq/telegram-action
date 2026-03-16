@@ -15,5 +15,24 @@ export function createFailureScenarios(): ScenarioDefinition[] {
         buttons: '[{"url":"https://google.com"}]',
       },
     }),
+    createScenario({
+      id: "message-source-conflict",
+      description: "Multiple message sources should fail validation",
+      expect_failure: true,
+      inputs: {
+        message: "Inline text",
+        message_file: "scripts/fixtures/sample-message.md",
+      },
+    }),
+    createScenario({
+      id: "attachment-conflict",
+      description: "Single and multi attachment inputs should not be combined",
+      expect_failure: true,
+      inputs: {
+        attachment: "scripts/fixtures/sample-document.txt",
+        attachment_type: "document",
+        attachments: '[{"type":"document","source":"scripts/fixtures/sample-document.txt"}]',
+      },
+    }),
   ];
 }
