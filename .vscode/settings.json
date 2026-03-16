@@ -17,5 +17,9 @@
     "grammyjs",
     "tsgo"
   ],
-  "terminal.integrated.copyOnSelection": true
+  "github.copilot.chat.commitMessageGeneration.instructions": [
+    {
+      "file": ".github/commit-instructions.md"
+    }
+  ]
 }
