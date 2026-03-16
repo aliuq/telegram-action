@@ -8,6 +8,7 @@
 
 - 发送 MarkdownV2 格式的文本消息
 - 超长文本自动拆分为连续回复消息
+- 在受支持私聊中通过项目内置的 Telegram draft 逻辑实现文本流式输出
 - 发送单行或多行 inline buttons
 - 支持从内联文本、本地文件、远程 URL 读取消息正文
 - 发送本地文件、公共 URL 或 Telegram `file_id` 附件
@@ -83,6 +84,35 @@
 
 当文本消息超过 Telegram 限制时，Action 会自动拆分并按顺序发送。后续每一段都会回复前一段消息，保证会话连续性。若设置了按钮，按钮只会附加在最后一段消息上。
 
+### 流式响应
+
+如果你希望 Telegram 中的文本像 AI 助手那样逐步出现，可以设置 `stream_response: "true"`。
+
+现在的实现会优先遵循 Telegram 当前 Bot API 的能力边界：
+
+- 在受支持的私聊里，Action 会通过内置的 `sendMessageDraft` 流程做渐进式输出，然后再发送最终落地消息
+- 在群组、频道或其他不能使用 `sendMessageDraft` 的场景里，Action 会直接回退到普通 `sendMessage` 发送，不再模拟流式编辑
+
+如果最终文本超过 Telegram 单条消息限制，本 Action 会把最终消息拆成多条回复链，保证阅读连续性。
+
+```yaml
+- name: Stream a Telegram response
+  uses: aliuq/telegram-action@master
+  env:
+    TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
+    TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
+  with:
+    stream_response: "true"
+    message: |
+      Build started...
+
+      Resolving dependencies
+      Compiling sources
+      Uploading artifacts
+```
+
+适合流式响应的场景包括长任务进度、AI 输出、渐进式日志。普通短通知仍然建议直接使用常规 `message` 发送。当前 `stream_response` 仅支持纯文本，不能和 `attachment` 或 `attachments` 混用。
+
 ### 带附件消息
 
 ```yaml
@@ -98,6 +128,8 @@
 ```
 
 当设置了 `attachment` 时，`message` 会作为附件说明（caption）发送。
+
+如果是单个视频发送，并且你希望 Telegram 以可流式播放的视频消息展示它，可以设置 `supports_streaming: "true"`。
 
 ### 一次发送多个附件
 
@@ -148,15 +180,20 @@ Telegram 频道评论区不是单条消息级别的 Bot API 开关。如果 `TEL
 - `message`：消息内容，可选
 - `message_file`：仓库内 UTF-8 文本文件路径，可选
 - `message_url`：远程 HTTP(S) URL，可选
+- `stream_response`：是否启用文本流式响应。私聊通过 Action 内置的 `sendMessageDraft` 流程发送，超长输出会自动落成多条回复链消息；其他聊天自动回退到普通 `sendMessage`，取值 `"true"` 或 `"false"`
 - `buttons`：按钮 JSON，可选
 - `disable_link_preview`：`"true"` 或 `"false"`
 - `attachment`：附件路径 / URL / Telegram `file_id`
 - `attachments`：多附件 JSON 数组；每项支持 `type`、`source`，可选 `filename`、`caption`
 - `attachment_type`：`photo`、`video`、`audio`、`animation`、`document`
 - `attachment_filename`：本地文件上传时可选文件名覆盖
+- `supports_streaming`：单个 `video` 附件是否启用 Telegram 流媒体模式，取值 `"true"` 或 `"false"`
 
 `message`、`message_file`、`message_url` 三者只能设置一个；同时你仍然需要至少提供一个消息来源或 `attachment`。
 `attachment` 与 `attachments` 不能同时使用；使用 `attachments` 时不要再设置 `attachment_type` 或 `attachment_filename`。
+`stream_response` 当前只支持纯文本消息，不能与 `attachment` 或 `attachments` 同时使用。
+Telegram 真正的 draft streaming 目前只适用于私聊，因此非私聊场景会自动使用普通非流式发送。
+对于 `attachments`，若视频条目需要流媒体模式，请在 JSON 条目里设置 `supports_streaming: true`。
 
 ## 输出参数
 
@@ -193,7 +230,7 @@ bun run test -- buttons-flat
 bun run test -- --all
 ```
 
-对于 `bun run`，Bun 会自动加载仓库根目录的 `.env`，因此这里既不需要脚本内部手动解析 `.env`，也不需要显式传 `--env-file`。默认情况下，`bun run test` 会打开交互式多选界面，并将所选场景直接发送到 Telegram。对于 `expect_failure` 场景，只有按预期失败才算通过。
+对于 `bun run`，Bun 会自动加载仓库根目录的 `.env`，因此这里既不需要脚本内部手动解析 `.env`，也不需要显式传 `--env-file`。默认情况下，`bun run test` 会先让你按场景 id 或描述做一次过滤，再打开交互式多选界面，并将所选场景直接发送到 Telegram。对于 `expect_failure` 场景，只有按预期失败才算通过。
 
 ### 2. 统一测试入口
 

@@ -7,12 +7,157 @@ import {
   TELEGRAM_MEDIA_GROUP_LIMIT,
 } from "./constants.js";
 import {
+  buildStreamingFrames,
   formatTelegramMessage,
-  splitTelegramMessage,
+  splitTelegramMessageChunks,
   TELEGRAM_CAPTION_LIMIT,
   TELEGRAM_MESSAGE_LIMIT,
 } from "./messages.js";
 import type { AttachmentType, ParsedActionInputs, ParsedAttachmentItem } from "./types.js";
+
+const STREAMING_SINGLE_CHUNK_FRAMES = 15;
+const STREAMING_MULTI_CHUNK_FRAMES = 8;
+const STREAMING_MULTI_CHUNK_TOTAL_FRAME_BUDGET = 20;
+const STREAMING_FRAME_DELAY_MS = 150;
+const STREAMING_FRAME_DELAY_MIN_MS = 100;
+const STREAMING_FRAME_DELAY_MAX_MS = 400;
+const TYPING_REFRESH_INTERVAL_MS = 4000;
+
+function sleep(ms: number): Promise<void> {
+  return new Promise((resolve) => setTimeout(resolve, ms));
+}
+
+/**
+ * Compute an inter-frame delay proportional to the new content size so shorter
+ * pieces fly by and longer ones pause a bit longer — matching how a human
+ * would perceive streaming text.
+ */
+function computeFrameDelay(pieceLength: number): number {
+  const scaled = STREAMING_FRAME_DELAY_MS + pieceLength * 0.4;
+  return Math.min(STREAMING_FRAME_DELAY_MAX_MS, Math.max(STREAMING_FRAME_DELAY_MIN_MS, scaled));
+}
+
+function getFramesPerChunk(chunkCount: number): number {
+  if (chunkCount <= 1) {
+    return STREAMING_SINGLE_CHUNK_FRAMES;
+  }
+
+  return Math.max(
+    1,
+    Math.min(STREAMING_MULTI_CHUNK_FRAMES, Math.floor(STREAMING_MULTI_CHUNK_TOTAL_FRAME_BUDGET / chunkCount)),
+  );
+}
+
+function getRetryAfterSeconds(error: unknown): number | undefined {
+  if (!(error instanceof Error) || !("error_code" in error) || error.error_code !== 429) {
+    return undefined;
+  }
+
+  if (!("parameters" in error) || typeof error.parameters !== "object" || error.parameters === null) {
+    return undefined;
+  }
+
+  const retryAfter = "retry_after" in error.parameters ? error.parameters.retry_after : undefined;
+  return typeof retryAfter === "number" ? retryAfter : undefined;
+}
+
+function isDraftParseError(error: unknown): boolean {
+  if (!(error instanceof Error) || !("error_code" in error) || error.error_code !== 400) {
+    return false;
+  }
+
+  return "description" in error && typeof error.description === "string" && error.description.includes("can't parse");
+}
+
+function getTelegramErrorDescription(error: unknown): string {
+  if (
+    "description" in (error as Record<string, unknown>) &&
+    typeof (error as Record<string, unknown>).description === "string"
+  ) {
+    return (error as Record<string, unknown>).description as string;
+  }
+
+  return error instanceof Error ? error.message : String(error);
+}
+
+function summarizeChunkForLogs(chunk: string): string {
+  return chunk.replace(/\s+/g, " ").trim().slice(0, 160);
+}
+
+function createPlainMessageOptions(request: ParsedActionInputs, replyMessageId?: number, includeReplyMarkup = true) {
+  const replyParameters = createReplyParameters(replyMessageId);
+
+  return {
+    link_preview_options: {
+      is_disabled: request.disableLinkPreview,
+    },
+    ...(includeReplyMarkup && request.replyMarkup ? { reply_markup: request.replyMarkup } : {}),
+    ...(replyParameters ? { reply_parameters: replyParameters } : {}),
+  };
+}
+
+async function sendFormattedMessage(
+  bot: TextTransportBot,
+  request: ParsedActionInputs,
+  rawChunk: string,
+  formattedChunk: string,
+  replyMessageId?: number,
+  includeReplyMarkup = false,
+) {
+  try {
+    return await bot.api.sendMessage(
+      request.chatId,
+      formattedChunk,
+      createMessageOptions(request, replyMessageId, includeReplyMarkup),
+    );
+  } catch (error) {
+    if (!isDraftParseError(error) || rawChunk.length > TELEGRAM_MESSAGE_LIMIT) {
+      throw error;
+    }
+
+    console.warn("Telegram rejected MarkdownV2 for a text chunk; falling back to plain text.", {
+      scenarioId: request.scenarioId,
+      error: getTelegramErrorDescription(error),
+      rawLength: rawChunk.length,
+      formattedLength: formattedChunk.length,
+      preview: summarizeChunkForLogs(rawChunk),
+    });
+    return await bot.api.sendMessage(
+      request.chatId,
+      rawChunk,
+      createPlainMessageOptions(request, replyMessageId, includeReplyMarkup),
+    );
+  }
+}
+
+async function sendDraftFrame(bot: TextTransportBot, chatId: number, draftId: number, frame: string): Promise<void> {
+  while (true) {
+    try {
+      await bot.api.sendMessageDraft(chatId, draftId, frame, createDraftMessageOptions());
+      return;
+    } catch (error) {
+      const retryAfterSeconds = getRetryAfterSeconds(error);
+      if (retryAfterSeconds !== undefined) {
+        await sleep(retryAfterSeconds * 1000);
+        continue;
+      }
+
+      // Draft frames are ephemeral — skip ones Telegram rejects due to parse
+      // errors rather than crashing the entire stream.
+      if (isDraftParseError(error)) {
+        return;
+      }
+
+      throw error;
+    }
+  }
+}
+
+type TextTransportApi = Pick<
+  Bot["api"],
+  "editMessageReplyMarkup" | "sendChatAction" | "sendMessage" | "sendMessageDraft"
+>;
+type TextTransportBot = { api: TextTransportApi };
 
 /**
  * Build Telegram reply parameters only when a reply target id was provided.
@@ -30,6 +175,7 @@ function createAttachmentOptions(
   replyMessageId?: number,
   caption?: string,
   includeReplyMarkup = true,
+  supportsStreaming?: boolean,
 ) {
   const replyParameters = createReplyParameters(replyMessageId);
 
@@ -38,6 +184,7 @@ function createAttachmentOptions(
     ...(includeReplyMarkup && request.replyMarkup ? { reply_markup: request.replyMarkup } : {}),
     ...(replyParameters ? { reply_parameters: replyParameters } : {}),
     ...(attachmentType === "document" ? { disable_content_type_detection: true } : {}),
+    ...(attachmentType === "video" && supportsStreaming ? { supports_streaming: true } : {}),
   };
 }
 
@@ -58,13 +205,28 @@ function createMessageOptions(request: ParsedActionInputs, replyMessageId?: numb
   };
 }
 
+function createDraftMessageOptions() {
+  return {
+    parse_mode: "MarkdownV2" as const,
+  };
+}
+
+function getDraftStreamingChatId(chatId: string): number | undefined {
+  if (!/^\d+$/.test(chatId)) {
+    return undefined;
+  }
+
+  const parsedChatId = Number.parseInt(chatId, 10);
+  return parsedChatId > 0 ? parsedChatId : undefined;
+}
+
 /**
  * Send a sequence of preformatted text chunks, optionally attaching buttons to the last one.
  */
 async function sendMessageChunks(
-  bot: Bot,
+  bot: TextTransportBot,
   request: ParsedActionInputs,
-  chunks: string[],
+  chunks: { raw: string; formatted: string }[],
   initialReplyMessageId?: number,
   attachReplyMarkupToLast = false,
 ): Promise<number | undefined> {
@@ -73,13 +235,82 @@ async function sendMessageChunks(
 
   for (const [index, chunk] of chunks.entries()) {
     const isLastChunk = index === chunks.length - 1;
-    const result = await bot.api.sendMessage(
-      request.chatId,
-      chunk,
-      createMessageOptions(request, replyMessageId, attachReplyMarkupToLast && isLastChunk),
+    const result = await sendFormattedMessage(
+      bot,
+      request,
+      chunk.raw,
+      chunk.formatted,
+      replyMessageId,
+      attachReplyMarkupToLast && isLastChunk,
     );
     lastMessageId = result.message_id;
     replyMessageId = result.message_id;
+  }
+
+  return lastMessageId;
+}
+
+/**
+ * Stream text through project-local Telegram draft updates in supported private chats.
+ */
+async function streamTextWithDraftApi(
+  bot: TextTransportBot,
+  request: ParsedActionInputs,
+  chunks: { raw: string; formatted: string }[],
+  draftChatId: number,
+): Promise<number | undefined> {
+  const draftSeed = Date.now();
+  const framesPerChunk = getFramesPerChunk(chunks.length);
+  let replyMessageId = request.replyMessageId;
+  let lastMessageId: number | undefined;
+
+  // Show typing indicator so users see "typing…" at the top of the chat
+  // while draft frames appear below. The indicator expires after ~5s, so
+  // we refresh it periodically during long streams.
+  await bot.api.sendChatAction(draftChatId, "typing");
+  let lastTypingTime = Date.now();
+
+  for (const [chunkIndex, chunk] of chunks.entries()) {
+    const isLastChunk = chunkIndex === chunks.length - 1;
+    const draftId = draftSeed + chunkIndex + 1;
+    // Frames are derived from the raw Markdown source, but every emitted frame is
+    // formatted into a Telegram-safe MarkdownV2 payload. This lets us keep code
+    // fences intact during draft streaming instead of revealing broken mid-block
+    // prefixes that Telegram rejects.
+    const frames = buildStreamingFrames(chunk.raw, {
+      minFrames: framesPerChunk,
+      maxFrames: framesPerChunk,
+    });
+
+    let previousFrameLength = 0;
+    for (const [frameIndex, frame] of frames.entries()) {
+      if (frameIndex > 0) {
+        const newContentLength = frame.length - previousFrameLength;
+        await sleep(computeFrameDelay(newContentLength));
+      }
+
+      // Refresh the typing indicator before it expires
+      if (Date.now() - lastTypingTime > TYPING_REFRESH_INTERVAL_MS) {
+        await bot.api.sendChatAction(draftChatId, "typing");
+        lastTypingTime = Date.now();
+      }
+
+      await sendDraftFrame(bot, draftChatId, draftId, frame);
+      previousFrameLength = frame.length;
+    }
+
+    // Persist the completed chunk after its last visible draft update. Long
+    // stream responses therefore progress as draft -> final message cycles, and
+    // later chunks reply to the previous persisted message to keep the thread readable.
+    const result = await sendFormattedMessage(bot, request, chunk.raw, chunk.formatted, replyMessageId, isLastChunk);
+    lastMessageId = result.message_id;
+    replyMessageId = result.message_id;
+
+    // Refresh typing before the next chunk's draft frames begin
+    if (!isLastChunk) {
+      await bot.api.sendChatAction(draftChatId, "typing");
+      lastTypingTime = Date.now();
+    }
   }
 
   return lastMessageId;
@@ -140,6 +371,7 @@ function createMediaGroupItem(item: ParsedAttachmentItem) {
   return MEDIA_GROUP_BUILDERS[item.type](item.source.value, {
     ...(item.caption ? { caption: item.caption, parse_mode: "MarkdownV2" as const } : {}),
     ...(item.type === "document" ? { disable_content_type_detection: true } : {}),
+    ...(item.type === "video" && item.supportsStreaming ? { supports_streaming: true } : {}),
   });
 }
 
@@ -155,7 +387,7 @@ async function sendAttachmentBatch(
       bot,
       request.chatId,
       item.source.value,
-      createAttachmentOptions(request, item.type, replyMessageId, item.caption, false),
+      createAttachmentOptions(request, item.type, replyMessageId, item.caption, false, item.supportsStreaming),
     );
     return result.message_id;
   }
@@ -177,7 +409,7 @@ async function sendAttachmentBatch(
 }
 
 async function sendAttachmentItems(bot: Bot, request: ParsedActionInputs): Promise<{ message_id: number }> {
-  const introChunks = request.message ? splitTelegramMessage(request.message, TELEGRAM_MESSAGE_LIMIT) : [];
+  const introChunks = request.message ? splitTelegramMessageChunks(request.message, TELEGRAM_MESSAGE_LIMIT) : [];
   const introTailMessageId = await sendMessageChunks(
     bot,
     request,
@@ -200,29 +432,74 @@ async function sendAttachmentItems(bot: Bot, request: ParsedActionInputs): Promi
   return { message_id: previousMessageId };
 }
 
-function buildAttachmentCaptionPlan(message?: string): { leadingChunks: string[]; caption?: string } {
+function buildAttachmentCaptionPlan(message?: string): {
+  leadingChunks: { raw: string; formatted: string }[];
+  caption?: string;
+} {
   if (!message) {
     return { leadingChunks: [] };
   }
 
-  const formattedMessage = formatTelegramMessage(message);
-  if (formattedMessage.length <= TELEGRAM_CAPTION_LIMIT) {
-    return { leadingChunks: [], caption: formattedMessage };
+  // Skip the full-message format when the raw text already exceeds the caption
+  // limit — the formatted version can only be longer.
+  if (message.length <= TELEGRAM_CAPTION_LIMIT) {
+    const formattedMessage = formatTelegramMessage(message);
+    if (formattedMessage.length <= TELEGRAM_CAPTION_LIMIT) {
+      return { leadingChunks: [], caption: formattedMessage };
+    }
   }
 
-  const messageChunks = splitTelegramMessage(message, TELEGRAM_MESSAGE_LIMIT);
+  const messageChunks = splitTelegramMessageChunks(message, TELEGRAM_MESSAGE_LIMIT);
   const lastChunk = messageChunks.at(-1);
 
-  if (lastChunk && lastChunk.length <= TELEGRAM_CAPTION_LIMIT) {
+  if (lastChunk && lastChunk.formatted.length <= TELEGRAM_CAPTION_LIMIT) {
     return {
       leadingChunks: messageChunks.slice(0, -1),
-      caption: lastChunk,
+      caption: lastChunk.formatted,
     };
   }
 
   return {
     leadingChunks: messageChunks,
   };
+}
+
+/**
+ * Describe the Telegram method a text-only request will use, for logging.
+ */
+export function describeTextSendMethod(request: ParsedActionInputs): string {
+  const messageChunks = splitTelegramMessageChunks(request.message ?? "", TELEGRAM_MESSAGE_LIMIT);
+  const draftChatId = request.streamResponse ? getDraftStreamingChatId(request.chatId) : undefined;
+
+  if (request.streamResponse && draftChatId !== undefined) {
+    return messageChunks.length > 1
+      ? `sendMessageDraft -> sendMessage x${messageChunks.length}`
+      : "sendMessageDraft -> sendMessage";
+  }
+
+  return messageChunks.length > 1 ? `sendMessage x${messageChunks.length}` : "sendMessage";
+}
+
+/**
+ * Send the text-only path with either normal sends or streaming edits.
+ */
+export async function sendTextMessage(
+  bot: TextTransportBot,
+  request: ParsedActionInputs,
+): Promise<{ message_id: number }> {
+  const messageChunks = splitTelegramMessageChunks(request.message ?? "", TELEGRAM_MESSAGE_LIMIT);
+  const draftChatId = request.streamResponse ? getDraftStreamingChatId(request.chatId) : undefined;
+
+  const lastMessageId =
+    draftChatId !== undefined
+      ? await streamTextWithDraftApi(bot, request, messageChunks, draftChatId)
+      : await sendMessageChunks(bot, request, messageChunks, request.replyMessageId, true);
+
+  if (!lastMessageId) {
+    throw new Error("failed to send any Telegram messages");
+  }
+
+  return { message_id: lastMessageId };
 }
 
 /**
@@ -281,15 +558,14 @@ export async function sendTelegramMessage(request: ParsedActionInputs): Promise<
         chainTailMessageId ?? request.replyMessageId,
         captionPlan.caption,
         !attachReplyMarkupToText,
+        request.supportsStreaming,
       ),
     );
   }
 
-  const messageChunks = splitTelegramMessage(request.message ?? "", TELEGRAM_MESSAGE_LIMIT);
-
   logActRequestSummary({
     scenarioId: request.scenarioId,
-    method: messageChunks.length > 1 ? `sendMessage x${messageChunks.length}` : "sendMessage",
+    method: describeTextSendMethod(request),
     chatId: request.chatId,
     message: request.message,
     disableLinkPreview: request.disableLinkPreview,
@@ -297,11 +573,5 @@ export async function sendTelegramMessage(request: ParsedActionInputs): Promise<
     replyMarkup: request.replyMarkup,
   });
 
-  const lastMessageId = await sendMessageChunks(bot, request, messageChunks, request.replyMessageId, true);
-
-  if (!lastMessageId) {
-    throw new Error("failed to send any Telegram messages");
-  }
-
-  return { message_id: lastMessageId };
+  return sendTextMessage(bot, request);
 }

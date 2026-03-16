@@ -25,5 +25,15 @@ export function createVideoScenarios(): ScenarioDefinition[] {
         attachment_filename: "sample-video.mp4",
       },
     }),
+    createScenario({
+      id: "video-streaming",
+      description: "Send a video with Telegram streaming mode enabled",
+      inputs: {
+        message: "▶️ Streaming video test",
+        attachment: "https://samplelib.com/lib/preview/mp4/sample-5s.mp4",
+        attachment_type: "video",
+        supports_streaming: "true",
+      },
+    }),
   ];
 }

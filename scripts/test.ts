@@ -7,7 +7,7 @@ import { formatActErrorDetails, formatActRequestSummary } from "../src/act-loggi
 import { ATTACHMENT_METHOD_NAMES } from "../src/constants.ts";
 import { getRequiredEnv } from "../src/env.ts";
 import { parseActionInputs } from "../src/inputs.ts";
-import { sendTelegramMessage } from "../src/telegram.ts";
+import { describeTextSendMethod, sendTelegramMessage } from "../src/telegram.ts";
 import type {
   CliOptions,
   RawActionInputs,
@@ -87,6 +87,7 @@ function buildRawActionInputs(scenario: ScenarioDefinition, useRealEnv: boolean)
     message: scenario.inputs.message,
     messageFile: scenario.inputs.message_file,
     messageUrl: scenario.inputs.message_url,
+    streamResponse: scenario.inputs.stream_response,
     buttons: scenario.inputs.buttons,
     replyToMessageId: scenario.inputs.reply_to_message_id
       ? useRealEnv
@@ -98,6 +99,7 @@ function buildRawActionInputs(scenario: ScenarioDefinition, useRealEnv: boolean)
     attachments: scenario.inputs.attachments,
     attachmentType: scenario.inputs.attachment_type,
     attachmentFilename: scenario.inputs.attachment_filename,
+    supportsStreaming: scenario.inputs.supports_streaming,
   };
 }
 
@@ -249,6 +251,21 @@ async function promptMode(history: TestHistoryState): Promise<TestMode | "last">
 }
 
 /**
+ * Describe the primary Telegram method a parsed request will use.
+ */
+function describeRequestMethod(request: Awaited<ReturnType<typeof parseActionInputs>>): string {
+  if (request.attachmentType) {
+    return ATTACHMENT_METHOD_NAMES[request.attachmentType];
+  }
+
+  if (request.attachmentItems?.length) {
+    return `sendMediaGroup/batch (${request.attachmentItems.length} items)`;
+  }
+
+  return describeTextSendMethod(request);
+}
+
+/**
  * Prompt for either a manual scenario subset or the full catalog.
  */
 async function promptScenarioSelection(allScenarios: ScenarioDefinition[], mode: TestMode): Promise<TestSelection> {
@@ -270,7 +287,7 @@ async function promptScenarioSelection(allScenarios: ScenarioDefinition[], mode:
     return { mode, runAll: true, scenarioIds: allScenarios.map((scenario) => scenario.id) };
   }
 
-  const selectedScenarioIds = await p.multiselect({
+  const selectedScenarioIds = await p.autocompleteMultiselect({
     message: "Choose the scenarios to run",
     required: true,
     initialValues: [],
@@ -482,7 +499,7 @@ async function runSourceSelection(scenarios: ScenarioDefinition[], logFilePath: 
           const request = await parseActionInputs(buildRawActionInputs(scenario, true));
           const requestSummary = formatActRequestSummary({
             scenarioId: request.scenarioId,
-            method: request.attachmentType ? ATTACHMENT_METHOD_NAMES[request.attachmentType] : "sendMessage",
+            method: describeRequestMethod(request),
             chatId: request.chatId,
             message: request.message,
             disableLinkPreview: request.disableLinkPreview,
@@ -510,7 +527,7 @@ async function runSourceSelection(scenarios: ScenarioDefinition[], logFilePath: 
       const request = await parseActionInputs(buildRawActionInputs(scenario, true));
       const requestSummary = formatActRequestSummary({
         scenarioId: request.scenarioId,
-        method: request.attachmentType ? ATTACHMENT_METHOD_NAMES[request.attachmentType] : "sendMessage",
+        method: describeRequestMethod(request),
         chatId: request.chatId,
         message: request.message,
         disableLinkPreview: request.disableLinkPreview,

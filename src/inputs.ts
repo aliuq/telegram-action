@@ -27,6 +27,7 @@ export function readRawActionInputs(): RawActionInputs {
     message: core.getInput("message", { required: false }),
     messageFile: core.getInput("message_file", { required: false }),
     messageUrl: core.getInput("message_url", { required: false }),
+    streamResponse: core.getInput("stream_response", { required: false }) || "false",
     buttons: core.getInput("buttons", { required: false }),
     replyToMessageId: getOptionalEnv("TELEGRAM_REPLY_TO_MESSAGE_ID"),
     disableLinkPreview: core.getInput("disable_link_preview", { required: false }) || "true",
@@ -34,6 +35,7 @@ export function readRawActionInputs(): RawActionInputs {
     attachments: core.getInput("attachments", { required: false }),
     attachmentType: core.getInput("attachment_type", { required: false }),
     attachmentFilename: core.getInput("attachment_filename", { required: false }),
+    supportsStreaming: core.getInput("supports_streaming", { required: false }) || "false",
   };
 }
 
@@ -168,6 +170,16 @@ function assertRawAttachmentItem(input: unknown): asserts input is RawAttachment
   if ("caption" in item && typeof item.caption !== "string") {
     throw new Error(`attachments item "caption" must be a string: ${JSON.stringify(input)}`);
   }
+
+  if ("supports_streaming" in item && typeof item.supports_streaming !== "boolean") {
+    throw new Error(`attachments item "supports_streaming" must be a boolean: ${JSON.stringify(input)}`);
+  }
+
+  if (item.supports_streaming === true && item.type !== "video") {
+    throw new Error(
+      `attachments item "supports_streaming" can only be used with type "video": ${JSON.stringify(input)}`,
+    );
+  }
 }
 
 function parseAttachments(input: string): ParsedAttachmentItem[] {
@@ -202,6 +214,7 @@ function parseAttachments(input: string): ParsedAttachmentItem[] {
       source,
       filename: item.filename,
       caption,
+      supportsStreaming: item.supports_streaming,
     };
   });
 }
@@ -230,12 +243,34 @@ function assertInputConsistency(rawInputs: RawActionInputs, attachmentType?: Att
     throw new Error('either a message source, "attachment", or "attachments" must be provided');
   }
 
+  if (rawInputs.streamResponse === "true" && messageSourceCount === 0) {
+    throw new Error('"stream_response" requires "message", "message_file", or "message_url"');
+  }
+
+  if (rawInputs.streamResponse === "true" && (hasAttachment || hasAttachments)) {
+    throw new Error('"stream_response" currently supports text-only messages and cannot be combined with attachments');
+  }
+
   if (hasAttachment && !attachmentType) {
     throw new Error('attachment_type is required when "attachment" is provided');
   }
 
   if (!hasAttachment && attachmentType) {
     throw new Error('"attachment" is required when attachment_type is provided');
+  }
+
+  if (rawInputs.supportsStreaming === "true" && !hasAttachment) {
+    throw new Error('"supports_streaming" requires a single "attachment" with attachment_type "video"');
+  }
+
+  if (rawInputs.supportsStreaming === "true" && rawInputs.attachmentType !== "video") {
+    throw new Error('"supports_streaming" can only be used with attachment_type "video"');
+  }
+
+  if (rawInputs.supportsStreaming === "true" && hasAttachments) {
+    throw new Error(
+      '"supports_streaming" cannot be used with "attachments"; set "supports_streaming" per item instead',
+    );
   }
 
   if (hasAttachments && rawInputs.buttons && messageSourceCount === 0) {
@@ -273,11 +308,13 @@ export async function parseActionInputs(rawInputs: RawActionInputs): Promise<Par
     botToken: rawInputs.botToken,
     chatId: rawInputs.chatId,
     message,
+    streamResponse: parseBooleanInput("stream_response", rawInputs.streamResponse),
     disableLinkPreview: parseBooleanInput("disable_link_preview", rawInputs.disableLinkPreview),
     replyMessageId: parseOptionalIntegerInput("reply_to_message_id", rawInputs.replyToMessageId),
     replyMarkup,
     attachmentType,
     attachmentSource,
     attachmentItems,
+    supportsStreaming: parseBooleanInput("supports_streaming", rawInputs.supportsStreaming),
   };
 }

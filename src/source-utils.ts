@@ -21,8 +21,11 @@ export function isRemoteUrl(input: string): boolean {
 }
 
 /**
- * Resolve a repository-relative path against the current workspace root.
+ * Resolve a repository-relative path against the workspace root.
+ * Prefers `GITHUB_WORKSPACE` when running inside GitHub Actions,
+ * falling back to `process.cwd()` for local development.
  */
 export function resolveWorkspacePath(input: string): string {
-  return resolve(process.cwd(), input);
+  const base = process.env.GITHUB_WORKSPACE || process.cwd();
+  return resolve(base, input);
 }

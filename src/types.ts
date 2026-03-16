@@ -18,6 +18,7 @@ export interface AttachmentSendOptions {
   reply_markup?: InlineKeyboardMarkup;
   reply_parameters?: { message_id: number };
   disable_content_type_detection?: boolean;
+  supports_streaming?: boolean;
 }
 
 /**
@@ -43,6 +44,7 @@ export interface RawActionInputs {
   message: string;
   messageFile: string;
   messageUrl: string;
+  streamResponse: string;
   buttons: string;
   replyToMessageId: string;
   disableLinkPreview: string;
@@ -50,6 +52,7 @@ export interface RawActionInputs {
   attachments: string;
   attachmentType: string;
   attachmentFilename: string;
+  supportsStreaming: string;
 }
 
 /**
@@ -68,12 +71,14 @@ export interface ParsedActionInputs {
   botToken: string;
   chatId: string;
   message?: string;
+  streamResponse: boolean;
   disableLinkPreview: boolean;
   replyMessageId?: number;
   replyMarkup?: InlineKeyboardMarkup;
   attachmentType?: AttachmentType;
   attachmentSource?: ResolvedAttachmentSource;
   attachmentItems?: ParsedAttachmentItem[];
+  supportsStreaming: boolean;
 }
 
 /**
@@ -84,6 +89,7 @@ export interface RawAttachmentItemInput {
   source: string;
   filename?: string;
   caption?: string;
+  supports_streaming?: boolean;
 }
 
 /**
@@ -94,6 +100,7 @@ export interface ParsedAttachmentItem {
   source: ResolvedAttachmentSource;
   filename?: string;
   caption?: string;
+  supportsStreaming?: boolean;
 }
 
 export type TelegramMediaGroupItem = InputMediaAudio | InputMediaDocument | InputMediaPhoto | InputMediaVideo;
@@ -105,6 +112,7 @@ export interface ScenarioInputs {
   message: string;
   message_file: string;
   message_url: string;
+  stream_response: string;
   reply_to_message_id: string;
   disable_link_preview: string;
   buttons: string;
@@ -112,6 +120,7 @@ export interface ScenarioInputs {
   attachments: string;
   attachment_type: string;
   attachment_filename: string;
+  supports_streaming: string;
 }
 
 /**

@@ -20,12 +20,12 @@ export function createDocumentScenarios(): ScenarioDefinition[] {
       id: "media-group-documents",
       description: "Send multiple documents in batched attachments mode",
       inputs: {
+        message: "📎 Document batch",
         attachments: JSON.stringify([
           {
             type: "document",
             source: "scripts/fixtures/sample-document.txt",
             filename: "sample-document.txt",
-            caption: "Document A",
           },
           {
             type: "document",

@@ -14,6 +14,10 @@ inputs:
     description: "Remote HTTP(S) URL whose response body becomes the message body."
     required: false
     default: ""
+  stream_response:
+    description: 'Stream a text-only response in supported private chats using the action''s built-in sendMessageDraft flow. Long outputs become reply-chained final messages. Other chats fall back to normal sendMessage behavior. Only "true" and "false" are accepted.'
+    required: false
+    default: "false"
   buttons:
     description: >
       Inline keyboard buttons in JSON. Supports two formats:
@@ -43,6 +47,10 @@ inputs:
     description: "Optional filename override when uploading a local file."
     required: false
     default: ""
+  supports_streaming:
+    description: 'Enable Telegram streaming mode for single video sends. Only "true" and "false" are accepted.'
+    required: false
+    default: "false"
 
 outputs:
   message_id:

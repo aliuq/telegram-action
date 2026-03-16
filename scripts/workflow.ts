@@ -43,6 +43,7 @@ async function writeScenarioOutputs(): Promise<void> {
   writeOutput("message", scenario.inputs.message ?? "");
   writeOutput("message_file", scenario.inputs.message_file ?? "");
   writeOutput("message_url", scenario.inputs.message_url ?? "");
+  writeOutput("stream_response", scenario.inputs.stream_response ?? "false");
   writeOutput("reply_to_message_id", scenario.inputs.reply_to_message_id ?? "");
   writeOutput("disable_link_preview", scenario.inputs.disable_link_preview ?? "true");
   writeOutput("buttons", scenario.inputs.buttons ?? "");
@@ -50,6 +51,7 @@ async function writeScenarioOutputs(): Promise<void> {
   writeOutput("attachments", scenario.inputs.attachments ?? "");
   writeOutput("attachment_type", scenario.inputs.attachment_type ?? "");
   writeOutput("attachment_filename", scenario.inputs.attachment_filename ?? "");
+  writeOutput("supports_streaming", scenario.inputs.supports_streaming ?? "false");
   writeOutput("expect_failure", String(Boolean(scenario.expect_failure)));
   writeOutput("message_url_overrides", JSON.stringify(TEST_MESSAGE_URL_OVERRIDES));
 }

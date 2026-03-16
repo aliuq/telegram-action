@@ -8,6 +8,7 @@ For Chinese documentation, see [README.zh-CN.md](./README.zh-CN.md). The English
 
 - Send plain text messages with MarkdownV2 formatting
 - Split overlong text into a reply chain automatically
+- Stream text responses through project-local Telegram draft updates in supported private chats
 - Send inline keyboard buttons using flat or nested JSON
 - Load message text from inline input, local files, or remote URLs
 - Send media and documents from local files, public URLs, or Telegram file IDs
@@ -111,6 +112,37 @@ Each button must contain a `text` field and exactly one Telegram action field su
 
 When a text message exceeds Telegram's limit, the action splits it automatically and sends the chunks in order. Every later chunk replies to the previous chunk so the full message stays connected in the chat history. When buttons are present, they are attached to the final chunk only.
 
+### Streaming responses
+
+Set `stream_response: "true"` when you want a text-only message to appear progressively, similar to an AI assistant or a long-running command log.
+
+The implementation follows Telegram's current Bot API capabilities:
+
+- in supported private chats, the action uses the official `sendMessageDraft` API through the action's built-in draft streamer, then posts the final persisted message(s)
+- in groups, channels, or any chat that cannot use `sendMessageDraft`, the action falls back to the normal `sendMessage` flow without simulated streaming edits
+
+If the final text exceeds Telegram's message limit, the action sends it as multiple reply-chained messages so the output stays readable.
+
+The draft-streaming path displays a "typing…" indicator at the top of the chat while frames arrive, and adds a natural inter-frame delay (100–400 ms, scaled by piece length) so Telegram mobile clients render visible, progressive text.
+
+```yaml
+- name: Stream a Telegram response
+  uses: aliuq/telegram-action@master
+  env:
+    TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
+    TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
+  with:
+    stream_response: "true"
+    message: |
+      Build started...
+
+      Resolving dependencies
+      Compiling sources
+      Uploading artifacts
+```
+
+Use streaming for text that benefits from visible progress. Keep regular `message` sends for short, final notifications. `stream_response` is intentionally limited to text-only messages and cannot be combined with `attachment` or `attachments`.
+
 ### Message with attachments
 
 Use `attachment` together with `attachment_type` to send a media or document payload. Local paths are resolved from the workspace root, so repository files can be uploaded directly during the workflow run.
@@ -166,6 +198,8 @@ Use `attachment` together with `attachment_type` to send a media or document pay
 
 When an attachment is present, the `message` input is sent as the attachment caption.
 Use `attachment_type: "document"` whenever you want Telegram to send an image or video as a regular file instead of optimizing it as inline media. The action sets `disable_content_type_detection: true` for uploaded documents so Telegram keeps media files in document mode.
+
+For single video sends, set `supports_streaming: "true"` when you want Telegram to present the video as a streamable media message instead of a generic upload.
 
 ### Message with multiple attachments
 
@@ -234,15 +268,20 @@ Telegram channel comments are not controlled by a per-message Bot API flag. If y
 | `message` | Inline message text. Mutually exclusive with `message_file` and `message_url`. Used as the caption when an attachment is sent and it fits Telegram's caption limit | No | `""` |
 | `message_file` | Repository-local UTF-8 text file whose contents become the message body. Mutually exclusive with `message` and `message_url` | No | `""` |
 | `message_url` | Remote HTTP(S) URL whose response body becomes the message body. Mutually exclusive with `message` and `message_file` | No | `""` |
+| `stream_response` | Stream a text-only response in supported private chats using the action's built-in `sendMessageDraft` flow. Long outputs are finalized as reply-chained messages. Other chats fall back to normal `sendMessage` behavior. Accepts only `"true"` or `"false"` | No | `"false"` |
 | `buttons` | Inline keyboard JSON in flat or nested format | No | `""` |
 | `disable_link_preview` | Whether to disable link previews. Accepts only `"true"` or `"false"` | No | `"true"` |
 | `attachment` | Local file path, public URL, or Telegram file ID to send as an attachment | No | `""` |
 | `attachments` | JSON array for sending multiple attachment items. Each item supports `type`, `source`, optional `filename`, and optional `caption` | No | `""` |
 | `attachment_type` | Attachment type: `photo`, `video`, `audio`, `animation`, or `document` | No | `""` |
 | `attachment_filename` | Optional filename override for local file uploads | No | `""` |
+| `supports_streaming` | Enable Telegram streaming mode for single `video` attachments. Accepts only `"true"` or `"false"` | No | `"false"` |
 
 Exactly one of `message`, `message_file`, and `message_url` may be set. You must still provide at least one message source or an `attachment`.
 `attachment` and `attachments` are mutually exclusive. When `attachments` is used, do not set `attachment_type` or `attachment_filename`.
+`stream_response` currently supports text-only messages. Do not combine it with `attachment` or `attachments`.
+Telegram's true draft streaming is private-chat-only, so non-private chats automatically fall back to the normal non-streaming send path.
+For `attachments`, set streaming per item inside the JSON payload with `supports_streaming: true` on video items.
 
 ## Outputs
 
@@ -296,7 +335,7 @@ bun run test -- buttons-flat
 bun run test -- --all
 ```
 
-Bun automatically loads the repository-root `.env` file for `bun run`, so the sender does not need its own custom `.env` parser or an explicit `--env-file` flag. By default, `bun run test` opens an interactive multi-select prompt and sends the chosen scenarios directly to Telegram. Expected-failure scenarios are treated as pass cases only when they fail as intended.
+Bun automatically loads the repository-root `.env` file for `bun run`, so the sender does not need its own custom `.env` parser or an explicit `--env-file` flag. By default, `bun run test` opens an interactive runner that first lets you filter scenarios by id or description, then sends the chosen scenarios directly to Telegram. Expected-failure scenarios are treated as pass cases only when they fail as intended.
 
 ### 2. Unified interactive runner
 

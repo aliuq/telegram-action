@@ -61,6 +61,7 @@ export const MEDIA_GROUP_BUILDERS: Record<
       caption?: string;
       parse_mode?: "MarkdownV2";
       disable_content_type_detection?: boolean;
+      supports_streaming?: boolean;
     },
   ) => TelegramMediaGroupItem
 > = {
