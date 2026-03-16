@@ -6,7 +6,6 @@ import {
   loadScenarios,
   resolveScenarioSelection,
 } from "./scenarios/index.ts";
-import { TEST_MESSAGE_URL_OVERRIDES } from "./scenarios/shared.ts";
 
 /**
  * Write a multiline-safe GitHub Actions output value.
@@ -52,7 +51,6 @@ async function writeScenarioOutputs(): Promise<void> {
   writeOutput("attachment_filename", scenario.inputs.attachment_filename ?? "");
   writeOutput("supports_streaming", scenario.inputs.supports_streaming ?? "false");
   writeOutput("expect_failure", String(Boolean(scenario.expect_failure)));
-  writeOutput("message_url_overrides", JSON.stringify(TEST_MESSAGE_URL_OVERRIDES));
 }
 
 /**

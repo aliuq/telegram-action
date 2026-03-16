@@ -76317,21 +76317,6 @@ var import_telegramify_markdown = /* @__PURE__ */ __toESM((/* @__PURE__ */ __com
 const TELEGRAM_MESSAGE_LIMIT = 4096;
 const TELEGRAM_MESSAGE_SOFT_LIMIT = 4e3;
 const TELEGRAM_CAPTION_LIMIT = 1024;
-function getMessageUrlOverride(messageUrl) {
-	const rawOverrides = process.env.TELEGRAM_ACTION_TEST_MESSAGE_URL_OVERRIDES;
-	if (!rawOverrides) return;
-	let overrides;
-	try {
-		overrides = JSON.parse(rawOverrides);
-	} catch (error) {
-		throw new Error(`TELEGRAM_ACTION_TEST_MESSAGE_URL_OVERRIDES must be valid JSON: ${error instanceof Error ? error.message : error}`);
-	}
-	if (typeof overrides !== "object" || overrides === null || Array.isArray(overrides)) throw new Error("TELEGRAM_ACTION_TEST_MESSAGE_URL_OVERRIDES must be a JSON object keyed by URL");
-	const override = overrides[messageUrl];
-	if (override === void 0) return;
-	if (typeof override !== "string") throw new Error(`message_url override for "${messageUrl}" must be a string`);
-	return override;
-}
 /**
 * Convert plain user input into Telegram MarkdownV2 while keeping current behavior.
 */
@@ -76369,8 +76354,6 @@ async function resolveMessageText(options) {
 	}
 	if (options.messageUrl) {
 		if (!isRemoteUrl(options.messageUrl)) throw new Error("message_url must start with http:// or https://");
-		const override = getMessageUrlOverride(options.messageUrl);
-		if (override !== void 0) return override;
 		const response = await fetch(options.messageUrl, { signal: AbortSignal.timeout(3e4) });
 		if (!response.ok) throw new Error(`message_url request failed with status ${response.status}: ${options.messageUrl}`);
 		return await response.text();

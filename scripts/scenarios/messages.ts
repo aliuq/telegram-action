@@ -1,5 +1,5 @@
 import type { ScenarioDefinition } from "../../src/types.ts";
-import { createScenario, SAMPLE_MESSAGE_URL } from "./shared.ts";
+import { createScenario } from "./shared.ts";
 
 /**
  * Create the baseline text-message scenarios used by local and workflow tests.
@@ -29,15 +29,15 @@ export function createMessageScenarios(): ScenarioDefinition[] {
       },
     }),
     createScenario({
-      id: "message-from-url-mock",
+      id: "message-from-url",
       description: "Message body loaded from a remote URL",
       inputs: {
-        message_url: SAMPLE_MESSAGE_URL,
+        message_url: "https://raw.githubusercontent.com/aliuq/aliuq/refs/heads/master/README.md",
       },
     }),
     createScenario({
       id: "message-from-url-real",
-      description: "Message body loaded from a remote URL without test override (real HTTP request)",
+      description: "Message body loaded from a third-party remote URL",
       inputs: {
         message_url: "https://www.shadcn-vue.com/raw/docs/introduction.md",
       },

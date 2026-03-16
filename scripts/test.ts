@@ -4,7 +4,7 @@ import { loadScenarios } from "./scenarios/index.ts";
 import { parseCliOptions, resolveScenarios, resolveSelection } from "./test-support/cli.ts";
 import { runActSelection, runSourceSelection, runValidationSelection } from "./test-support/execution.ts";
 import { buildRunnerCommand, createLogFilePath, loadHistoryState, saveHistoryEntry } from "./test-support/history.ts";
-import { printBanner, TEST_MESSAGE_URL_OVERRIDES_JSON, validateScenarioCatalog } from "./test-support/shared.ts";
+import { printBanner, validateScenarioCatalog } from "./test-support/shared.ts";
 
 function formatDuration(durationMs: number): string {
   if (durationMs < 1000) {
@@ -26,8 +26,6 @@ function formatDuration(durationMs: number): string {
  */
 async function main(runStartedAt: number): Promise<void> {
   const cli = parseCliOptions(process.argv.slice(2));
-
-  process.env.TELEGRAM_ACTION_TEST_MESSAGE_URL_OVERRIDES = TEST_MESSAGE_URL_OVERRIDES_JSON;
 
   printBanner();
 
