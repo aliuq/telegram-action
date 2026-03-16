@@ -1,10 +1,19 @@
+import * as core from "@actions/core";
 import { Bot } from "grammy";
 import { logActRequestSummary } from "./act-logging.js";
 import {
   ATTACHMENT_METHOD_NAMES,
   ATTACHMENT_SENDERS,
+  MAX_DRAFT_RETRIES,
   MEDIA_GROUP_BUILDERS,
+  STREAMING_FRAME_DELAY_MAX_MS,
+  STREAMING_FRAME_DELAY_MIN_MS,
+  STREAMING_FRAME_DELAY_MS,
+  STREAMING_MULTI_CHUNK_FRAMES,
+  STREAMING_MULTI_CHUNK_TOTAL_FRAME_BUDGET,
+  STREAMING_SINGLE_CHUNK_FRAMES,
   TELEGRAM_MEDIA_GROUP_LIMIT,
+  TYPING_REFRESH_INTERVAL_MS,
 } from "./constants.js";
 import {
   buildStreamingFrames,
@@ -14,14 +23,6 @@ import {
   TELEGRAM_MESSAGE_LIMIT,
 } from "./messages.js";
 import type { AttachmentType, ParsedActionInputs, ParsedAttachmentItem } from "./types.js";
-
-const STREAMING_SINGLE_CHUNK_FRAMES = 15;
-const STREAMING_MULTI_CHUNK_FRAMES = 8;
-const STREAMING_MULTI_CHUNK_TOTAL_FRAME_BUDGET = 20;
-const STREAMING_FRAME_DELAY_MS = 150;
-const STREAMING_FRAME_DELAY_MIN_MS = 100;
-const STREAMING_FRAME_DELAY_MAX_MS = 400;
-const TYPING_REFRESH_INTERVAL_MS = 4000;
 
 function sleep(ms: number): Promise<void> {
   return new Promise((resolve) => setTimeout(resolve, ms));
@@ -59,6 +60,35 @@ function getRetryAfterSeconds(error: unknown): number | undefined {
 
   const retryAfter = "retry_after" in error.parameters ? error.parameters.retry_after : undefined;
   return typeof retryAfter === "number" ? retryAfter : undefined;
+}
+
+interface RetryRateLimitOptions {
+  maxRetries: number;
+  label: string;
+}
+
+async function retryOnRateLimit<T>(operation: () => Promise<T>, options: RetryRateLimitOptions): Promise<T> {
+  let retries = 0;
+
+  while (true) {
+    try {
+      return await operation();
+    } catch (error) {
+      const retryAfterSeconds = getRetryAfterSeconds(error);
+      if (retryAfterSeconds === undefined) {
+        throw error;
+      }
+
+      retries++;
+      if (retries >= options.maxRetries) {
+        throw new Error(
+          `${options.label} rate-limited ${options.maxRetries} times — aborting to avoid hanging indefinitely.`,
+        );
+      }
+
+      await sleep(retryAfterSeconds * 1000);
+    }
+  }
 }
 
 function isDraftParseError(error: unknown): boolean {
@@ -115,13 +145,11 @@ async function sendFormattedMessage(
       throw error;
     }
 
-    console.warn("Telegram rejected MarkdownV2 for a text chunk; falling back to plain text.", {
-      scenarioId: request.scenarioId,
-      error: getTelegramErrorDescription(error),
-      rawLength: rawChunk.length,
-      formattedLength: formattedChunk.length,
-      preview: summarizeChunkForLogs(rawChunk),
-    });
+    core.warning(
+      `Telegram rejected MarkdownV2 for a text chunk; falling back to plain text. ` +
+        `scenarioId=${request.scenarioId} rawLength=${rawChunk.length} formattedLength=${formattedChunk.length} ` +
+        `error="${getTelegramErrorDescription(error)}" preview="${summarizeChunkForLogs(rawChunk)}"`,
+    );
     return await bot.api.sendMessage(
       request.chatId,
       rawChunk,
@@ -131,24 +159,32 @@ async function sendFormattedMessage(
 }
 
 async function sendDraftFrame(bot: TextTransportBot, chatId: number, draftId: number, frame: string): Promise<void> {
-  while (true) {
-    try {
-      await bot.api.sendMessageDraft(chatId, draftId, frame, createDraftMessageOptions());
+  try {
+    await retryOnRateLimit(() => bot.api.sendMessageDraft(chatId, draftId, frame, createDraftMessageOptions()), {
+      maxRetries: MAX_DRAFT_RETRIES,
+      label: "Draft frame",
+    });
+  } catch (error) {
+    // Draft frames are ephemeral — skip ones Telegram rejects due to parse
+    // errors rather than crashing the entire stream.
+    if (isDraftParseError(error)) {
       return;
-    } catch (error) {
-      const retryAfterSeconds = getRetryAfterSeconds(error);
-      if (retryAfterSeconds !== undefined) {
-        await sleep(retryAfterSeconds * 1000);
-        continue;
-      }
+    }
 
-      // Draft frames are ephemeral — skip ones Telegram rejects due to parse
-      // errors rather than crashing the entire stream.
-      if (isDraftParseError(error)) {
-        return;
-      }
+    throw error;
+  }
+}
 
-      throw error;
+async function closeBotResources(bot: Bot): Promise<void> {
+  if ("raw" in bot.api && typeof bot.api.raw === "object" && bot.api.raw !== null) {
+    const maybeClose = Reflect.get(bot.api.raw as Record<string, unknown>, "close");
+    if (typeof maybeClose === "function") {
+      try {
+        await (maybeClose as (signal?: AbortSignal) => Promise<true>).call(bot.api.raw);
+      } catch {
+        // Action mode uses plain Bot API calls rather than long polling, so
+        // cleanup is best-effort only.
+      }
     }
   }
 }
@@ -510,68 +546,71 @@ export async function sendTextMessage(
  */
 export async function sendTelegramMessage(request: ParsedActionInputs): Promise<{ message_id: number }> {
   const bot = new Bot(request.botToken);
+  try {
+    if (request.attachmentItems && request.attachmentItems.length > 0) {
+      logActRequestSummary({
+        scenarioId: request.scenarioId,
+        method: `sendMediaGroup/batch (${request.attachmentItems.length} items)`,
+        chatId: request.chatId,
+        message: request.message,
+        disableLinkPreview: request.disableLinkPreview,
+        replyMessageId: request.replyMessageId,
+        replyMarkup: request.replyMarkup,
+      });
 
-  if (request.attachmentItems && request.attachmentItems.length > 0) {
-    logActRequestSummary({
-      scenarioId: request.scenarioId,
-      method: `sendMediaGroup/batch (${request.attachmentItems.length} items)`,
-      chatId: request.chatId,
-      message: request.message,
-      disableLinkPreview: request.disableLinkPreview,
-      replyMessageId: request.replyMessageId,
-      replyMarkup: request.replyMarkup,
-    });
+      return sendAttachmentItems(bot, request);
+    }
 
-    return sendAttachmentItems(bot, request);
-  }
+    if (request.attachmentSource && request.attachmentType) {
+      logActRequestSummary({
+        scenarioId: request.scenarioId,
+        method: ATTACHMENT_METHOD_NAMES[request.attachmentType],
+        chatId: request.chatId,
+        message: request.message,
+        disableLinkPreview: request.disableLinkPreview,
+        replyMessageId: request.replyMessageId,
+        replyMarkup: request.replyMarkup,
+        attachmentType: request.attachmentType,
+        attachmentSource: request.attachmentSource,
+      });
 
-  if (request.attachmentSource && request.attachmentType) {
-    logActRequestSummary({
-      scenarioId: request.scenarioId,
-      method: ATTACHMENT_METHOD_NAMES[request.attachmentType],
-      chatId: request.chatId,
-      message: request.message,
-      disableLinkPreview: request.disableLinkPreview,
-      replyMessageId: request.replyMessageId,
-      replyMarkup: request.replyMarkup,
-      attachmentType: request.attachmentType,
-      attachmentSource: request.attachmentSource,
-    });
-
-    const captionPlan = buildAttachmentCaptionPlan(request.message);
-    const attachReplyMarkupToText = Boolean(request.replyMarkup) && !captionPlan.caption;
-    const chainTailMessageId = await sendMessageChunks(
-      bot,
-      request,
-      captionPlan.leadingChunks,
-      request.replyMessageId,
-      attachReplyMarkupToText,
-    );
-
-    return ATTACHMENT_SENDERS[request.attachmentType](
-      bot,
-      request.chatId,
-      request.attachmentSource.value,
-      createAttachmentOptions(
+      const captionPlan = buildAttachmentCaptionPlan(request.message);
+      const attachReplyMarkupToText = Boolean(request.replyMarkup) && !captionPlan.caption;
+      const chainTailMessageId = await sendMessageChunks(
+        bot,
         request,
-        request.attachmentType,
-        chainTailMessageId ?? request.replyMessageId,
-        captionPlan.caption,
-        !attachReplyMarkupToText,
-        request.supportsStreaming,
-      ),
-    );
+        captionPlan.leadingChunks,
+        request.replyMessageId,
+        attachReplyMarkupToText,
+      );
+
+      return ATTACHMENT_SENDERS[request.attachmentType](
+        bot,
+        request.chatId,
+        request.attachmentSource.value,
+        createAttachmentOptions(
+          request,
+          request.attachmentType,
+          chainTailMessageId ?? request.replyMessageId,
+          captionPlan.caption,
+          !attachReplyMarkupToText,
+          request.supportsStreaming,
+        ),
+      );
+    }
+
+    logActRequestSummary({
+      scenarioId: request.scenarioId,
+      method: describeTextSendMethod(request),
+      chatId: request.chatId,
+      message: request.message,
+      disableLinkPreview: request.disableLinkPreview,
+      replyMessageId: request.replyMessageId,
+      replyMarkup: request.replyMarkup,
+    });
+
+    return sendTextMessage(bot, request);
+  } finally {
+    await closeBotResources(bot);
   }
-
-  logActRequestSummary({
-    scenarioId: request.scenarioId,
-    method: describeTextSendMethod(request),
-    chatId: request.chatId,
-    message: request.message,
-    disableLinkPreview: request.disableLinkPreview,
-    replyMessageId: request.replyMessageId,
-    replyMarkup: request.replyMarkup,
-  });
-
-  return sendTextMessage(bot, request);
 }

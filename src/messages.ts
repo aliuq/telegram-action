@@ -141,6 +141,10 @@ function getFormattedLength(message: string): number {
  * within Telegram's hard size limit.
  */
 function findMaximumFittingPrefix(message: string, limit: number): number {
+  if (message.length === 0) {
+    return 0;
+  }
+
   let low = 1;
   let high = message.length;
   let best = 1;

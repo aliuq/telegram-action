@@ -206,9 +206,10 @@ Telegram 真正的 draft streaming 目前只适用于私聊，因此非私聊场
 
 1. 先执行 `bun run test`，直接发送并测试所选场景。
    也可以执行 `bun run test -- <scenarioId>`，或执行 `bun run test -- --all`。
-2. 如果你只想做解析层校验、不发消息，执行 `bun run test:validate`。
-3. 需要通过 `act` 跑工作流级测试时，执行 `bun run test:act`，它会调用 `.github/workflows/test.yaml`。
-4. 只有在你需要完全手动控制工作流时，再直接使用原始 `act` 命令。
+2. 如果你想快速跑本地单元测试，执行 `bun run test:unit`（基于 `vitest`）。
+3. 如果你只想做解析层校验、不发消息，执行 `bun run test:validate`。
+4. 需要通过 `act` 跑工作流级测试时，执行 `bun run test:act`，它会调用 `.github/workflows/test.yaml`。
+5. 只有在你需要完全手动控制工作流时，再直接使用原始 `act` 命令。
 
 ### 1. 直接发送测试
 
@@ -244,6 +245,7 @@ bun run test -- --all
 
 ```bash
 bun run test
+bun run test:unit
 bun run test:act
 bun run test:validate
 ```

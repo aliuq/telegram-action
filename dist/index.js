@@ -15957,6 +15957,14 @@ function error(message, properties = {}) {
 	issueCommand("error", toCommandProperties(properties), message instanceof Error ? message.toString() : message);
 }
 /**
+* Adds a warning issue
+* @param message warning issue message. Errors will be converted to string via toString()
+* @param properties optional properties to add to the annotation.
+*/
+function warning(message, properties = {}) {
+	issueCommand("warning", toCommandProperties(properties), message instanceof Error ? message.toString() : message);
+}
+/**
 * Writes info to log with console.log.
 * @param message info message
 */
@@ -76375,6 +76383,7 @@ function getFormattedLength(message) {
 * within Telegram's hard size limit.
 */
 function findMaximumFittingPrefix(message, limit) {
+	if (message.length === 0) return 0;
 	let low = 1;
 	let high = message.length;
 	let best = 1;
@@ -76769,13 +76778,6 @@ async function parseActionInputs(rawInputs) {
 }
 //#endregion
 //#region src/telegram.ts
-const STREAMING_SINGLE_CHUNK_FRAMES = 15;
-const STREAMING_MULTI_CHUNK_FRAMES = 8;
-const STREAMING_MULTI_CHUNK_TOTAL_FRAME_BUDGET = 20;
-const STREAMING_FRAME_DELAY_MS = 150;
-const STREAMING_FRAME_DELAY_MIN_MS = 100;
-const STREAMING_FRAME_DELAY_MAX_MS = 400;
-const TYPING_REFRESH_INTERVAL_MS = 4e3;
 function sleep(ms) {
 	return new Promise((resolve) => setTimeout(resolve, ms));
 }
@@ -76785,18 +76787,30 @@ function sleep(ms) {
 * would perceive streaming text.
 */
 function computeFrameDelay(pieceLength) {
-	const scaled = STREAMING_FRAME_DELAY_MS + pieceLength * .4;
-	return Math.min(STREAMING_FRAME_DELAY_MAX_MS, Math.max(STREAMING_FRAME_DELAY_MIN_MS, scaled));
+	const scaled = 150 + pieceLength * .4;
+	return Math.min(400, Math.max(100, scaled));
 }
 function getFramesPerChunk(chunkCount) {
-	if (chunkCount <= 1) return STREAMING_SINGLE_CHUNK_FRAMES;
-	return Math.max(1, Math.min(STREAMING_MULTI_CHUNK_FRAMES, Math.floor(STREAMING_MULTI_CHUNK_TOTAL_FRAME_BUDGET / chunkCount)));
+	if (chunkCount <= 1) return 15;
+	return Math.max(1, Math.min(8, Math.floor(20 / chunkCount)));
 }
 function getRetryAfterSeconds(error) {
 	if (!(error instanceof Error) || !("error_code" in error) || error.error_code !== 429) return;
 	if (!("parameters" in error) || typeof error.parameters !== "object" || error.parameters === null) return;
 	const retryAfter = "retry_after" in error.parameters ? error.parameters.retry_after : void 0;
 	return typeof retryAfter === "number" ? retryAfter : void 0;
+}
+async function retryOnRateLimit(operation, options) {
+	let retries = 0;
+	while (true) try {
+		return await operation();
+	} catch (error) {
+		const retryAfterSeconds = getRetryAfterSeconds(error);
+		if (retryAfterSeconds === void 0) throw error;
+		retries++;
+		if (retries >= options.maxRetries) throw new Error(`${options.label} rate-limited ${options.maxRetries} times — aborting to avoid hanging indefinitely.`);
+		await sleep(retryAfterSeconds * 1e3);
+	}
 }
 function isDraftParseError(error) {
 	if (!(error instanceof Error) || !("error_code" in error) || error.error_code !== 400) return false;
@@ -76822,28 +76836,27 @@ async function sendFormattedMessage(bot, request, rawChunk, formattedChunk, repl
 		return await bot.api.sendMessage(request.chatId, formattedChunk, createMessageOptions(request, replyMessageId, includeReplyMarkup));
 	} catch (error) {
 		if (!isDraftParseError(error) || rawChunk.length > 4096) throw error;
-		console.warn("Telegram rejected MarkdownV2 for a text chunk; falling back to plain text.", {
-			scenarioId: request.scenarioId,
-			error: getTelegramErrorDescription(error),
-			rawLength: rawChunk.length,
-			formattedLength: formattedChunk.length,
-			preview: summarizeChunkForLogs(rawChunk)
-		});
+		warning(`Telegram rejected MarkdownV2 for a text chunk; falling back to plain text. scenarioId=${request.scenarioId} rawLength=${rawChunk.length} formattedLength=${formattedChunk.length} error="${getTelegramErrorDescription(error)}" preview="${summarizeChunkForLogs(rawChunk)}"`);
 		return await bot.api.sendMessage(request.chatId, rawChunk, createPlainMessageOptions(request, replyMessageId, includeReplyMarkup));
 	}
 }
 async function sendDraftFrame(bot, chatId, draftId, frame) {
-	while (true) try {
-		await bot.api.sendMessageDraft(chatId, draftId, frame, createDraftMessageOptions());
-		return;
+	try {
+		await retryOnRateLimit(() => bot.api.sendMessageDraft(chatId, draftId, frame, createDraftMessageOptions()), {
+			maxRetries: 5,
+			label: "Draft frame"
+		});
 	} catch (error) {
-		const retryAfterSeconds = getRetryAfterSeconds(error);
-		if (retryAfterSeconds !== void 0) {
-			await sleep(retryAfterSeconds * 1e3);
-			continue;
-		}
 		if (isDraftParseError(error)) return;
 		throw error;
+	}
+}
+async function closeBotResources(bot) {
+	if ("raw" in bot.api && typeof bot.api.raw === "object" && bot.api.raw !== null) {
+		const maybeClose = Reflect.get(bot.api.raw, "close");
+		if (typeof maybeClose === "function") try {
+			await maybeClose.call(bot.api.raw);
+		} catch {}
 	}
 }
 /**
@@ -76923,7 +76936,7 @@ async function streamTextWithDraftApi(bot, request, chunks, draftChatId) {
 		let previousFrameLength = 0;
 		for (const [frameIndex, frame] of frames.entries()) {
 			if (frameIndex > 0) await sleep(computeFrameDelay(frame.length - previousFrameLength));
-			if (Date.now() - lastTypingTime > TYPING_REFRESH_INTERVAL_MS) {
+			if (Date.now() - lastTypingTime > 4e3) {
 				await bot.api.sendChatAction(draftChatId, "typing");
 				lastTypingTime = Date.now();
 			}
@@ -77035,45 +77048,49 @@ async function sendTextMessage(bot, request) {
 */
 async function sendTelegramMessage(request) {
 	const bot = new import_out.Bot(request.botToken);
-	if (request.attachmentItems && request.attachmentItems.length > 0) {
+	try {
+		if (request.attachmentItems && request.attachmentItems.length > 0) {
+			logActRequestSummary({
+				scenarioId: request.scenarioId,
+				method: `sendMediaGroup/batch (${request.attachmentItems.length} items)`,
+				chatId: request.chatId,
+				message: request.message,
+				disableLinkPreview: request.disableLinkPreview,
+				replyMessageId: request.replyMessageId,
+				replyMarkup: request.replyMarkup
+			});
+			return sendAttachmentItems(bot, request);
+		}
+		if (request.attachmentSource && request.attachmentType) {
+			logActRequestSummary({
+				scenarioId: request.scenarioId,
+				method: ATTACHMENT_METHOD_NAMES[request.attachmentType],
+				chatId: request.chatId,
+				message: request.message,
+				disableLinkPreview: request.disableLinkPreview,
+				replyMessageId: request.replyMessageId,
+				replyMarkup: request.replyMarkup,
+				attachmentType: request.attachmentType,
+				attachmentSource: request.attachmentSource
+			});
+			const captionPlan = buildAttachmentCaptionPlan(request.message);
+			const attachReplyMarkupToText = Boolean(request.replyMarkup) && !captionPlan.caption;
+			const chainTailMessageId = await sendMessageChunks(bot, request, captionPlan.leadingChunks, request.replyMessageId, attachReplyMarkupToText);
+			return ATTACHMENT_SENDERS[request.attachmentType](bot, request.chatId, request.attachmentSource.value, createAttachmentOptions(request, request.attachmentType, chainTailMessageId ?? request.replyMessageId, captionPlan.caption, !attachReplyMarkupToText, request.supportsStreaming));
+		}
 		logActRequestSummary({
 			scenarioId: request.scenarioId,
-			method: `sendMediaGroup/batch (${request.attachmentItems.length} items)`,
+			method: describeTextSendMethod(request),
 			chatId: request.chatId,
 			message: request.message,
 			disableLinkPreview: request.disableLinkPreview,
 			replyMessageId: request.replyMessageId,
 			replyMarkup: request.replyMarkup
 		});
-		return sendAttachmentItems(bot, request);
+		return sendTextMessage(bot, request);
+	} finally {
+		await closeBotResources(bot);
 	}
-	if (request.attachmentSource && request.attachmentType) {
-		logActRequestSummary({
-			scenarioId: request.scenarioId,
-			method: ATTACHMENT_METHOD_NAMES[request.attachmentType],
-			chatId: request.chatId,
-			message: request.message,
-			disableLinkPreview: request.disableLinkPreview,
-			replyMessageId: request.replyMessageId,
-			replyMarkup: request.replyMarkup,
-			attachmentType: request.attachmentType,
-			attachmentSource: request.attachmentSource
-		});
-		const captionPlan = buildAttachmentCaptionPlan(request.message);
-		const attachReplyMarkupToText = Boolean(request.replyMarkup) && !captionPlan.caption;
-		const chainTailMessageId = await sendMessageChunks(bot, request, captionPlan.leadingChunks, request.replyMessageId, attachReplyMarkupToText);
-		return ATTACHMENT_SENDERS[request.attachmentType](bot, request.chatId, request.attachmentSource.value, createAttachmentOptions(request, request.attachmentType, chainTailMessageId ?? request.replyMessageId, captionPlan.caption, !attachReplyMarkupToText, request.supportsStreaming));
-	}
-	logActRequestSummary({
-		scenarioId: request.scenarioId,
-		method: describeTextSendMethod(request),
-		chatId: request.chatId,
-		message: request.message,
-		disableLinkPreview: request.disableLinkPreview,
-		replyMessageId: request.replyMessageId,
-		replyMarkup: request.replyMarkup
-	});
-	return sendTextMessage(bot, request);
 }
 //#endregion
 //#region src/index.ts

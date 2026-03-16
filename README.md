@@ -311,9 +311,10 @@ Use this order locally:
 
 1. Run `bun run test` to send selected scenarios directly to Telegram.
    You can also run `bun run test -- <scenarioId>` or `bun run test -- --all`.
-2. Run `bun run test:validate` when you only want parser-level validation without sending messages.
-3. Run `bun run test:act` when you want to execute selected scenarios through `act` against `.github/workflows/test.yaml`.
-4. Run raw `act` commands only when you need a fully manual workflow invocation.
+2. Run `bun run test:unit` for fast local unit tests with `vitest`.
+3. Run `bun run test:validate` when you only want parser-level validation without sending messages.
+4. Run `bun run test:act` when you want to execute selected scenarios through `act` against `.github/workflows/test.yaml`.
+5. Run raw `act` commands only when you need a fully manual workflow invocation.
 
 ### 1. Direct send test
 
@@ -359,6 +360,7 @@ EOF
 
 ```bash
 bun run test
+bun run test:unit
 bun run test:act
 bun run test:validate
 bun run test -- --all

@@ -9,6 +9,7 @@
     "dev": "tsdown --watch",
     "lint": "tsc --noEmit && biome check .",
     "test": "bun scripts/test.ts",
+    "test:unit": "vitest run",
     "test:validate": "bun scripts/test.ts --mode validate",
     "test:act": "bun scripts/test.ts --mode act",
     "release": "bun run build && bunx bumpp --push --tag --commit --all && bunx changelogithub"
@@ -30,8 +31,9 @@
     "cac": "^7.0.0",
     "grammy": "^1.41.1",
     "telegramify-markdown": "^1.3.2",
-    "tsdown": "^0.21.3",
-    "typescript": "^5.9.3"
+    "tsdown": "^0.21.4",
+    "typescript": "^5.9.3",
+    "vitest": "^4.1.0"
   },
   "engines": {
     "node": ">=20"

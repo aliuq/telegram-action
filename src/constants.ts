@@ -70,3 +70,29 @@ export const MEDIA_GROUP_BUILDERS: Record<
   audio: (source, options) => InputMediaBuilder.audio(source, options),
   document: (source, options) => InputMediaBuilder.document(source, options),
 };
+
+// ── Streaming tuning constants ──────────────────────────────────────────────
+
+/** Number of draft frames for a single-chunk streaming response. */
+export const STREAMING_SINGLE_CHUNK_FRAMES = 15;
+
+/** Number of draft frames per chunk in multi-chunk streaming responses. */
+export const STREAMING_MULTI_CHUNK_FRAMES = 8;
+
+/** Maximum total draft frames across all chunks in multi-chunk responses. */
+export const STREAMING_MULTI_CHUNK_TOTAL_FRAME_BUDGET = 20;
+
+/** Base inter-frame delay in milliseconds for streaming animation. */
+export const STREAMING_FRAME_DELAY_MS = 150;
+
+/** Minimum inter-frame delay in milliseconds. */
+export const STREAMING_FRAME_DELAY_MIN_MS = 100;
+
+/** Maximum inter-frame delay in milliseconds. */
+export const STREAMING_FRAME_DELAY_MAX_MS = 400;
+
+/** How often to refresh the typing indicator during streaming (ms). */
+export const TYPING_REFRESH_INTERVAL_MS = 4000;
+
+/** Maximum number of rate-limit retries for a single draft frame. */
+export const MAX_DRAFT_RETRIES = 5;
