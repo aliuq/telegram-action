@@ -282,11 +282,16 @@ function createDraftMessageOptions() {
   };
 }
 
-async function sendTypingIndicator(bot: TextTransportBot, chatId: string): Promise<void> {
+async function sendTypingIndicator(bot: TextTransportBot, request: ParsedActionInputs): Promise<void> {
   try {
-    await bot.api.sendChatAction(chatId, "typing");
+    await bot.api.sendChatAction(request.chatId, "typing", {
+      ...(request.topicId !== undefined ? { message_thread_id: request.topicId } : {}),
+    });
   } catch (error) {
-    core.warning(`Failed to send typing indicator: ${getTelegramErrorDescription(error)}`);
+    core.warning(
+      `Failed to send typing indicator: ${getTelegramErrorDescription(error)} ` +
+        `(chatId=${request.chatId}, topicId=${request.topicId ?? "none"})`,
+    );
   }
 }
 
@@ -585,7 +590,7 @@ export async function sendTextMessage(
   const draftChatId = request.streamResponse ? getDraftStreamingChatId(request.chatId) : undefined;
 
   if (draftChatId === undefined && messageChunks.length > 0) {
-    await sendTypingIndicator(bot, request.chatId);
+    await sendTypingIndicator(bot, request);
   }
 
   const lastMessageId =

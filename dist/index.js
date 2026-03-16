@@ -76904,11 +76904,11 @@ function createMessageOptions(request, replyMessageId, includeReplyMarkup = true
 function createDraftMessageOptions() {
 	return { parse_mode: "MarkdownV2" };
 }
-async function sendTypingIndicator(bot, chatId) {
+async function sendTypingIndicator(bot, request) {
 	try {
-		await bot.api.sendChatAction(chatId, "typing");
+		await bot.api.sendChatAction(request.chatId, "typing", { ...request.topicId !== void 0 ? { message_thread_id: request.topicId } : {} });
 	} catch (error) {
-		warning(`Failed to send typing indicator: ${getTelegramErrorDescription(error)}`);
+		warning(`Failed to send typing indicator: ${getTelegramErrorDescription(error)} (chatId=${request.chatId}, topicId=${request.topicId ?? "none"})`);
 	}
 }
 function getDraftStreamingChatId(chatId) {
@@ -77059,7 +77059,7 @@ function describeTextSendMethod(request) {
 async function sendTextMessage(bot, request) {
 	const messageChunks = splitTelegramMessageChunks(request.message ?? "", TELEGRAM_MESSAGE_LIMIT);
 	const draftChatId = request.streamResponse ? getDraftStreamingChatId(request.chatId) : void 0;
-	if (draftChatId === void 0 && messageChunks.length > 0) await sendTypingIndicator(bot, request.chatId);
+	if (draftChatId === void 0 && messageChunks.length > 0) await sendTypingIndicator(bot, request);
 	const lastMessageId = draftChatId !== void 0 ? await streamTextWithDraftApi(bot, request, messageChunks, draftChatId) : await sendMessageChunks(bot, request, messageChunks, void 0, true);
 	if (!lastMessageId) throw new Error("failed to send any Telegram messages");
 	return { message_id: lastMessageId };
