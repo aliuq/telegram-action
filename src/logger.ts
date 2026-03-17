@@ -19,9 +19,7 @@ interface CreateLoggerOptions {
   target?: LoggerTarget;
 }
 
-export function isGitHubActionsRuntime(
-  env: NodeJS.ProcessEnv = process.env,
-): boolean {
+export function isGitHubActionsRuntime(env: NodeJS.ProcessEnv = process.env): boolean {
   return env.GITHUB_ACTIONS === 'true';
 }
 
@@ -67,9 +65,7 @@ export class Logger {
   readonly #groupStack: string[] = [];
 
   constructor(options: CreateLoggerOptions = {}) {
-    const mode = isGitHubActionsRuntime(options.env)
-      ? 'github-actions'
-      : 'plain';
+    const mode = isGitHubActionsRuntime(options.env) ? 'github-actions' : 'plain';
     this.#target = options.target ?? createDefaultTarget(mode);
     this.#now = options.now ?? (() => new Date().toISOString());
   }
@@ -125,9 +121,7 @@ export class Logger {
   }
 
   fail(message: string): void {
-    const formattedMessage = formatLogLines('ERROR', message, this.#now()).join(
-      '\n',
-    );
+    const formattedMessage = formatLogLines('ERROR', message, this.#now()).join('\n');
     this.#target.fail(formattedMessage);
   }
 }

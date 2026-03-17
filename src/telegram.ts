@@ -22,11 +22,7 @@ import {
   TELEGRAM_CAPTION_LIMIT,
   TELEGRAM_MESSAGE_LIMIT,
 } from './messages.js';
-import type {
-  AttachmentType,
-  ParsedActionInputs,
-  ParsedAttachmentItem,
-} from './types.js';
+import type { AttachmentType, ParsedActionInputs, ParsedAttachmentItem } from './types.js';
 
 function sleep(ms: number): Promise<void> {
   return new Promise((resolve) => setTimeout(resolve, ms));
@@ -39,10 +35,7 @@ function sleep(ms: number): Promise<void> {
  */
 function computeFrameDelay(pieceLength: number): number {
   const scaled = STREAMING_FRAME_DELAY_MS + pieceLength * 0.4;
-  return Math.min(
-    STREAMING_FRAME_DELAY_MAX_MS,
-    Math.max(STREAMING_FRAME_DELAY_MIN_MS, scaled),
-  );
+  return Math.min(STREAMING_FRAME_DELAY_MAX_MS, Math.max(STREAMING_FRAME_DELAY_MIN_MS, scaled));
 }
 
 function getFramesPerChunk(chunkCount: number): number {
@@ -60,11 +53,7 @@ function getFramesPerChunk(chunkCount: number): number {
 }
 
 function getRetryAfterSeconds(error: unknown): number | undefined {
-  if (
-    !(error instanceof Error) ||
-    !('error_code' in error) ||
-    error.error_code !== 429
-  ) {
+  if (!(error instanceof Error) || !('error_code' in error) || error.error_code !== 429) {
     return undefined;
   }
 
@@ -76,10 +65,7 @@ function getRetryAfterSeconds(error: unknown): number | undefined {
     return undefined;
   }
 
-  const retryAfter =
-    'retry_after' in error.parameters
-      ? error.parameters.retry_after
-      : undefined;
+  const retryAfter = 'retry_after' in error.parameters ? error.parameters.retry_after : undefined;
   return typeof retryAfter === 'number' ? retryAfter : undefined;
 }
 
@@ -88,24 +74,15 @@ interface RetryRateLimitOptions {
   label: string;
 }
 
-async function sleepWithWarningCountdown(
-  message: string,
-  seconds: number,
-): Promise<void> {
+async function sleepWithWarningCountdown(message: string, seconds: number): Promise<void> {
   if (!process.stderr.isTTY) {
     logger.warn(message);
     await sleep(seconds * 1000);
     return;
   }
 
-  for (
-    let remainingSeconds = seconds;
-    remainingSeconds > 0;
-    remainingSeconds--
-  ) {
-    process.stderr.write(
-      `\r\x1b[33m${message} Retrying in ${remainingSeconds}s...\x1b[0m`,
-    );
+  for (let remainingSeconds = seconds; remainingSeconds > 0; remainingSeconds--) {
+    process.stderr.write(`\r\x1b[33m${message} Retrying in ${remainingSeconds}s...\x1b[0m`);
     await sleep(1000);
   }
 
@@ -143,11 +120,7 @@ async function retryOnRateLimit<T>(
 }
 
 function isDraftParseError(error: unknown): boolean {
-  if (
-    !(error instanceof Error) ||
-    !('error_code' in error) ||
-    error.error_code !== 400
-  ) {
+  if (!(error instanceof Error) || !('error_code' in error) || error.error_code !== 400) {
     return false;
   }
 
@@ -184,12 +157,8 @@ function createPlainMessageOptions(
     link_preview_options: {
       is_disabled: request.disableLinkPreview,
     },
-    ...(request.topicId !== undefined
-      ? { message_thread_id: request.topicId }
-      : {}),
-    ...(includeReplyMarkup && request.replyMarkup
-      ? { reply_markup: request.replyMarkup }
-      : {}),
+    ...(request.topicId !== undefined ? { message_thread_id: request.topicId } : {}),
+    ...(includeReplyMarkup && request.replyMarkup ? { reply_markup: request.replyMarkup } : {}),
     ...(replyParameters ? { reply_parameters: replyParameters } : {}),
   };
 }
@@ -230,11 +199,7 @@ async function sendFormattedMessage(
         bot.api.sendMessage(
           request.chatId,
           rawChunk,
-          createPlainMessageOptions(
-            request,
-            replyMessageId,
-            includeReplyMarkup,
-          ),
+          createPlainMessageOptions(request, replyMessageId, includeReplyMarkup),
         ),
       {
         maxRetries: MAX_DRAFT_RETRIES,
@@ -252,13 +217,7 @@ async function sendDraftFrame(
 ): Promise<void> {
   try {
     await retryOnRateLimit(
-      () =>
-        bot.api.sendMessageDraft(
-          chatId,
-          draftId,
-          frame,
-          createDraftMessageOptions(),
-        ),
+      () => bot.api.sendMessageDraft(chatId, draftId, frame, createDraftMessageOptions()),
       {
         maxRetries: MAX_DRAFT_RETRIES,
         label: 'Draft frame',
@@ -276,20 +235,11 @@ async function sendDraftFrame(
 }
 
 async function closeBotResources(bot: Bot): Promise<void> {
-  if (
-    'raw' in bot.api &&
-    typeof bot.api.raw === 'object' &&
-    bot.api.raw !== null
-  ) {
-    const maybeClose = Reflect.get(
-      bot.api.raw as Record<string, unknown>,
-      'close',
-    );
+  if ('raw' in bot.api && typeof bot.api.raw === 'object' && bot.api.raw !== null) {
+    const maybeClose = Reflect.get(bot.api.raw as Record<string, unknown>, 'close');
     if (typeof maybeClose === 'function') {
       try {
-        await (maybeClose as (signal?: AbortSignal) => Promise<true>).call(
-          bot.api.raw,
-        );
+        await (maybeClose as (signal?: AbortSignal) => Promise<true>).call(bot.api.raw);
       } catch {
         // Action mode uses plain Bot API calls rather than long polling, so
         // cleanup is best-effort only.
@@ -300,10 +250,7 @@ async function closeBotResources(bot: Bot): Promise<void> {
 
 type TextTransportApi = Pick<
   Bot['api'],
-  | 'editMessageReplyMarkup'
-  | 'sendChatAction'
-  | 'sendMessage'
-  | 'sendMessageDraft'
+  'editMessageReplyMarkup' | 'sendChatAction' | 'sendMessage' | 'sendMessageDraft'
 >;
 type TextTransportBot = { api: TextTransportApi };
 
@@ -311,9 +258,7 @@ type TextTransportBot = { api: TextTransportApi };
  * Build Telegram reply parameters only when a reply target id was provided.
  */
 function createReplyParameters(replyMessageId?: number) {
-  return replyMessageId !== undefined
-    ? { message_id: replyMessageId }
-    : undefined;
+  return replyMessageId !== undefined ? { message_id: replyMessageId } : undefined;
 }
 
 /**
@@ -331,19 +276,11 @@ function createAttachmentOptions(
 
   return {
     ...(caption ? { caption, parse_mode: 'MarkdownV2' as const } : {}),
-    ...(request.topicId !== undefined
-      ? { message_thread_id: request.topicId }
-      : {}),
-    ...(includeReplyMarkup && request.replyMarkup
-      ? { reply_markup: request.replyMarkup }
-      : {}),
+    ...(request.topicId !== undefined ? { message_thread_id: request.topicId } : {}),
+    ...(includeReplyMarkup && request.replyMarkup ? { reply_markup: request.replyMarkup } : {}),
     ...(replyParameters ? { reply_parameters: replyParameters } : {}),
-    ...(attachmentType === 'document'
-      ? { disable_content_type_detection: true }
-      : {}),
-    ...(attachmentType === 'video' && supportsStreaming
-      ? { supports_streaming: true }
-      : {}),
+    ...(attachmentType === 'document' ? { disable_content_type_detection: true } : {}),
+    ...(attachmentType === 'video' && supportsStreaming ? { supports_streaming: true } : {}),
   };
 }
 
@@ -363,12 +300,8 @@ function createMessageOptions(
     link_preview_options: {
       is_disabled: request.disableLinkPreview,
     },
-    ...(request.topicId !== undefined
-      ? { message_thread_id: request.topicId }
-      : {}),
-    ...(includeReplyMarkup && request.replyMarkup
-      ? { reply_markup: request.replyMarkup }
-      : {}),
+    ...(request.topicId !== undefined ? { message_thread_id: request.topicId } : {}),
+    ...(includeReplyMarkup && request.replyMarkup ? { reply_markup: request.replyMarkup } : {}),
     ...(replyParameters ? { reply_parameters: replyParameters } : {}),
   };
 }
@@ -533,9 +466,7 @@ function getAttachmentBatchKind(type: AttachmentType): AttachmentBatchKind {
   return 'single';
 }
 
-function createMediaGroupBatches(
-  items: ParsedAttachmentItem[],
-): ParsedAttachmentItem[][] {
+function createMediaGroupBatches(items: ParsedAttachmentItem[]): ParsedAttachmentItem[][] {
   const batches: ParsedAttachmentItem[][] = [];
   let currentBatch: ParsedAttachmentItem[] = [];
   let currentKind: AttachmentBatchKind | undefined;
@@ -568,21 +499,13 @@ function createMediaGroupBatches(
 
 function createMediaGroupItem(item: ParsedAttachmentItem) {
   if (item.type === 'animation') {
-    throw new Error(
-      'animation attachments are not supported inside Telegram media groups',
-    );
+    throw new Error('animation attachments are not supported inside Telegram media groups');
   }
 
   return MEDIA_GROUP_BUILDERS[item.type](item.source.value, {
-    ...(item.caption
-      ? { caption: item.caption, parse_mode: 'MarkdownV2' as const }
-      : {}),
-    ...(item.type === 'document'
-      ? { disable_content_type_detection: true }
-      : {}),
-    ...(item.type === 'video' && item.supportsStreaming
-      ? { supports_streaming: true }
-      : {}),
+    ...(item.caption ? { caption: item.caption, parse_mode: 'MarkdownV2' as const } : {}),
+    ...(item.type === 'document' ? { disable_content_type_detection: true } : {}),
+    ...(item.type === 'video' && item.supportsStreaming ? { supports_streaming: true } : {}),
   });
 }
 
@@ -623,12 +546,8 @@ async function sendAttachmentBatch(
         request.chatId,
         items.map((item) => createMediaGroupItem(item)),
         {
-          ...(request.topicId !== undefined
-            ? { message_thread_id: request.topicId }
-            : {}),
-          ...(replyMessageId
-            ? { reply_parameters: { message_id: replyMessageId } }
-            : {}),
+          ...(request.topicId !== undefined ? { message_thread_id: request.topicId } : {}),
+          ...(replyMessageId ? { reply_parameters: { message_id: replyMessageId } } : {}),
         },
       ),
     {
@@ -664,12 +583,7 @@ async function sendAttachmentItems(
   const batches = createMediaGroupBatches(request.attachmentItems ?? []);
 
   for (const batch of batches) {
-    previousMessageId = await sendAttachmentBatch(
-      bot,
-      request,
-      batch,
-      previousMessageId,
-    );
+    previousMessageId = await sendAttachmentBatch(bot, request, batch, previousMessageId);
   }
 
   if (!previousMessageId) {
@@ -696,10 +610,7 @@ function buildAttachmentCaptionPlan(message?: string): {
     }
   }
 
-  const messageChunks = splitTelegramMessageChunks(
-    message,
-    TELEGRAM_MESSAGE_LIMIT,
-  );
+  const messageChunks = splitTelegramMessageChunks(message, TELEGRAM_MESSAGE_LIMIT);
   const lastChunk = messageChunks.at(-1);
 
   if (lastChunk && lastChunk.formatted.length <= TELEGRAM_CAPTION_LIMIT) {
@@ -718,13 +629,8 @@ function buildAttachmentCaptionPlan(message?: string): {
  * Describe the Telegram method a text-only request will use, for logging.
  */
 export function describeTextSendMethod(request: ParsedActionInputs): string {
-  const messageChunks = splitTelegramMessageChunks(
-    request.message ?? '',
-    TELEGRAM_MESSAGE_LIMIT,
-  );
-  const draftChatId = request.streamResponse
-    ? getDraftStreamingChatId(request.chatId)
-    : undefined;
+  const messageChunks = splitTelegramMessageChunks(request.message ?? '', TELEGRAM_MESSAGE_LIMIT);
+  const draftChatId = request.streamResponse ? getDraftStreamingChatId(request.chatId) : undefined;
 
   if (request.streamResponse && draftChatId !== undefined) {
     return messageChunks.length > 1
@@ -732,9 +638,7 @@ export function describeTextSendMethod(request: ParsedActionInputs): string {
       : 'sendMessageDraft -> sendMessage';
   }
 
-  return messageChunks.length > 1
-    ? `sendMessage x${messageChunks.length}`
-    : 'sendMessage';
+  return messageChunks.length > 1 ? `sendMessage x${messageChunks.length}` : 'sendMessage';
 }
 
 /**
@@ -744,13 +648,8 @@ export async function sendTextMessage(
   bot: TextTransportBot,
   request: ParsedActionInputs,
 ): Promise<{ message_id: number }> {
-  const messageChunks = splitTelegramMessageChunks(
-    request.message ?? '',
-    TELEGRAM_MESSAGE_LIMIT,
-  );
-  const draftChatId = request.streamResponse
-    ? getDraftStreamingChatId(request.chatId)
-    : undefined;
+  const messageChunks = splitTelegramMessageChunks(request.message ?? '', TELEGRAM_MESSAGE_LIMIT);
+  const draftChatId = request.streamResponse ? getDraftStreamingChatId(request.chatId) : undefined;
 
   if (draftChatId === undefined && messageChunks.length > 0) {
     await sendTypingIndicator(bot, request);
@@ -812,8 +711,7 @@ export async function sendTelegramMessage(
       });
 
       const captionPlan = buildAttachmentCaptionPlan(request.message);
-      const attachReplyMarkupToText =
-        Boolean(request.replyMarkup) && !captionPlan.caption;
+      const attachReplyMarkupToText = Boolean(request.replyMarkup) && !captionPlan.caption;
       const chainTailMessageId = await sendMessageChunks(
         bot,
         request,

@@ -17,8 +17,7 @@ export function createVideoScenarios(): ScenarioDefinition[] {
     }),
     createScenario({
       id: 'video-as-document',
-      description:
-        'Send a local video as a document file (no Telegram streaming/compression)',
+      description: 'Send a local video as a document file (no Telegram streaming/compression)',
       inputs: {
         message: '📎 Video sent as a document file',
         attachment: 'scripts/fixtures/sample-video.mp4',

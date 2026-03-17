@@ -79,9 +79,7 @@ export async function resolveMessageText(
   if (options.messageFile) {
     const resolvedPath = resolveWorkspacePath(options.messageFile);
     if (!existsSync(resolvedPath)) {
-      throw new Error(
-        `message_file path does not exist: ${options.messageFile}`,
-      );
+      throw new Error(`message_file path does not exist: ${options.messageFile}`);
     }
 
     return readFileSync(resolvedPath, 'utf8');
@@ -154,11 +152,7 @@ function findNaturalSplitIndex(candidate: string): number | undefined {
  * hard limit if needed. This keeps long messages readable without risking a
  * Telegram rejection on the final payload.
  */
-function findPreferredSplit(
-  message: string,
-  preferredLimit: number,
-  hardLimit: number,
-): number {
+function findPreferredSplit(message: string, preferredLimit: number, hardLimit: number): number {
   const preferredPrefix = findMaximumFittingPrefix(message, preferredLimit);
   const preferredCandidate = message.slice(0, preferredPrefix);
   const preferredSplit = findNaturalSplitIndex(preferredCandidate);
@@ -180,15 +174,10 @@ function findPreferredSplit(
  * Split text into Telegram-safe MarkdownV2 chunks while preferring natural boundaries.
  */
 export function splitTelegramMessage(message: string, limit: number): string[] {
-  return splitTelegramMessageChunks(message, limit).map(
-    (chunk) => chunk.formatted,
-  );
+  return splitTelegramMessageChunks(message, limit).map((chunk) => chunk.formatted);
 }
 
-function splitPlainTelegramMessageChunks(
-  message: string,
-  limit: number,
-): TelegramMessageChunk[] {
+function splitPlainTelegramMessageChunks(message: string, limit: number): TelegramMessageChunk[] {
   if (!message) {
     return [];
   }
@@ -205,14 +194,11 @@ function splitPlainTelegramMessageChunks(
       break;
     }
 
-    const preferredLimit =
-      limit === TELEGRAM_MESSAGE_LIMIT ? TELEGRAM_MESSAGE_SOFT_LIMIT : limit;
+    const preferredLimit = limit === TELEGRAM_MESSAGE_LIMIT ? TELEGRAM_MESSAGE_SOFT_LIMIT : limit;
     const splitIndex = findPreferredSplit(remaining, preferredLimit, limit);
     const chunk = remaining.slice(0, splitIndex);
     if (!chunk) {
-      throw new Error(
-        `failed to split message into Telegram-safe chunks (limit=${limit})`,
-      );
+      throw new Error(`failed to split message into Telegram-safe chunks (limit=${limit})`);
     }
 
     chunks.push({ raw: chunk, formatted: formatTelegramMessage(chunk) });
@@ -266,20 +252,14 @@ function splitOversizedCodeLine(line: string, maxLength: number): string[] {
   return parts;
 }
 
-function splitFencedCodeBlock(
-  rawBlock: string,
-  limit: number,
-): TelegramMessageChunk[] {
+function splitFencedCodeBlock(rawBlock: string, limit: number): TelegramMessageChunk[] {
   const firstNewlineIndex = rawBlock.indexOf('\n');
-  const openingFence =
-    firstNewlineIndex === -1 ? '```' : rawBlock.slice(0, firstNewlineIndex + 1);
+  const openingFence = firstNewlineIndex === -1 ? '```' : rawBlock.slice(0, firstNewlineIndex + 1);
   const closingFence = '\n```';
   const body =
     firstNewlineIndex === -1
       ? ''
-      : rawBlock
-          .slice(firstNewlineIndex + 1, rawBlock.length - 3)
-          .replace(/\n$/, '');
+      : rawBlock.slice(firstNewlineIndex + 1, rawBlock.length - 3).replace(/\n$/, '');
   const fullFormatted = formatTelegramMessage(rawBlock);
 
   if (fullFormatted.length <= limit) {
@@ -307,9 +287,7 @@ function splitFencedCodeBlock(
     }
 
     if (!currentBody) {
-      throw new Error(
-        'failed to split fenced code block into Telegram-safe chunks',
-      );
+      throw new Error('failed to split fenced code block into Telegram-safe chunks');
     }
 
     const currentRaw = `${openingFence}${currentBody}${currentBody.endsWith('\n') ? '' : '\n'}\`\`\``;
@@ -365,10 +343,7 @@ function mergeAdjacentChunks(
  * forms. The raw form is reused by draft streaming, while the formatted form is
  * what we actually persist with `sendMessage`.
  */
-export function splitTelegramMessageChunks(
-  message: string,
-  limit: number,
-): TelegramMessageChunk[] {
+export function splitTelegramMessageChunks(message: string, limit: number): TelegramMessageChunk[] {
   if (!message) {
     return [];
   }
@@ -386,10 +361,7 @@ export function splitTelegramMessageChunks(
   return splitPlainTelegramMessageChunks(message, limit);
 }
 
-function splitOversizedStreamingToken(
-  token: string,
-  maxTokenLength: number,
-): string[] {
+function splitOversizedStreamingToken(token: string, maxTokenLength: number): string[] {
   if (token.length <= maxTokenLength || /\s/.test(token)) {
     return [token];
   }
@@ -404,9 +376,7 @@ function splitOversizedStreamingToken(
 
 function getStreamingTokens(message: string, maxTokenLength: number): string[] {
   const rawTokens = message.match(/[^\s]+(?:[ \t]+)?|\n+/g) ?? [message];
-  return rawTokens.flatMap((token) =>
-    splitOversizedStreamingToken(token, maxTokenLength),
-  );
+  return rawTokens.flatMap((token) => splitOversizedStreamingToken(token, maxTokenLength));
 }
 
 /**
@@ -414,10 +384,7 @@ function getStreamingTokens(message: string, maxTokenLength: number): string[] {
  * boundaries are preferred, but long uninterrupted text is still forced to move
  * forward so the stream never stalls.
  */
-function buildStreamingPieces(
-  message: string,
-  targetCharactersPerPiece = 120,
-): string[] {
+function buildStreamingPieces(message: string, targetCharactersPerPiece = 120): string[] {
   if (!message) {
     return [];
   }
@@ -429,10 +396,7 @@ function buildStreamingPieces(
 
   for (const token of tokens) {
     current += token;
-    const minimumNaturalBoundaryLength = Math.max(
-      1,
-      Math.ceil(targetCharactersPerPiece * 0.85),
-    );
+    const minimumNaturalBoundaryLength = Math.max(1, Math.ceil(targetCharactersPerPiece * 0.85));
     const shouldEmit =
       current.trim().length > 0 &&
       (current.length >= targetCharactersPerPiece ||
@@ -476,10 +440,7 @@ function buildStreamingSegmentPieces(
  * Fenced code blocks are only introduced as complete units so every draft frame
  * remains valid Telegram MarkdownV2.
  */
-export function buildStreamingFrames(
-  message: string,
-  options: StreamingFrameOptions,
-): string[] {
+export function buildStreamingFrames(message: string, options: StreamingFrameOptions): string[] {
   if (!message) {
     return [];
   }
@@ -490,10 +451,7 @@ export function buildStreamingFrames(
     Math.min(options.maxFrames, Math.ceil(formattedMessage.length / 120)),
   );
   // Use raw message length for piece sizing since pieces are now raw text.
-  const targetCharactersPerPiece = Math.max(
-    1,
-    Math.ceil(message.length / desiredFrameCount),
-  );
+  const targetCharactersPerPiece = Math.max(1, Math.ceil(message.length / desiredFrameCount));
   const pieces = parseMessageSegments(message).flatMap((segment) =>
     buildStreamingSegmentPieces(segment, targetCharactersPerPiece),
   );

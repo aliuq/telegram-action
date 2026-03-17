@@ -1,9 +1,5 @@
 import { InputMediaBuilder } from 'grammy';
-import type {
-  AttachmentSender,
-  AttachmentType,
-  TelegramMediaGroupItem,
-} from './types.js';
+import type { AttachmentSender, AttachmentType, TelegramMediaGroupItem } from './types.js';
 
 /**
  * Telegram inline keyboard fields that count as button actions.
@@ -24,13 +20,7 @@ export const BUTTON_ACTION_FIELDS = [
 /**
  * Attachment kinds supported by this action.
  */
-export const ATTACHMENT_TYPES = [
-  'photo',
-  'video',
-  'audio',
-  'animation',
-  'document',
-] as const;
+export const ATTACHMENT_TYPES = ['photo', 'video', 'audio', 'animation', 'document'] as const;
 
 /** Mapping from attachment kinds to Telegram Bot API method names. */
 export const ATTACHMENT_METHOD_NAMES: Record<AttachmentType, string> = {
@@ -43,27 +33,17 @@ export const ATTACHMENT_METHOD_NAMES: Record<AttachmentType, string> = {
 
 /** Concrete sender implementations for each supported attachment kind. */
 export const ATTACHMENT_SENDERS: Record<AttachmentType, AttachmentSender> = {
-  photo: (bot, chatId, source, options) =>
-    bot.api.sendPhoto(chatId, source, options),
-  video: (bot, chatId, source, options) =>
-    bot.api.sendVideo(chatId, source, options),
-  audio: (bot, chatId, source, options) =>
-    bot.api.sendAudio(chatId, source, options),
-  animation: (bot, chatId, source, options) =>
-    bot.api.sendAnimation(chatId, source, options),
-  document: (bot, chatId, source, options) =>
-    bot.api.sendDocument(chatId, source, options),
+  photo: (bot, chatId, source, options) => bot.api.sendPhoto(chatId, source, options),
+  video: (bot, chatId, source, options) => bot.api.sendVideo(chatId, source, options),
+  audio: (bot, chatId, source, options) => bot.api.sendAudio(chatId, source, options),
+  animation: (bot, chatId, source, options) => bot.api.sendAnimation(chatId, source, options),
+  document: (bot, chatId, source, options) => bot.api.sendDocument(chatId, source, options),
 };
 
 /**
  * Media types that Telegram supports inside `sendMediaGroup`.
  */
-export const MEDIA_GROUP_ATTACHMENT_TYPES = [
-  'photo',
-  'video',
-  'audio',
-  'document',
-] as const;
+export const MEDIA_GROUP_ATTACHMENT_TYPES = ['photo', 'video', 'audio', 'document'] as const;
 
 /**
  * Maximum items allowed by Telegram in a single media group request.

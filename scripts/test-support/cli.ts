@@ -20,10 +20,7 @@ export function parseCliOptions(argv: string[]): CliOptions {
     .usage('[scenario-id ...] [options]')
     .option('-m, --mode <mode>', 'Runner mode: source, act, or validate')
     .option('-a, --all', 'Run the full scenario catalog')
-    .option(
-      '-l, --last',
-      'Rerun the last saved command from .test-history/test-history.json',
-    )
+    .option('-l, --last', 'Rerun the last saved command from .test-history/test-history.json')
     .help()
     .example('bun scripts/test.ts')
     .example('bun scripts/test.ts --mode source video-as-document')
@@ -53,9 +50,7 @@ export function parseCliOptions(argv: string[]): CliOptions {
 /**
  * Prompt for the execution mode when it was not provided on the CLI.
  */
-async function promptMode(
-  history: TestHistoryState,
-): Promise<TestMode | 'last'> {
+async function promptMode(history: TestHistoryState): Promise<TestMode | 'last'> {
   const options = [
     {
       value: 'source',
@@ -140,10 +135,7 @@ async function promptScenarioSelection(
     options: allScenarios.map((scenario, index) => ({
       value: scenario.id,
       label: `${index + 1}. ${scenario.id}`,
-      hint: [
-        scenario.description,
-        scenario.expect_failure ? 'expected failure' : undefined,
-      ]
+      hint: [scenario.description, scenario.expect_failure ? 'expected failure' : undefined]
         .filter(Boolean)
         .join(' · '),
     })),
@@ -171,9 +163,7 @@ export async function resolveSelection(
 ): Promise<TestSelection> {
   if (cli.rerunLast) {
     if (!history.lastRun) {
-      throw new Error(
-        'No previous command found in .test-history/test-history.json',
-      );
+      throw new Error('No previous command found in .test-history/test-history.json');
     }
 
     return {
@@ -238,7 +228,5 @@ export function resolveScenarios(
     return allScenarios;
   }
 
-  return selection.scenarioIds.map((scenarioId) =>
-    findScenarioById(allScenarios, scenarioId),
-  );
+  return selection.scenarioIds.map((scenarioId) => findScenarioById(allScenarios, scenarioId));
 }

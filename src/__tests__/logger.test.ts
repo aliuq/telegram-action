@@ -50,9 +50,7 @@ describe('logger helpers', () => {
   });
 
   test('formats each line with timestamp and level', () => {
-    expect(
-      formatLogLines('INFO', 'hello\nworld', '2026-03-17T07:00:00.000Z'),
-    ).toEqual([
+    expect(formatLogLines('INFO', 'hello\nworld', '2026-03-17T07:00:00.000Z')).toEqual([
       '[2026-03-17T07:00:00.000Z] [INFO] hello',
       '[2026-03-17T07:00:00.000Z] [INFO] world',
     ]);
@@ -82,12 +80,8 @@ describe('plain logger', () => {
       '[2026-03-17T07:00:00.000Z] [INFO] line two',
       '[2026-03-17T07:00:00.000Z] [GROUP] End group: Run scenario',
     ]);
-    expect(target.warnMessages).toEqual([
-      '[2026-03-17T07:00:00.000Z] [WARN] careful',
-    ]);
-    expect(target.errorMessages).toEqual([
-      '[2026-03-17T07:00:00.000Z] [ERROR] broken',
-    ]);
+    expect(target.warnMessages).toEqual(['[2026-03-17T07:00:00.000Z] [WARN] careful']);
+    expect(target.errorMessages).toEqual(['[2026-03-17T07:00:00.000Z] [ERROR] broken']);
   });
 });
 
@@ -105,16 +99,12 @@ describe('github actions logger', () => {
     logger.endGroup();
     logger.fail('fatal');
 
-    expect(target.groupTitles).toEqual([
-      '[2026-03-17T07:00:00.000Z] [GROUP] Run scenario',
-    ]);
+    expect(target.groupTitles).toEqual(['[2026-03-17T07:00:00.000Z] [GROUP] Run scenario']);
     expect(target.infoMessages).toEqual([
       '[2026-03-17T07:00:00.000Z] [INFO] inside group',
       '[2026-03-17T07:00:00.000Z] [GROUP] End group: Run scenario',
     ]);
     expect(target.endGroupCount).toBe(1);
-    expect(target.failMessages).toEqual([
-      '[2026-03-17T07:00:00.000Z] [ERROR] fatal',
-    ]);
+    expect(target.failMessages).toEqual(['[2026-03-17T07:00:00.000Z] [ERROR] fatal']);
   });
 });

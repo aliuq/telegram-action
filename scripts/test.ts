@@ -1,11 +1,7 @@
 import { logger } from '../src/logger.ts';
 import type { TestHistoryEntry } from '../src/types.ts';
 import { loadScenarios } from './scenarios/index.ts';
-import {
-  parseCliOptions,
-  resolveScenarios,
-  resolveSelection,
-} from './test-support/cli.ts';
+import { parseCliOptions, resolveScenarios, resolveSelection } from './test-support/cli.ts';
 import {
   runActSelection,
   runSourceSelection,
@@ -97,9 +93,7 @@ async function main(runStartedAt: number): Promise<void> {
 const runStartedAt = Date.now();
 
 void main(runStartedAt).catch((error) => {
-  logger.error(
-    error instanceof Error ? (error.stack ?? error.message) : String(error),
-  );
+  logger.error(error instanceof Error ? (error.stack ?? error.message) : String(error));
   showOutro(`❌  Failed after ${formatDuration(Date.now() - runStartedAt)}`);
   process.exit(1);
 });

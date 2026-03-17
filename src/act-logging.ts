@@ -1,8 +1,5 @@
 import { logger } from './logger.js';
-import type {
-  ActRequestSummaryOptions,
-  ResolvedAttachmentSource,
-} from './types.js';
+import type { ActRequestSummaryOptions, ResolvedAttachmentSource } from './types.js';
 
 /**
  * Detect whether the action is running inside a local `act` session.
@@ -60,9 +57,7 @@ function indentBlock(value: string): string {
 /**
  * Build the local debug summary shown before a request is sent via `act` or source mode.
  */
-export function formatActRequestSummary(
-  options: ActRequestSummaryOptions,
-): string {
+export function formatActRequestSummary(options: ActRequestSummaryOptions): string {
   const buttonRows = options.replyMarkup?.inline_keyboard.length ?? 0;
   const buttonCount = options.replyMarkup?.inline_keyboard.flat().length ?? 0;
   const attachmentSummary = options.attachmentType

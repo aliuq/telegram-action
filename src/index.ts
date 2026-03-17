@@ -23,15 +23,11 @@ export async function run(): Promise<void> {
     core.setOutput('status', 'success');
 
     if (isActRun()) {
-      logger.info(
-        `[act] Sent Telegram message successfully (message_id=${result.message_id})`,
-      );
+      logger.info(`[act] Sent Telegram message successfully (message_id=${result.message_id})`);
     }
   } catch (error) {
-    const message =
-      error instanceof Error ? error.message : 'An unexpected error occurred';
-    const details =
-      error instanceof Error ? (error.stack ?? error.message) : String(error);
+    const message = error instanceof Error ? error.message : 'An unexpected error occurred';
+    const details = error instanceof Error ? (error.stack ?? error.message) : String(error);
 
     if (!isActRun()) {
       await logger.withGroup('telegram-action failure', () => {

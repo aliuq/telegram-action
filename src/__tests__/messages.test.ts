@@ -92,10 +92,7 @@ describe('splitTelegramMessageChunks', () => {
   });
 
   test('returns both raw and formatted for each chunk', () => {
-    const chunks = splitTelegramMessageChunks(
-      'Hello **world**',
-      TELEGRAM_MESSAGE_LIMIT,
-    );
+    const chunks = splitTelegramMessageChunks('Hello **world**', TELEGRAM_MESSAGE_LIMIT);
     expect(chunks).toHaveLength(1);
     expect(chunks[0].raw).toBe('Hello **world**');
     expect(chunks[0].formatted).toBeTruthy();
@@ -120,9 +117,7 @@ describe('splitTelegramMessageChunks', () => {
 
     expect(chunks.length).toBeGreaterThan(1);
     for (const chunk of chunks) {
-      expect(chunk.formatted.length).toBeLessThanOrEqual(
-        TELEGRAM_MESSAGE_LIMIT,
-      );
+      expect(chunk.formatted.length).toBeLessThanOrEqual(TELEGRAM_MESSAGE_LIMIT);
     }
   });
 
@@ -131,17 +126,12 @@ describe('splitTelegramMessageChunks', () => {
       { length: 30 },
       (_, i) => `Paragraph ${i}: ${'content '.repeat(40)}`,
     ).join('\n\n');
-    const chunks = splitTelegramMessageChunks(
-      paragraphs,
-      TELEGRAM_MESSAGE_LIMIT,
-    );
+    const chunks = splitTelegramMessageChunks(paragraphs, TELEGRAM_MESSAGE_LIMIT);
 
     // Each chunk (except possibly the last) should end at a natural boundary
     for (const chunk of chunks.slice(0, -1)) {
       const endsNaturally =
-        chunk.raw.endsWith('\n\n') ||
-        chunk.raw.endsWith('\n') ||
-        chunk.raw.endsWith(' ');
+        chunk.raw.endsWith('\n\n') || chunk.raw.endsWith('\n') || chunk.raw.endsWith(' ');
       expect(endsNaturally).toBe(true);
     }
   });
@@ -151,9 +141,7 @@ describe('splitTelegramMessageChunks', () => {
 
 describe('buildStreamingFrames', () => {
   test('returns empty array for empty input', () => {
-    expect(buildStreamingFrames('', { minFrames: 5, maxFrames: 10 })).toEqual(
-      [],
-    );
+    expect(buildStreamingFrames('', { minFrames: 5, maxFrames: 10 })).toEqual([]);
   });
 
   test('generates at least minFrames for normal text', () => {
@@ -237,8 +225,7 @@ describe('edge cases', () => {
   });
 
   test('message with many special characters needing escape', () => {
-    const special =
-      'Price: $100 + $50 = $150 (total) [link](http://example.com)';
+    const special = 'Price: $100 + $50 = $150 (total) [link](http://example.com)';
     const chunks = splitTelegramMessage(special, TELEGRAM_MESSAGE_LIMIT);
     expect(chunks).toHaveLength(1);
     expect(chunks[0].length).toBeGreaterThan(special.length); // escaping adds characters
