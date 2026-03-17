@@ -1,4 +1,4 @@
-import * as p from '@clack/prompts';
+import { logger } from '../src/logger.ts';
 import type { TestHistoryEntry } from '../src/types.ts';
 import { loadScenarios } from './scenarios/index.ts';
 import {
@@ -17,6 +17,7 @@ import {
   loadHistoryState,
   saveHistoryEntry,
 } from './test-support/history.ts';
+import { showNote, showOutro } from './test-support/output.ts';
 import { printBanner, validateScenarioCatalog } from './test-support/shared.ts';
 
 function formatDuration(durationMs: number): string {
@@ -84,10 +85,9 @@ async function main(runStartedAt: number): Promise<void> {
     durationMs,
     durationText: duration,
   });
-  p.note(historyEntry.command, 'Rerun command');
-  p.note(logFilePath, 'Saved log');
-  p.note(duration, 'Elapsed');
-  p.outro(
+  showNote(historyEntry.command, 'Rerun command');
+  showNote(logFilePath, 'Saved log');
+  showOutro(
     selection.runAll
       ? `✅  Completed ${scenarios.length} scenarios in ${selection.mode} mode in ${duration}`
       : `✅  Completed ${scenarios.map((scenario) => scenario.id).join(', ')} in ${selection.mode} mode in ${duration}`,
@@ -97,9 +97,9 @@ async function main(runStartedAt: number): Promise<void> {
 const runStartedAt = Date.now();
 
 void main(runStartedAt).catch((error) => {
-  console.error(
+  logger.error(
     error instanceof Error ? (error.stack ?? error.message) : String(error),
   );
-  p.outro(`❌  Failed after ${formatDuration(Date.now() - runStartedAt)}`);
+  showOutro(`❌  Failed after ${formatDuration(Date.now() - runStartedAt)}`);
   process.exit(1);
 });

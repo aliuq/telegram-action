@@ -15988,6 +15988,91 @@ function endGroup() {
 	issue("endgroup");
 }
 //#endregion
+//#region src/logger.ts
+function isGitHubActionsRuntime(env = process.env) {
+	return env.GITHUB_ACTIONS === "true";
+}
+function formatLogLines(level, message, timestamp = (/* @__PURE__ */ new Date()).toISOString()) {
+	return message.split(/\r?\n/).map((line) => `[${timestamp}] [${level}] ${line}`);
+}
+function createDefaultTarget(mode) {
+	if (mode === "github-actions") return {
+		mode,
+		info: (message) => info(message),
+		warn: (message) => warning(message),
+		error: (message) => error(message),
+		startGroup: (title) => startGroup(title),
+		endGroup: () => endGroup(),
+		fail: (message) => setFailed(message)
+	};
+	return {
+		mode,
+		info: (message) => console.info(message),
+		warn: (message) => console.warn(message),
+		error: (message) => console.error(message),
+		startGroup: () => {},
+		endGroup: () => {},
+		fail: (message) => {
+			console.error(message);
+			process.exitCode = 1;
+		}
+	};
+}
+var Logger = class {
+	#target;
+	#now;
+	#groupStack = [];
+	constructor(options = {}) {
+		const mode = isGitHubActionsRuntime(options.env) ? "github-actions" : "plain";
+		this.#target = options.target ?? createDefaultTarget(mode);
+		this.#now = options.now ?? (() => (/* @__PURE__ */ new Date()).toISOString());
+	}
+	#emit(level, message, method) {
+		const timestamp = this.#now();
+		for (const line of formatLogLines(level, message, timestamp)) this.#target[method](line);
+	}
+	info(message) {
+		this.#emit("INFO", message, "info");
+	}
+	warn(message) {
+		this.#emit("WARN", message, "warn");
+	}
+	error(message) {
+		this.#emit("ERROR", message, "error");
+	}
+	startGroup(label) {
+		this.#groupStack.push(label);
+		const title = formatLogLines("GROUP", label, this.#now())[0];
+		if (this.#target.mode === "github-actions") {
+			this.#target.startGroup(title);
+			return;
+		}
+		this.#target.info(title);
+	}
+	endGroup() {
+		const label = this.#groupStack.pop();
+		const endMessage = label ? `End group: ${label}` : "End group";
+		this.#emit("GROUP", endMessage, "info");
+		if (this.#target.mode === "github-actions") this.#target.endGroup();
+	}
+	async withGroup(label, fn) {
+		this.startGroup(label);
+		try {
+			return await fn();
+		} finally {
+			this.endGroup();
+		}
+	}
+	fail(message) {
+		const formattedMessage = formatLogLines("ERROR", message, this.#now()).join("\n");
+		this.#target.fail(formattedMessage);
+	}
+};
+function createLogger(options = {}) {
+	return new Logger(options);
+}
+const logger = createLogger();
+//#endregion
 //#region src/act-logging.ts
 /**
 * Detect whether the action is running inside a local `act` session.
@@ -16049,9 +16134,9 @@ function formatActRequestSummary(options) {
 */
 function logActRequestSummary(options) {
 	if (!isActRun()) return;
-	startGroup(`[act] Telegram request debug${options.scenarioId ? ` (${options.scenarioId})` : ""}`);
-	for (const line of formatActRequestSummary(options).split("\n")) info(line);
-	endGroup();
+	logger.startGroup(`[act] Telegram request debug${options.scenarioId ? ` (${options.scenarioId})` : ""}`);
+	for (const line of formatActRequestSummary(options).split("\n")) logger.info(line);
+	logger.endGroup();
 }
 /**
 * Expand nested errors into a readable multi-line debug block for local runs.
@@ -16080,9 +16165,9 @@ function formatActErrorDetails(error) {
 */
 function logActErrorDetails(error) {
 	if (!isActRun()) return;
-	startGroup("[act] Telegram request failure details");
-	for (const detail of formatActErrorDetails(error).split("\n")) info(detail);
-	endGroup();
+	logger.startGroup("[act] Telegram request failure details");
+	for (const detail of formatActErrorDetails(error).split("\n")) logger.info(detail);
+	logger.endGroup();
 }
 //#endregion
 //#region node_modules/grammy/out/filter.js
@@ -76788,7 +76873,7 @@ function getRetryAfterSeconds(error) {
 }
 async function sleepWithWarningCountdown(message, seconds) {
 	if (!process.stderr.isTTY) {
-		warning(message);
+		logger.warn(message);
 		await sleep(seconds * 1e3);
 		return;
 	}
@@ -76838,7 +76923,7 @@ async function sendFormattedMessage(bot, request, rawChunk, formattedChunk, repl
 		});
 	} catch (error) {
 		if (!isDraftParseError(error) || rawChunk.length > 4096) throw error;
-		warning(`Telegram rejected MarkdownV2 for a text chunk; falling back to plain text. scenarioId=${request.scenarioId} rawLength=${rawChunk.length} formattedLength=${formattedChunk.length} error="${getTelegramErrorDescription(error)}" preview="${summarizeChunkForLogs(rawChunk)}"`);
+		logger.warn(`Telegram rejected MarkdownV2 for a text chunk; falling back to plain text. scenarioId=${request.scenarioId} rawLength=${rawChunk.length} formattedLength=${formattedChunk.length} error="${getTelegramErrorDescription(error)}" preview="${summarizeChunkForLogs(rawChunk)}"`);
 		return await retryOnRateLimit(() => bot.api.sendMessage(request.chatId, rawChunk, createPlainMessageOptions(request, replyMessageId, includeReplyMarkup)), {
 			maxRetries: 5,
 			label: "Plain-text fallback chunk"
@@ -76904,12 +76989,15 @@ function createMessageOptions(request, replyMessageId, includeReplyMarkup = true
 function createDraftMessageOptions() {
 	return { parse_mode: "MarkdownV2" };
 }
-async function sendTypingIndicator(bot, request) {
+async function sendTypingIndicatorForTarget(bot, chatId, topicId) {
 	try {
-		await bot.api.sendChatAction(request.chatId, "typing", { ...request.topicId !== void 0 ? { message_thread_id: request.topicId } : {} });
+		await bot.api.sendChatAction(chatId, "typing", { ...topicId !== void 0 ? { message_thread_id: topicId } : {} });
 	} catch (error) {
-		warning(`Failed to send typing indicator: ${getTelegramErrorDescription(error)} (chatId=${request.chatId}, topicId=${request.topicId ?? "none"})`);
+		logger.warn(`Failed to send typing indicator: ${getTelegramErrorDescription(error)} (chatId=${chatId}, topicId=${topicId ?? "none"})`);
 	}
+}
+async function sendTypingIndicator(bot, request) {
+	await sendTypingIndicatorForTarget(bot, request.chatId, request.topicId);
 }
 function getDraftStreamingChatId(chatId) {
 	if (!/^\d+$/.test(chatId)) return;
@@ -76938,7 +77026,7 @@ async function streamTextWithDraftApi(bot, request, chunks, draftChatId) {
 	const framesPerChunk = getFramesPerChunk(chunks.length);
 	let replyMessageId;
 	let lastMessageId;
-	await bot.api.sendChatAction(draftChatId, "typing");
+	await sendTypingIndicatorForTarget(bot, draftChatId, request.topicId);
 	let lastTypingTime = Date.now();
 	for (const [chunkIndex, chunk] of chunks.entries()) {
 		const isLastChunk = chunkIndex === chunks.length - 1;
@@ -76950,8 +77038,8 @@ async function streamTextWithDraftApi(bot, request, chunks, draftChatId) {
 		let previousFrameLength = 0;
 		for (const [frameIndex, frame] of frames.entries()) {
 			if (frameIndex > 0) await sleep(computeFrameDelay(frame.length - previousFrameLength));
-			if (Date.now() - lastTypingTime > 4e3) {
-				await bot.api.sendChatAction(draftChatId, "typing");
+			if (Date.now() - lastTypingTime > 5e3) {
+				await sendTypingIndicatorForTarget(bot, draftChatId, request.topicId);
 				lastTypingTime = Date.now();
 			}
 			await sendDraftFrame(bot, draftChatId, draftId, frame);
@@ -76961,7 +77049,7 @@ async function streamTextWithDraftApi(bot, request, chunks, draftChatId) {
 		lastMessageId = result.message_id;
 		replyMessageId = result.message_id;
 		if (!isLastChunk) {
-			await bot.api.sendChatAction(draftChatId, "typing");
+			await sendTypingIndicatorForTarget(bot, draftChatId, request.topicId);
 			lastTypingTime = Date.now();
 		}
 	}
@@ -77140,25 +77228,21 @@ async function run() {
 		const result = await sendTelegramMessage(await parseActionInputs(readRawActionInputs()));
 		setOutput("message_id", result.message_id.toString());
 		setOutput("status", "success");
-		if (isActRun()) info(`[act] Sent Telegram message successfully (message_id=${result.message_id})`);
+		if (isActRun()) logger.info(`[act] Sent Telegram message successfully (message_id=${result.message_id})`);
 	} catch (error) {
 		const message = error instanceof Error ? error.message : "An unexpected error occurred";
 		const details = error instanceof Error ? error.stack ?? error.message : String(error);
-		if (!isActRun()) {
-			startGroup("telegram-action failure");
-			for (const line of details.split("\n")) info(line);
-			endGroup();
-		}
+		if (!isActRun()) await logger.withGroup("telegram-action failure", () => {
+			logger.info(details);
+		});
 		logActErrorDetails(error);
 		if (shouldSuppressFailureAnnotations()) {
 			process.exitCode = 1;
 			return;
 		}
-		setFailed(message);
+		logger.fail(message);
 	}
 }
 run();
 //#endregion
 export { run };
-
-//# sourceMappingURL=index.js.map

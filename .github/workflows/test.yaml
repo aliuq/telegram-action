@@ -1,4 +1,4 @@
-name: Integration Tests
+name: Scenario Test
 
 on:
   push:
@@ -25,4 +25,9 @@ jobs:
           TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
           TELEGRAM_TOPIC_ID: ${{ secrets.TELEGRAM_TOPIC_ID }}
           TELEGRAM_REPLY_TO_MESSAGE_ID: ${{ secrets.TELEGRAM_REPLY_TO_MESSAGE_ID }}
-        run: npx tsx scripts/workflow.ts run-selection
+        run: |
+          npm install bun -g
+          bun install
+          bun run test:unit
+          bun run test:validate --all
+          bun run scripts/workflow.ts

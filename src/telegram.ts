@@ -1,4 +1,3 @@
-import * as core from '@actions/core';
 import { Bot } from 'grammy';
 import { logActRequestSummary } from './act-logging.js';
 import {
@@ -15,6 +14,7 @@ import {
   TELEGRAM_MEDIA_GROUP_LIMIT,
   TYPING_REFRESH_INTERVAL_MS,
 } from './constants.js';
+import { logger } from './logger.js';
 import {
   buildStreamingFrames,
   formatTelegramMessage,
@@ -93,7 +93,7 @@ async function sleepWithWarningCountdown(
   seconds: number,
 ): Promise<void> {
   if (!process.stderr.isTTY) {
-    core.warning(message);
+    logger.warn(message);
     await sleep(seconds * 1000);
     return;
   }
@@ -220,7 +220,7 @@ async function sendFormattedMessage(
       throw error;
     }
 
-    core.warning(
+    logger.warn(
       `Telegram rejected MarkdownV2 for a text chunk; falling back to plain text. ` +
         `scenarioId=${request.scenarioId} rawLength=${rawChunk.length} formattedLength=${formattedChunk.length} ` +
         `error="${getTelegramErrorDescription(error)}" preview="${summarizeChunkForLogs(rawChunk)}"`,
@@ -379,22 +379,28 @@ function createDraftMessageOptions() {
   };
 }
 
+async function sendTypingIndicatorForTarget(
+  bot: TextTransportBot,
+  chatId: string | number,
+  topicId?: number,
+): Promise<void> {
+  try {
+    await bot.api.sendChatAction(chatId, 'typing', {
+      ...(topicId !== undefined ? { message_thread_id: topicId } : {}),
+    });
+  } catch (error) {
+    logger.warn(
+      `Failed to send typing indicator: ${getTelegramErrorDescription(error)} ` +
+        `(chatId=${chatId}, topicId=${topicId ?? 'none'})`,
+    );
+  }
+}
+
 async function sendTypingIndicator(
   bot: TextTransportBot,
   request: ParsedActionInputs,
 ): Promise<void> {
-  try {
-    await bot.api.sendChatAction(request.chatId, 'typing', {
-      ...(request.topicId !== undefined
-        ? { message_thread_id: request.topicId }
-        : {}),
-    });
-  } catch (error) {
-    core.warning(
-      `Failed to send typing indicator: ${getTelegramErrorDescription(error)} ` +
-        `(chatId=${request.chatId}, topicId=${request.topicId ?? 'none'})`,
-    );
-  }
+  await sendTypingIndicatorForTarget(bot, request.chatId, request.topicId);
 }
 
 function getDraftStreamingChatId(chatId: string): number | undefined {
@@ -450,10 +456,10 @@ async function streamTextWithDraftApi(
   let replyMessageId: number | undefined;
   let lastMessageId: number | undefined;
 
-  // Show typing indicator so users see "typing…" at the top of the chat
-  // while draft frames appear below. The indicator expires after ~5s, so
-  // we refresh it periodically during long streams.
-  await bot.api.sendChatAction(draftChatId, 'typing');
+  // Telegram documents chat actions as lasting for ~5 seconds or less and
+  // recommends avoiding more than one update every 5 seconds, so we emit the
+  // initial indicator and refresh it on that cadence during longer streams.
+  await sendTypingIndicatorForTarget(bot, draftChatId, request.topicId);
   let lastTypingTime = Date.now();
 
   for (const [chunkIndex, chunk] of chunks.entries()) {
@@ -477,7 +483,7 @@ async function streamTextWithDraftApi(
 
       // Refresh the typing indicator before it expires
       if (Date.now() - lastTypingTime > TYPING_REFRESH_INTERVAL_MS) {
-        await bot.api.sendChatAction(draftChatId, 'typing');
+        await sendTypingIndicatorForTarget(bot, draftChatId, request.topicId);
         lastTypingTime = Date.now();
       }
 
@@ -501,7 +507,7 @@ async function streamTextWithDraftApi(
 
     // Refresh typing before the next chunk's draft frames begin
     if (!isLastChunk) {
-      await bot.api.sendChatAction(draftChatId, 'typing');
+      await sendTypingIndicatorForTarget(bot, draftChatId, request.topicId);
       lastTypingTime = Date.now();
     }
   }

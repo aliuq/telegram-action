@@ -1,4 +1,4 @@
-import * as core from '@actions/core';
+import { logger } from './logger.js';
 import type {
   ActRequestSummaryOptions,
   ResolvedAttachmentSource,
@@ -90,13 +90,13 @@ export function logActRequestSummary(options: ActRequestSummaryOptions): void {
     return;
   }
 
-  core.startGroup(
+  logger.startGroup(
     `[act] Telegram request debug${options.scenarioId ? ` (${options.scenarioId})` : ''}`,
   );
   for (const line of formatActRequestSummary(options).split('\n')) {
-    core.info(line);
+    logger.info(line);
   }
-  core.endGroup();
+  logger.endGroup();
 }
 
 /**
@@ -142,9 +142,9 @@ export function logActErrorDetails(error: unknown): void {
     return;
   }
 
-  core.startGroup('[act] Telegram request failure details');
+  logger.startGroup('[act] Telegram request failure details');
   for (const detail of formatActErrorDetails(error).split('\n')) {
-    core.info(detail);
+    logger.info(detail);
   }
-  core.endGroup();
+  logger.endGroup();
 }

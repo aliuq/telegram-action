@@ -1,33 +1,9 @@
 import { spawn } from 'node:child_process';
-import {
-  appendFileSync,
-  mkdtempSync,
-  readFileSync,
-  rmSync,
-  writeFileSync,
-} from 'node:fs';
+import { mkdtempSync, readFileSync, rmSync, writeFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { dirname, join } from 'node:path';
-import { getRequiredEnv } from '../src/env.ts';
-import {
-  buildWorkflowScenarioMatrix,
-  findScenarioById,
-  loadScenarios,
-  resolveScenarioSelection,
-} from './scenarios/index.ts';
-
-/**
- * Write a multiline-safe GitHub Actions output value.
- */
-function writeOutput(name: string, value: string): void {
-  const outputPath = process.env.GITHUB_OUTPUT;
-  if (!outputPath) {
-    throw new Error('GITHUB_OUTPUT environment variable is required');
-  }
-
-  const delimiter = `EOF_${name.toUpperCase()}_${Math.random().toString(36).slice(2)}`;
-  appendFileSync(outputPath, `${name}<<${delimiter}\n${value}\n${delimiter}\n`);
-}
+import { logger } from '../src/logger.ts';
+import { loadScenarios, resolveScenarioSelection } from './scenarios/index.ts';
 
 const ACTION_INPUT_NAMES = [
   'message',
@@ -100,7 +76,7 @@ async function runLoggedCommand(
   args: string[],
   env: NodeJS.ProcessEnv,
 ): Promise<number> {
-  console.info(
+  logger.info(
     `$ ${[command, ...args].map((arg) => shellEscape(arg)).join(' ')}`,
   );
 
@@ -114,48 +90,6 @@ async function runLoggedCommand(
     child.on('error', reject);
     child.on('close', (code) => resolveExitCode(code ?? 1));
   });
-}
-
-/**
- * Emit the scenario matrix for the integration workflow.
- */
-async function writeMatrix(): Promise<void> {
-  const scenarios = await loadScenarios();
-  const selection = resolveScenarioSelection(
-    scenarios,
-    process.env.SCENARIO_IDS,
-  );
-  const matrix = buildWorkflowScenarioMatrix(selection);
-
-  writeOutput('matrix', JSON.stringify(matrix));
-}
-
-/**
- * Emit the selected scenario's inputs as workflow outputs.
- */
-async function writeScenarioOutputs(): Promise<void> {
-  const scenarioId = getRequiredEnv('SCENARIO_ID');
-  const scenarios = await loadScenarios();
-  const scenario = findScenarioById(scenarios, scenarioId);
-
-  writeOutput('message', scenario.inputs.message ?? '');
-  writeOutput('message_file', scenario.inputs.message_file ?? '');
-  writeOutput('message_url', scenario.inputs.message_url ?? '');
-  writeOutput('stream_response', scenario.inputs.stream_response ?? 'false');
-  writeOutput(
-    'disable_link_preview',
-    scenario.inputs.disable_link_preview ?? 'true',
-  );
-  writeOutput('buttons', scenario.inputs.buttons ?? '');
-  writeOutput('attachment', scenario.inputs.attachment ?? '');
-  writeOutput('attachments', scenario.inputs.attachments ?? '');
-  writeOutput('attachment_type', scenario.inputs.attachment_type ?? '');
-  writeOutput('attachment_filename', scenario.inputs.attachment_filename ?? '');
-  writeOutput(
-    'supports_streaming',
-    scenario.inputs.supports_streaming ?? 'false',
-  );
-  writeOutput('expect_failure', String(Boolean(scenario.expect_failure)));
 }
 
 /**
@@ -174,15 +108,7 @@ function assertScenarioOutcome(
     );
   }
 
-  console.info(`Scenario '${scenarioId}' finished with the expected outcome.`);
-}
-
-function assertScenarioOutcomeFromEnv(): void {
-  assertScenarioOutcome(
-    getRequiredEnv('SCENARIO_ID'),
-    getRequiredEnv('EXPECT_FAILURE') === 'true',
-    getRequiredEnv('SCENARIO_OUTCOME'),
-  );
+  logger.info(`Scenario '${scenarioId}' finished with the expected outcome.`);
 }
 
 async function runSelectedScenarios(): Promise<void> {
@@ -192,85 +118,56 @@ async function runSelectedScenarios(): Promise<void> {
     process.env.SCENARIO_IDS,
   );
 
-  console.info(`Resolved ${selection.selectedScenarios.length} scenario(s).`);
+  logger.info(`Resolved ${selection.selectedScenarios.length} scenario(s).`);
 
   for (const scenario of selection.selectedScenarios) {
-    console.log(`::group::Run scenario — ${scenario.id}`);
     const outputFilePath = createGitHubOutputFile(`action-${scenario.id}`);
 
-    try {
-      const actionEnv: NodeJS.ProcessEnv = {
-        ...process.env,
-        ACT_SCENARIO_ID: scenario.id,
-        GITHUB_OUTPUT: outputFilePath,
-        TELEGRAM_ACTION_EXPECT_FAILURE: scenario.expect_failure
-          ? 'true'
-          : 'false',
-      };
+    await logger
+      .withGroup(`Run scenario — ${scenario.id}`, async () => {
+        const actionEnv: NodeJS.ProcessEnv = {
+          ...process.env,
+          ACT_SCENARIO_ID: scenario.id,
+          GITHUB_OUTPUT: outputFilePath,
+          TELEGRAM_ACTION_EXPECT_FAILURE: scenario.expect_failure
+            ? 'true'
+            : 'false',
+        };
 
-      for (const inputName of ACTION_INPUT_NAMES) {
-        actionEnv[`INPUT_${inputName.toUpperCase()}`] =
-          scenario.inputs[inputName] ?? '';
-      }
-
-      const exitCode = await runLoggedCommand(
-        'node',
-        ['dist/index.js'],
-        actionEnv,
-      );
-      const outputs = parseGitHubOutputFile(outputFilePath);
-      const outcome = exitCode === 0 ? 'success' : 'failure';
-
-      assertScenarioOutcome(scenario.id, scenario.expect_failure, outcome);
-
-      if (outcome === 'success') {
-        if (outputs.message_id) {
-          console.info(`message_id=${outputs.message_id}`);
+        for (const inputName of ACTION_INPUT_NAMES) {
+          actionEnv[`INPUT_${inputName.toUpperCase()}`] =
+            scenario.inputs[inputName] ?? '';
         }
-        if (outputs.status) {
-          console.info(`status=${outputs.status}`);
+
+        const exitCode = await runLoggedCommand(
+          'node',
+          ['dist/index.js'],
+          actionEnv,
+        );
+        const outputs = parseGitHubOutputFile(outputFilePath);
+        const outcome = exitCode === 0 ? 'success' : 'failure';
+
+        assertScenarioOutcome(scenario.id, scenario.expect_failure, outcome);
+
+        if (outcome === 'success') {
+          if (outputs.message_id) {
+            logger.info(`message_id=${outputs.message_id}`);
+          }
+          if (outputs.status) {
+            logger.info(`status=${outputs.status}`);
+          }
+        } else {
+          logger.info(`[expected failure] ${scenario.id}`);
         }
-      } else {
-        console.info(`[expected failure] ${scenario.id}`);
-      }
-    } finally {
-      cleanupGitHubOutputFile(outputFilePath);
-      console.log('::endgroup::');
-    }
+      })
+      .finally(() => {
+        cleanupGitHubOutputFile(outputFilePath);
+      });
   }
 }
 
-/**
- * Dispatch the requested workflow helper subcommand.
- */
-async function main(): Promise<void> {
-  const command = process.argv[2];
-
-  if (command === 'matrix') {
-    await writeMatrix();
-    return;
-  }
-
-  if (command === 'scenario') {
-    await writeScenarioOutputs();
-    return;
-  }
-
-  if (command === 'run-selection') {
-    await runSelectedScenarios();
-    return;
-  }
-
-  if (command === 'assert-outcome') {
-    assertScenarioOutcomeFromEnv();
-    return;
-  }
-
-  throw new Error(`Unknown workflow command: ${command ?? '<missing>'}`);
-}
-
-void main().catch((error) => {
-  console.error(
+void runSelectedScenarios().catch((error) => {
+  logger.error(
     error instanceof Error ? (error.stack ?? error.message) : String(error),
   );
   process.exit(1);

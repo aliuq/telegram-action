@@ -125,7 +125,7 @@ The implementation follows Telegram's current Bot API capabilities:
 
 If the final text exceeds Telegram's message limit, the action sends it as multiple reply-chained messages so the output stays readable.
 
-The draft-streaming path displays a "typing…" indicator at the top of the chat while frames arrive, and adds a natural inter-frame delay (100–400 ms, scaled by piece length) so Telegram mobile clients render visible, progressive text.
+The draft-streaming path displays a "typing…" indicator at the top of the chat while frames arrive, and adds a natural inter-frame delay (100–400 ms, scaled by piece length) so Telegram mobile clients render visible, progressive text. The typing indicator is refreshed at most once every 5 seconds to stay within Telegram's documented chat-action lifetime/rate guidance.
 
 ```yaml
 - name: Stream a Telegram response
@@ -304,6 +304,7 @@ The runtime is intentionally split into a few focused modules:
 - `src/messages.ts`: message-source resolution and Telegram-safe text chunking
 - `src/attachments.ts`: local file and attachment source resolution
 - `src/source-utils.ts`: shared path and URL helpers
+- `src/logger.ts`: runtime-aware logging with timestamps for GitHub Actions and local runs
 - `src/telegram.ts`: Telegram API request construction and dispatch
 - `src/act-logging.ts`: local-only debug logging for `act`
 
@@ -351,7 +352,7 @@ The repository includes a single local runner built with [@clack/prompts](https:
 - `act`: execute the GitHub Actions workflow locally through `act`
 - `validate`: check the scenario catalog without sending messages
 
-Every run stores the exact rerun command plus a log file in `.test-history/`, and the prompt can quickly rerun the previous command.
+Every run stores the exact rerun command plus a log file in `.test-history/`, and the prompt can quickly rerun the previous command. The shared logger prefixes each emitted line with an ISO 8601 timestamp so local reruns, Docker sessions, and saved logs are easier to correlate.
 
 Before running it, create a repository-root `.env` file:
 
@@ -373,7 +374,7 @@ bun run test -- --all
 bun run test:validate -- buttons-flat
 ```
 
-The runner lets you choose the environment first, then pick either a manual scenario subset or the full catalog. The `act` mode preserves ANSI colors and saves the full colored output to `.test-history/logs/`.
+The runner lets you choose the environment first, then pick either a manual scenario subset or the full catalog. The `act` mode preserves ANSI colors and saves the full colored output to `.test-history/logs/`. GitHub Actions keeps collapsible log groups, while plain Node or Docker runs fall back to regular timestamped text output instead of raw `::group::` control lines. In CI-style environments, the runner also downgrades `@clack/prompts` summary boxes to plain log lines so saved logs and workflow output stay readable.
 
 During local `act` runs, the action prints an extra debug group with the scenario id, Telegram method, masked chat id, button counts, attachment source kind, and nested network error details when a request fails.
 
@@ -381,7 +382,7 @@ The `invalid-buttons` test case is expected to fail because the action rejects m
 
 ### 4. Direct `act` usage
 
-You can also invoke the bundled workflow directly. The workflow accepts a single `scenario_ids` input and runs the selected scenarios sequentially inside one `notification` job.
+You can also invoke the bundled workflow directly. The workflow accepts a single `scenario_ids` input and runs the selected scenarios sequentially inside one `notification` job through `scripts/workflow.ts`.
 
 ```bash
 act workflow_dispatch -n -W .github/workflows/test.yaml -j notification \

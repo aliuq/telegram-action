@@ -112,7 +112,7 @@ export const STREAMING_FRAME_DELAY_MIN_MS = 100;
 export const STREAMING_FRAME_DELAY_MAX_MS = 400;
 
 /** How often to refresh the typing indicator during streaming (ms). */
-export const TYPING_REFRESH_INTERVAL_MS = 4000;
+export const TYPING_REFRESH_INTERVAL_MS = 5000;
 
 /** Maximum number of rate-limit retries for a single draft frame. */
 export const MAX_DRAFT_RETRIES = 5;

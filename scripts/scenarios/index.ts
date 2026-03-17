@@ -1,8 +1,4 @@
-import type {
-  ScenarioDefinition,
-  ScenarioSelection,
-  WorkflowScenarioMatrix,
-} from '../../src/types.ts';
+import type { ScenarioDefinition, ScenarioSelection } from '../../src/types.ts';
 import { createButtonScenarios } from './buttons.ts';
 import { createDocumentScenarios } from './documents.ts';
 import { createFailureScenarios } from './failures.ts';
@@ -121,18 +117,5 @@ export function resolveScenarioSelection(
     runAll: false,
     scenarioIds: selectedScenarios.map((scenario) => scenario.id),
     selectedScenarios,
-  };
-}
-
-/**
- * Build the GitHub Actions matrix format expected by the integration workflow.
- */
-export function buildWorkflowScenarioMatrix(
-  selection: ScenarioSelection,
-): WorkflowScenarioMatrix {
-  return {
-    include: selection.selectedScenarios.map((scenario) => ({
-      scenario_id: scenario.id,
-    })),
   };
 }

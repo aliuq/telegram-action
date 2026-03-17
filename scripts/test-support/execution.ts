@@ -9,6 +9,13 @@ import { parseActionInputs } from '../../src/inputs.ts';
 import { sendTelegramMessage } from '../../src/telegram.ts';
 import type { ScenarioDefinition, TestSelection } from '../../src/types.ts';
 import {
+  showCancel,
+  showError,
+  showNote,
+  showStep,
+  showSuccess,
+} from './output.ts';
+import {
   buildRawActionInputs,
   describeRequestMethod,
   ROOT,
@@ -74,7 +81,7 @@ export async function runActSelection(
   ensureSecretFileExists();
   const actCommand = formatActCommand(selection);
   const logStream = createWriteStream(logFilePath, { flags: 'a' });
-  p.note(actCommand, 'Command to execute');
+  showNote(actCommand, 'Command to execute');
 
   const shouldRun = await p.confirm({
     message: selection.runAll
@@ -84,9 +91,12 @@ export async function runActSelection(
   });
 
   if (p.isCancel(shouldRun) || !shouldRun) {
-    p.cancel('Cancelled before execution');
+    showCancel('Cancelled before execution');
     process.exit(0);
   }
+
+  // Add spacing after the prompt before act's output starts for better readability
+  console.log();
 
   const scriptArgs = ['-qefc', actCommand, '/dev/null'];
   const child = spawn('script', scriptArgs, {
@@ -120,7 +130,7 @@ export async function runActSelection(
   logStream.end();
 
   if (!sawOutput) {
-    p.log.error('act exited without output');
+    showError('act exited without output');
   }
 
   if (exitCode !== 0) {
@@ -159,15 +169,15 @@ export async function runSourceSelection(
             attachmentType: request.attachmentType,
             attachmentSource: request.attachmentSource,
           });
-          p.note(requestSummary, `[source] Send preview (${scenario.id})`);
+          showNote(requestSummary, `[source] Send preview (${scenario.id})`);
           logLines.push(`[debug:${scenario.id}]\n${requestSummary}`);
           await sendTelegramMessage(request);
         } catch (error) {
           const details = formatActErrorDetails(error);
-          p.note(details, `[source] Send failure details (${scenario.id})`);
+          showNote(details, `[source] Send failure details (${scenario.id})`);
           logLines.push(`[debug:${scenario.id}]\n${details}`);
           const message = `[expected failure] ${scenario.id}: ${error instanceof Error ? error.message : String(error)}`;
-          p.log.step(message);
+          showStep(message);
           logLines.push(message);
           continue;
         }
@@ -192,12 +202,12 @@ export async function runSourceSelection(
         attachmentType: request.attachmentType,
         attachmentSource: request.attachmentSource,
       });
-      p.note(requestSummary, `[source] Send preview (${scenario.id})`);
+      showNote(requestSummary, `[source] Send preview (${scenario.id})`);
       logLines.push(`[debug:${scenario.id}]\n${requestSummary}`);
 
       const result = await sendTelegramMessage(request);
       const message = `Sent scenario "${scenario.id}" (message_id=${result.message_id})`;
-      p.log.success(message);
+      showSuccess(message);
       logLines.push(message);
     }
   } finally {
@@ -229,7 +239,7 @@ export async function runValidationSelection(
         await runValidation();
       } catch (error) {
         const message = `[expected failure] ${scenario.id}: ${error instanceof Error ? error.message : String(error)}`;
-        p.log.step(message);
+        showStep(message);
         logLines.push(message);
         continue;
       }
@@ -241,7 +251,7 @@ export async function runValidationSelection(
 
     await runValidation();
     const message = `Validated scenario "${scenario.id}" against the action parser`;
-    p.log.success(message);
+    showSuccess(message);
     logLines.push(message);
   }
 

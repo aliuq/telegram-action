@@ -154,13 +154,6 @@ export interface ScenarioSelection {
 }
 
 /**
- * GitHub Actions matrix payload used by the integration workflow job fan-out.
- */
-export interface WorkflowScenarioMatrix {
-  include: Array<{ scenario_id: string }>;
-}
-
-/**
  * Supported execution modes for the local runner.
  */
 export type TestMode = 'source' | 'act' | 'validate';

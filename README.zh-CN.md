@@ -113,7 +113,7 @@
       Uploading artifacts
 ```
 
-适合流式响应的场景包括长任务进度、AI 输出、渐进式日志。普通短通知仍然建议直接使用常规 `message` 发送。当前 `stream_response` 仅支持纯文本，不能和 `attachment` 或 `attachments` 混用。
+适合流式响应的场景包括长任务进度、AI 输出、渐进式日志。普通短通知仍然建议直接使用常规 `message` 发送。当前 `stream_response` 仅支持纯文本，不能和 `attachment` 或 `attachments` 混用。typing 指示器的刷新频率最多每 5 秒一次，以符合 Telegram 对 chat action 生命周期 / 频率的文档约束。
 
 ### 带附件消息
 
@@ -254,7 +254,9 @@ bun run test:act
 bun run test:validate
 ```
 
-测试脚本会把最近一次执行命令和日志保存在 `.test-history/` 里，并支持快速重跑上一次命令。`act` 模式会保留彩色输出。GitHub Actions 中的 `notification` job 现在也会在单个 runner 里顺序执行所选场景，而不是为每个场景单独起一个 job。
+测试脚本会把最近一次执行命令和日志保存在 `.test-history/` 里，并支持快速重跑上一次命令。共享 logger 会为每一行输出补上 ISO 8601 时间戳，方便在本地、Docker 和落盘日志里对齐问题。`act` 模式会保留彩色输出。GitHub Actions 中的 `notification` job 现在也会在单个 runner 里顺序执行所选场景，并通过 `scripts/workflow.ts` 直接驱动发送流程，而不是为每个场景单独起一个 job。
+
+GitHub Actions 环境仍然保留可折叠的日志分组；普通 Node / Docker 运行时则会退回普通文本日志，不再直接输出原始 `::group::` / `::endgroup::` 控制行。在 CI 风格环境里，runner 还会把 `@clack/prompts` 的总结框降级成普通日志行，避免工作流日志和落盘日志出现难读的窄框/竖排输出。
 
 ## 常见问题
 

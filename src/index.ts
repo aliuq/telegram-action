@@ -1,6 +1,7 @@
 import * as core from '@actions/core';
 import { isActRun, logActErrorDetails } from './act-logging.js';
 import { parseActionInputs, readRawActionInputs } from './inputs.js';
+import { logger } from './logger.js';
 import { sendTelegramMessage } from './telegram.js';
 
 function shouldSuppressFailureAnnotations(): boolean {
@@ -22,7 +23,7 @@ export async function run(): Promise<void> {
     core.setOutput('status', 'success');
 
     if (isActRun()) {
-      core.info(
+      logger.info(
         `[act] Sent Telegram message successfully (message_id=${result.message_id})`,
       );
     }
@@ -33,11 +34,9 @@ export async function run(): Promise<void> {
       error instanceof Error ? (error.stack ?? error.message) : String(error);
 
     if (!isActRun()) {
-      core.startGroup('telegram-action failure');
-      for (const line of details.split('\n')) {
-        core.info(line);
-      }
-      core.endGroup();
+      await logger.withGroup('telegram-action failure', () => {
+        logger.info(details);
+      });
     }
     logActErrorDetails(error);
 
@@ -46,7 +45,7 @@ export async function run(): Promise<void> {
       return;
     }
 
-    core.setFailed(message);
+    logger.fail(message);
   }
 }
 
