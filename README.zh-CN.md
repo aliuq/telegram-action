@@ -8,7 +8,6 @@
 
 - 发送 MarkdownV2 文本消息
 - 超长文本自动拆成回复链
-- 在支持的私聊里用 `sendMessageDraft` 做流式文本输出
 - 发送单行或多行 inline buttons
 - 从内联文本、本地文件、远程 URL 读取消息正文
 - 发送本地文件、公共 URL 或 Telegram `file_id` 附件
@@ -84,34 +83,18 @@
 
 当文本消息超过 Telegram 限制时，Action 会自动拆分并按顺序发送。后续每一段都会回复前一段消息，保证会话连续性。若设置了按钮，按钮只会附加在最后一段消息上。
 
-### 流式响应
+### Streaming response 说明
 
-如果你希望 Telegram 中的文本像 AI 助手那样逐步出现，可以设置 `stream_response: "true"`。
+Streaming response 现在会回到主 Action 流程里处理，不再单独对外暴露 `telegram-action/stream` 入口。
 
-现在的实现按 Telegram 目前的 Bot API 能力来走：
+目前定下来的方向是：
 
-- 在支持的私聊里，Action 会先用 `sendMessageDraft` 做渐进式输出，再发送最终消息
-- 在群组、频道或其他不能使用 `sendMessageDraft` 的场景里，会回退到普通 `sendMessage`
+- 和 stream 相关的字段放回主 Action 输入与工作流配置
+- 运行时仍然从主入口（`src/index.ts` / `dist/index.js`）读取并处理流
+- 流结束通过显式 done 标记、自然 EOF、空闲超时、总时长超时来判断
+- Telegram draft streaming 继续走 `@grammyjs/stream`，不自己重复实现 `sendMessageDraft`
 
-如果最终文本超过 Telegram 单条消息限制，本 Action 会把最终消息拆成多条回复链，保证阅读连续性。
-
-```yaml
-- name: Stream a Telegram response
-  uses: aliuq/telegram-action@master
-  env:
-    TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
-    TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
-  with:
-    stream_response: "true"
-    message: |
-      Build started...
-
-      Resolving dependencies
-      Compiling sources
-      Uploading artifacts
-```
-
-如果你要发进度、长输出，或者希望 Telegram 里能看到逐步生成的效果，用 `stream_response` 会比较合适。短一点、结果导向的通知，直接发普通 `message` 通常更省事。这个选项只支持纯文本，不能和 `attachment` 或 `attachments` 混用。typing 指示器最多每 5 秒刷新一次，和 Telegram 文档里的 chat action 约束保持一致。
+在这些字段真正落地前，README 下面保留的仍然是当前已经可用的非流式输入说明。
 
 ### 带附件消息
 
@@ -181,7 +164,6 @@ Telegram 频道评论区不是单条消息级别的 Bot API 开关。如果 `TEL
 - `message`：消息内容，可选。单附件场景里会尽量作为 caption 发送；如果用的是 `attachments`，它会先作为独立文本消息发出去
 - `message_file`：仓库内 UTF-8 文本文件路径，可选
 - `message_url`：远程 HTTP(S) URL，可选
-- `stream_response`：是否启用文本流式响应。私聊通过 Action 内置的 `sendMessageDraft` 流程发送，超长输出会自动落成多条回复链消息；其他聊天自动回退到普通 `sendMessage`，取值 `"true"` 或 `"false"`。该选项当前只支持纯文本消息，不能与 `attachment` 或 `attachments` 同时使用
 - `buttons`：按钮 JSON，可选
 - `disable_link_preview`：`"true"` 或 `"false"`
 - `attachment`：附件路径 / URL / Telegram `file_id`
@@ -192,8 +174,6 @@ Telegram 频道评论区不是单条消息级别的 Bot API 开关。如果 `TEL
 
 `message`、`message_file`、`message_url` 三者只能设置一个；同时你仍然需要至少提供一个消息来源、`attachment` 或 `attachments`。
 `attachment` 与 `attachments` 不能同时使用；使用 `attachments` 时不要再设置 `attachment_type` 或 `attachment_filename`。
-`stream_response` 当前只支持纯文本消息，不能与 `attachment` 或 `attachments` 同时使用。
-Telegram 真正的 draft streaming 目前只适用于私聊，因此非私聊场景会自动使用普通非流式发送。
 对于 `attachments`，若视频条目需要流媒体模式，请在 JSON 条目里设置 `supports_streaming: true`。
 
 ## 输出参数
@@ -240,6 +220,7 @@ bun run test -- --all
 本地现在只保留一个 runner，里面有三种模式：
 
 - `source`：直接运行源码环境
+- `source`：直接运行主 Action 入口（`src/index.ts`）
 - `act`：通过 `act` 运行 GitHub Actions 环境
 - `validate`：只做场景和输入校验，不真正发消息
 

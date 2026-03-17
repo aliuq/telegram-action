@@ -8,7 +8,6 @@ For Chinese documentation, see [README.zh-CN.md](./README.zh-CN.md). The English
 
 - Send MarkdownV2-formatted text
 - Split long text into a reply chain automatically
-- Stream text in supported private chats with `sendMessageDraft`
 - Attach inline keyboard buttons in flat or nested JSON
 - Load message text from inline input, local files, or remote URLs
 - Send media from local files, public URLs, or Telegram file IDs
@@ -112,36 +111,18 @@ Each button must contain a `text` field and exactly one Telegram action field su
 
 When a text message exceeds Telegram's limit, the action splits it automatically and sends the chunks in order. Every later chunk replies to the previous chunk so the full message stays connected in the chat history. When buttons are present, they are attached to the final chunk only.
 
-### Streaming responses
+### Streaming response note
 
-Set `stream_response: "true"` when you want a text-only message to appear progressively, similar to an AI assistant or a long-running command log.
+Streaming response is being folded back into the main action flow. There is no separate public `telegram-action/stream` entry in the current interface.
 
-The implementation follows the current Bot API limits:
+The intended direction is straightforward:
 
-- in supported private chats, the action uses `sendMessageDraft`, then posts the final persisted message
-- in groups, channels, or any other chat that cannot use `sendMessageDraft`, it falls back to the normal `sendMessage` flow
+- stream-related fields belong to the main action inputs and workflow configuration
+- the runtime reads the upstream text stream from the main entry path (`src/index.ts` / `dist/index.js`)
+- stream completion is judged by explicit done markers, natural EOF, idle timeout, or max duration
+- Telegram draft delivery should keep using `@grammyjs/stream` internally instead of reimplementing `sendMessageDraft`
 
-If the final text exceeds Telegram's message limit, the action sends it as multiple reply-chained messages so the output stays readable.
-
-The draft-streaming path also sends a "typing…" indicator while frames arrive. Frame timing stays in the 100–400 ms range, scaled by piece length, so Telegram clients have enough time to show visible progress. The typing indicator is refreshed at most once every 5 seconds to stay within Telegram's documented chat-action guidance.
-
-```yaml
-- name: Stream a Telegram response
-  uses: aliuq/telegram-action@master
-  env:
-    TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
-    TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
-  with:
-    stream_response: "true"
-    message: |
-      Build started...
-
-      Resolving dependencies
-      Compiling sources
-      Uploading artifacts
-```
-
-Use streaming when visible progress helps. For short final notifications, a normal `message` send is usually simpler. `stream_response` only works for text and cannot be combined with `attachment` or `attachments`.
+Until those fields land, the public interface remains the non-streaming inputs documented below.
 
 ### Message with attachments
 
@@ -270,7 +251,6 @@ Telegram channel comments are not controlled by a per-message Bot API flag. If y
 | `message` | Inline message text. Mutually exclusive with `message_file` and `message_url`. For a single attachment it becomes the caption when it fits Telegram's caption limit; with `attachments`, it is sent as a separate text message before the media batches | No | `""` |
 | `message_file` | Repository-local UTF-8 text file whose contents become the message body. Mutually exclusive with `message` and `message_url` | No | `""` |
 | `message_url` | Remote HTTP(S) URL whose response body becomes the message body. Mutually exclusive with `message` and `message_file` | No | `""` |
-| `stream_response` | Stream a text-only response in supported private chats using the action's built-in `sendMessageDraft` flow. Long outputs are finalized as reply-chained messages. Other chats fall back to normal `sendMessage` behavior. Accepts only `"true"` or `"false"` | No | `"false"` |
 | `buttons` | Inline keyboard JSON in flat or nested format | No | `""` |
 | `disable_link_preview` | Whether to disable link previews. Accepts only `"true"` or `"false"` | No | `"true"` |
 | `attachment` | Local file path, public URL, or Telegram file ID to send as an attachment | No | `""` |
@@ -281,8 +261,6 @@ Telegram channel comments are not controlled by a per-message Bot API flag. If y
 
 Exactly one of `message`, `message_file`, and `message_url` may be set. You must still provide at least one message source, `attachment`, or `attachments`.
 `attachment` and `attachments` are mutually exclusive. When `attachments` is used, do not set `attachment_type` or `attachment_filename`.
-`stream_response` currently supports text-only messages. Do not combine it with `attachment` or `attachments`.
-Telegram's true draft streaming is private-chat-only, so non-private chats automatically fall back to the normal non-streaming send path.
 For `attachments`, set streaming per item inside the JSON payload with `supports_streaming: true` on video items.
 
 ## Outputs
@@ -300,6 +278,7 @@ The runtime is split into a few focused modules:
 - `src/env.ts`: shared environment variable helpers for the action and local tooling
 - `src/inputs.ts`: input reading, validation, and normalization
 - `src/messages.ts`: message-source resolution and Telegram-safe text chunking
+- `src/stream.ts`: internal streaming helpers used by the main action flow
 - `src/attachments.ts`: local file and attachment source resolution
 - `src/source-utils.ts`: shared path and URL helpers
 - `src/logger.ts`: runtime-aware logging with timestamps for GitHub Actions and local runs
@@ -346,7 +325,7 @@ Bun automatically loads the repository-root `.env` file for `bun run`, so the se
 
 The repository has one local runner built with [@clack/prompts](https://github.com/bombshell-dev/clack). It supports three modes:
 
-- `source`: run the source-mode Telegram sender directly from the current workspace
+- `source`: run the main action entry (`src/index.ts`) directly from the current workspace
 - `act`: execute the GitHub Actions workflow locally through `act`
 - `validate`: check the scenario catalog without sending messages
 
