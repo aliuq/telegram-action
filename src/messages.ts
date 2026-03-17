@@ -17,11 +17,6 @@ export interface TelegramMessageChunk {
   formatted: string;
 }
 
-export interface StreamingFrameOptions {
-  minFrames: number;
-  maxFrames: number;
-}
-
 interface MessageSegment {
   type: 'text' | 'code';
   raw: string;
@@ -340,8 +335,8 @@ function mergeAdjacentChunks(
 
 /**
  * Split text into Telegram-safe chunks while preserving both raw and formatted
- * forms. The raw form is reused by draft streaming, while the formatted form is
- * what we actually persist with `sendMessage`.
+ * forms. The raw form is useful to callers that still need the original text,
+ * while the formatted form is what we actually persist with `sendMessage`.
  */
 export function splitTelegramMessageChunks(message: string, limit: number): TelegramMessageChunk[] {
   if (!message) {
@@ -359,118 +354,4 @@ export function splitTelegramMessageChunks(message: string, limit: number): Tele
   }
 
   return splitPlainTelegramMessageChunks(message, limit);
-}
-
-function splitOversizedStreamingToken(token: string, maxTokenLength: number): string[] {
-  if (token.length <= maxTokenLength || /\s/.test(token)) {
-    return [token];
-  }
-
-  const chunks: string[] = [];
-  for (let index = 0; index < token.length; index += maxTokenLength) {
-    chunks.push(token.slice(index, index + maxTokenLength));
-  }
-
-  return chunks;
-}
-
-function getStreamingTokens(message: string, maxTokenLength: number): string[] {
-  const rawTokens = message.match(/[^\s]+(?:[ \t]+)?|\n+/g) ?? [message];
-  return rawTokens.flatMap((token) => splitOversizedStreamingToken(token, maxTokenLength));
-}
-
-/**
- * Break formatted text into smaller visible pieces for draft streaming. Natural
- * boundaries are preferred, but long uninterrupted text is still forced to move
- * forward so the stream never stalls.
- */
-function buildStreamingPieces(message: string, targetCharactersPerPiece = 120): string[] {
-  if (!message) {
-    return [];
-  }
-
-  const maxTokenLength = Math.max(1, targetCharactersPerPiece);
-  const tokens = getStreamingTokens(message, maxTokenLength);
-  const pieces: string[] = [];
-  let current = '';
-
-  for (const token of tokens) {
-    current += token;
-    const minimumNaturalBoundaryLength = Math.max(1, Math.ceil(targetCharactersPerPiece * 0.85));
-    const shouldEmit =
-      current.trim().length > 0 &&
-      (current.length >= targetCharactersPerPiece ||
-        ((current.endsWith('\n\n') || current.endsWith('\n')) &&
-          current.length >= minimumNaturalBoundaryLength));
-
-    if (!shouldEmit) {
-      continue;
-    }
-
-    if (current) {
-      pieces.push(current);
-    }
-    current = '';
-  }
-
-  if (current) {
-    pieces.push(current);
-  }
-
-  return pieces;
-}
-
-function buildStreamingSegmentPieces(
-  segment: MessageSegment,
-  targetCharactersPerPiece: number,
-): string[] {
-  if (segment.type === 'code') {
-    // Code blocks are revealed atomically to avoid unclosed pre-entity parse errors.
-    return [segment.raw];
-  }
-
-  return buildStreamingPieces(segment.raw, targetCharactersPerPiece);
-}
-
-/**
- * Build progressively longer formatted frames for project-local draft
- * streaming. Each next frame is simply "all previous raw text plus one more
- * piece", independently re-formatted into valid MarkdownV2. This avoids
- * invalid partial escape sequences that occur when slicing pre-formatted text.
- * Fenced code blocks are only introduced as complete units so every draft frame
- * remains valid Telegram MarkdownV2.
- */
-export function buildStreamingFrames(message: string, options: StreamingFrameOptions): string[] {
-  if (!message) {
-    return [];
-  }
-
-  const formattedMessage = formatTelegramMessage(message);
-  const desiredFrameCount = Math.max(
-    options.minFrames,
-    Math.min(options.maxFrames, Math.ceil(formattedMessage.length / 120)),
-  );
-  // Use raw message length for piece sizing since pieces are now raw text.
-  const targetCharactersPerPiece = Math.max(1, Math.ceil(message.length / desiredFrameCount));
-  const pieces = parseMessageSegments(message).flatMap((segment) =>
-    buildStreamingSegmentPieces(segment, targetCharactersPerPiece),
-  );
-  const frames: string[] = [];
-  let currentRaw = '';
-
-  for (const piece of pieces) {
-    currentRaw += piece;
-    // Format each accumulated frame independently so every frame is
-    // guaranteed to be valid MarkdownV2 on its own.
-    const formatted = formatTelegramMessage(currentRaw);
-    if (formatted !== frames.at(-1)) {
-      frames.push(formatted);
-    }
-  }
-
-  if (formattedMessage !== frames.at(-1)) {
-    frames.push(formattedMessage);
-  }
-
-  return frames;
 }

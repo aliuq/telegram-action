@@ -14,10 +14,6 @@ inputs:
     description: "Remote HTTP(S) URL whose response body becomes the message body."
     required: false
     default: ""
-  stream_response:
-    description: 'Stream a text-only response in supported private chats using the action''s built-in sendMessageDraft flow. Long outputs become reply-chained final messages. Other chats fall back to normal sendMessage behavior. The typing indicator is refreshed at most once every 5 seconds. Only "true" and "false" are accepted.'
-    required: false
-    default: "false"
   buttons:
     description: >
       Inline keyboard buttons in JSON. Supports two formats:

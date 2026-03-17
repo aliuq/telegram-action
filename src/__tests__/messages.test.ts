@@ -1,6 +1,5 @@
 import { describe, expect, test } from 'vitest';
 import {
-  buildStreamingFrames,
   formatTelegramMessage,
   splitTelegramMessage,
   splitTelegramMessageChunks,
@@ -133,73 +132,6 @@ describe('splitTelegramMessageChunks', () => {
       const endsNaturally =
         chunk.raw.endsWith('\n\n') || chunk.raw.endsWith('\n') || chunk.raw.endsWith(' ');
       expect(endsNaturally).toBe(true);
-    }
-  });
-});
-
-// ── buildStreamingFrames ─────────────────────────────────────────────────────
-
-describe('buildStreamingFrames', () => {
-  test('returns empty array for empty input', () => {
-    expect(buildStreamingFrames('', { minFrames: 5, maxFrames: 10 })).toEqual([]);
-  });
-
-  test('generates at least minFrames for normal text', () => {
-    const message =
-      'Hello world, this is a test message with enough content to generate multiple frames.';
-    const frames = buildStreamingFrames(message, {
-      minFrames: 3,
-      maxFrames: 10,
-    });
-    expect(frames.length).toBeGreaterThanOrEqual(1);
-  });
-
-  test('last frame equals full formatted message', () => {
-    const message = 'Hello **bold** and _italic_ text with `code`.';
-    const frames = buildStreamingFrames(message, {
-      minFrames: 3,
-      maxFrames: 10,
-    });
-    const fullFormatted = formatTelegramMessage(message);
-    expect(frames.at(-1)).toBe(fullFormatted);
-  });
-
-  test('frames are progressively longer', () => {
-    const message = 'word '.repeat(100);
-    const frames = buildStreamingFrames(message, {
-      minFrames: 5,
-      maxFrames: 15,
-    });
-
-    for (let i = 1; i < frames.length; i++) {
-      expect(frames[i].length).toBeGreaterThanOrEqual(frames[i - 1].length);
-    }
-  });
-
-  test('all frames are valid formatted text (no duplicates in sequence)', () => {
-    const message = 'Section one.\n\nSection two.\n\nSection three.';
-    const frames = buildStreamingFrames(message, {
-      minFrames: 2,
-      maxFrames: 5,
-    });
-
-    for (let i = 1; i < frames.length; i++) {
-      expect(frames[i]).not.toBe(frames[i - 1]);
-    }
-  });
-
-  test('handles code blocks atomically', () => {
-    const message = 'Before\n```js\nconst x = 1;\n```\nAfter';
-    const frames = buildStreamingFrames(message, {
-      minFrames: 2,
-      maxFrames: 5,
-    });
-
-    // Code blocks should appear complete, not partially
-    for (const frame of frames) {
-      const codeBlockOpens = (frame.match(/```/g) ?? []).length;
-      // If a code block appears, it should have matching open/close (even count)
-      expect(codeBlockOpens % 2).toBe(0);
     }
   });
 });

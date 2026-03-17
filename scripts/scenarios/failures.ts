@@ -34,24 +34,5 @@ export function createFailureScenarios(): ScenarioDefinition[] {
         attachments: '[{"type":"document","source":"scripts/fixtures/sample-document.txt"}]',
       },
     }),
-    createScenario({
-      id: 'stream-response-attachment-conflict',
-      description: 'Streaming text mode should reject attachment sends',
-      expect_failure: true,
-      inputs: {
-        message: 'This should fail because streaming responses are text-only for now.',
-        stream_response: 'true',
-        attachment: 'scripts/fixtures/sample-photo.webp',
-        attachment_type: 'photo',
-      },
-    }),
-    createScenario({
-      id: 'stream-response-missing-message',
-      description: 'Streaming mode should fail when no text message source is provided',
-      expect_failure: true,
-      inputs: {
-        stream_response: 'true',
-      },
-    }),
   ];
 }

@@ -46,7 +46,6 @@ export function buildRawActionInputs(
     message: scenario.inputs.message,
     messageFile: scenario.inputs.message_file,
     messageUrl: scenario.inputs.message_url,
-    streamResponse: scenario.inputs.stream_response,
     buttons: scenario.inputs.buttons,
     topicId: useRealEnv ? getOptionalEnv('TELEGRAM_TOPIC_ID') : '',
     replyToMessageId: useRealEnv ? getOptionalEnv('TELEGRAM_REPLY_TO_MESSAGE_ID') : '',

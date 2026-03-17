@@ -58,8 +58,6 @@ export interface RawActionInputs {
   messageFile: string;
   /** Remote HTTP(S) URL whose body becomes the message text. */
   messageUrl: string;
-  /** Raw toggle for draft-style streaming. */
-  streamResponse: string;
   /** Raw inline keyboard JSON. */
   buttons: string;
   /** Raw topic/thread id from the environment boundary. */
@@ -102,8 +100,6 @@ export interface ParsedActionInputs {
   chatId: string;
   /** Resolved message body, if present. */
   message?: string;
-  /** Whether the request should try draft-style streaming. */
-  streamResponse: boolean;
   /** Final link preview toggle. */
   disableLinkPreview: boolean;
   /** Parsed topic/thread id, if present. */
@@ -170,8 +166,6 @@ export interface ScenarioInputs {
   message_file: string;
   /** Scenario-local message URL input. */
   message_url: string;
-  /** Scenario-local streaming toggle. */
-  stream_response: string;
   /** Scenario-local link preview toggle. */
   disable_link_preview: string;
   /** Scenario-local button JSON. */

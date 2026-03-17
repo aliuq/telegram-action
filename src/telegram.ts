@@ -5,18 +5,10 @@ import {
   ATTACHMENT_SENDERS,
   MAX_DRAFT_RETRIES,
   MEDIA_GROUP_BUILDERS,
-  STREAMING_FRAME_DELAY_MAX_MS,
-  STREAMING_FRAME_DELAY_MIN_MS,
-  STREAMING_FRAME_DELAY_MS,
-  STREAMING_MULTI_CHUNK_FRAMES,
-  STREAMING_MULTI_CHUNK_TOTAL_FRAME_BUDGET,
-  STREAMING_SINGLE_CHUNK_FRAMES,
   TELEGRAM_MEDIA_GROUP_LIMIT,
-  TYPING_REFRESH_INTERVAL_MS,
 } from './constants.js';
 import { logger } from './logger.js';
 import {
-  buildStreamingFrames,
   formatTelegramMessage,
   splitTelegramMessageChunks,
   TELEGRAM_CAPTION_LIMIT,
@@ -26,30 +18,6 @@ import type { AttachmentType, ParsedActionInputs, ParsedAttachmentItem } from '.
 
 function sleep(ms: number): Promise<void> {
   return new Promise((resolve) => setTimeout(resolve, ms));
-}
-
-/**
- * Compute an inter-frame delay proportional to the new content size so shorter
- * pieces fly by and longer ones pause a bit longer — matching how a human
- * would perceive streaming text.
- */
-function computeFrameDelay(pieceLength: number): number {
-  const scaled = STREAMING_FRAME_DELAY_MS + pieceLength * 0.4;
-  return Math.min(STREAMING_FRAME_DELAY_MAX_MS, Math.max(STREAMING_FRAME_DELAY_MIN_MS, scaled));
-}
-
-function getFramesPerChunk(chunkCount: number): number {
-  if (chunkCount <= 1) {
-    return STREAMING_SINGLE_CHUNK_FRAMES;
-  }
-
-  return Math.max(
-    1,
-    Math.min(
-      STREAMING_MULTI_CHUNK_FRAMES,
-      Math.floor(STREAMING_MULTI_CHUNK_TOTAL_FRAME_BUDGET / chunkCount),
-    ),
-  );
 }
 
 function getRetryAfterSeconds(error: unknown): number | undefined {
@@ -210,31 +178,6 @@ async function sendFormattedMessage(
   }
 }
 
-async function sendDraftFrame(
-  bot: TextTransportBot,
-  chatId: number,
-  draftId: number,
-  frame: string,
-): Promise<void> {
-  try {
-    await retryOnRateLimit(
-      () => bot.api.sendMessageDraft(chatId, draftId, frame, createDraftMessageOptions()),
-      {
-        maxRetries: MAX_DRAFT_RETRIES,
-        label: 'Draft frame',
-      },
-    );
-  } catch (error) {
-    // Draft frames are ephemeral — skip ones Telegram rejects due to parse
-    // errors rather than crashing the entire stream.
-    if (isDraftParseError(error)) {
-      return;
-    }
-
-    throw error;
-  }
-}
-
 async function closeBotResources(bot: Bot): Promise<void> {
   if ('raw' in bot.api && typeof bot.api.raw === 'object' && bot.api.raw !== null) {
     const maybeClose = Reflect.get(bot.api.raw as Record<string, unknown>, 'close');
@@ -251,7 +194,7 @@ async function closeBotResources(bot: Bot): Promise<void> {
 
 type TextTransportApi = Pick<
   Bot['api'],
-  'editMessageReplyMarkup' | 'sendChatAction' | 'sendMessage' | 'sendMessageDraft'
+  'editMessageReplyMarkup' | 'sendChatAction' | 'sendMessage'
 >;
 type TextTransportBot = { api: TextTransportApi };
 
@@ -307,43 +250,20 @@ function createMessageOptions(
   };
 }
 
-function createDraftMessageOptions() {
-  return {
-    parse_mode: 'MarkdownV2' as const,
-  };
-}
-
-async function sendTypingIndicatorForTarget(
-  bot: TextTransportBot,
-  chatId: string | number,
-  topicId?: number,
-): Promise<void> {
-  try {
-    await bot.api.sendChatAction(chatId, 'typing', {
-      ...(topicId !== undefined ? { message_thread_id: topicId } : {}),
-    });
-  } catch (error) {
-    logger.warn(
-      `Failed to send typing indicator: ${getTelegramErrorDescription(error)} ` +
-        `(chatId=${chatId}, topicId=${topicId ?? 'none'})`,
-    );
-  }
-}
-
 async function sendTypingIndicator(
   bot: TextTransportBot,
   request: ParsedActionInputs,
 ): Promise<void> {
-  await sendTypingIndicatorForTarget(bot, request.chatId, request.topicId);
-}
-
-function getDraftStreamingChatId(chatId: string): number | undefined {
-  if (!/^\d+$/.test(chatId)) {
-    return undefined;
+  try {
+    await bot.api.sendChatAction(request.chatId, 'typing', {
+      ...(request.topicId !== undefined ? { message_thread_id: request.topicId } : {}),
+    });
+  } catch (error) {
+    logger.warn(
+      `Failed to send typing indicator: ${getTelegramErrorDescription(error)} ` +
+        `(chatId=${request.chatId}, topicId=${request.topicId ?? 'none'})`,
+    );
   }
-
-  const parsedChatId = Number.parseInt(chatId, 10);
-  return parsedChatId > 0 ? parsedChatId : undefined;
 }
 
 /**
@@ -371,79 +291,6 @@ async function sendMessageChunks(
     );
     lastMessageId = result.message_id;
     replyMessageId = result.message_id;
-  }
-
-  return lastMessageId;
-}
-
-/**
- * Stream text through project-local Telegram draft updates in supported private chats.
- */
-async function streamTextWithDraftApi(
-  bot: TextTransportBot,
-  request: ParsedActionInputs,
-  chunks: { raw: string; formatted: string }[],
-  draftChatId: number,
-): Promise<number | undefined> {
-  const draftSeed = Date.now();
-  const framesPerChunk = getFramesPerChunk(chunks.length);
-  let replyMessageId: number | undefined;
-  let lastMessageId: number | undefined;
-
-  // Telegram documents chat actions as lasting for ~5 seconds or less and
-  // recommends avoiding more than one update every 5 seconds, so we emit the
-  // initial indicator and refresh it on that cadence during longer streams.
-  await sendTypingIndicatorForTarget(bot, draftChatId, request.topicId);
-  let lastTypingTime = Date.now();
-
-  for (const [chunkIndex, chunk] of chunks.entries()) {
-    const isLastChunk = chunkIndex === chunks.length - 1;
-    const draftId = draftSeed + chunkIndex + 1;
-    // Frames are derived from the raw Markdown source, but every emitted frame is
-    // formatted into a Telegram-safe MarkdownV2 payload. This lets us keep code
-    // fences intact during draft streaming instead of revealing broken mid-block
-    // prefixes that Telegram rejects.
-    const frames = buildStreamingFrames(chunk.raw, {
-      minFrames: framesPerChunk,
-      maxFrames: framesPerChunk,
-    });
-
-    let previousFrameLength = 0;
-    for (const [frameIndex, frame] of frames.entries()) {
-      if (frameIndex > 0) {
-        const newContentLength = frame.length - previousFrameLength;
-        await sleep(computeFrameDelay(newContentLength));
-      }
-
-      // Refresh the typing indicator before it expires
-      if (Date.now() - lastTypingTime > TYPING_REFRESH_INTERVAL_MS) {
-        await sendTypingIndicatorForTarget(bot, draftChatId, request.topicId);
-        lastTypingTime = Date.now();
-      }
-
-      await sendDraftFrame(bot, draftChatId, draftId, frame);
-      previousFrameLength = frame.length;
-    }
-
-    // Persist the completed chunk after its last visible draft update. Long
-    // stream responses therefore progress as draft -> final message cycles, and
-    // later chunks reply to the previous persisted message to keep the thread readable.
-    const result = await sendFormattedMessage(
-      bot,
-      request,
-      chunk.raw,
-      chunk.formatted,
-      replyMessageId,
-      isLastChunk,
-    );
-    lastMessageId = result.message_id;
-    replyMessageId = result.message_id;
-
-    // Refresh typing before the next chunk's draft frames begin
-    if (!isLastChunk) {
-      await sendTypingIndicatorForTarget(bot, draftChatId, request.topicId);
-      lastTypingTime = Date.now();
-    }
   }
 
   return lastMessageId;
@@ -631,13 +478,6 @@ function buildAttachmentCaptionPlan(message?: string): {
  */
 export function describeTextSendMethod(request: ParsedActionInputs): string {
   const messageChunks = splitTelegramMessageChunks(request.message ?? '', TELEGRAM_MESSAGE_LIMIT);
-  const draftChatId = request.streamResponse ? getDraftStreamingChatId(request.chatId) : undefined;
-
-  if (request.streamResponse && draftChatId !== undefined) {
-    return messageChunks.length > 1
-      ? `sendMessageDraft -> sendMessage x${messageChunks.length}`
-      : 'sendMessageDraft -> sendMessage';
-  }
 
   return messageChunks.length > 1 ? `sendMessage x${messageChunks.length}` : 'sendMessage';
 }
@@ -650,16 +490,11 @@ export async function sendTextMessage(
   request: ParsedActionInputs,
 ): Promise<{ message_id: number }> {
   const messageChunks = splitTelegramMessageChunks(request.message ?? '', TELEGRAM_MESSAGE_LIMIT);
-  const draftChatId = request.streamResponse ? getDraftStreamingChatId(request.chatId) : undefined;
-
-  if (draftChatId === undefined && messageChunks.length > 0) {
+  if (messageChunks.length > 0) {
     await sendTypingIndicator(bot, request);
   }
 
-  const lastMessageId =
-    draftChatId !== undefined
-      ? await streamTextWithDraftApi(bot, request, messageChunks, draftChatId)
-      : await sendMessageChunks(bot, request, messageChunks, undefined, true);
+  const lastMessageId = await sendMessageChunks(bot, request, messageChunks, undefined, true);
 
   if (!lastMessageId) {
     throw new Error('failed to send any Telegram messages');

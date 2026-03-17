@@ -76602,71 +76602,14 @@ function mergeAdjacentChunks(chunks, limit) {
 }
 /**
 * Split text into Telegram-safe chunks while preserving both raw and formatted
-* forms. The raw form is reused by draft streaming, while the formatted form is
-* what we actually persist with `sendMessage`.
+* forms. The raw form is useful to callers that still need the original text,
+* while the formatted form is what we actually persist with `sendMessage`.
 */
 function splitTelegramMessageChunks(message, limit) {
 	if (!message) return [];
 	const segments = parseMessageSegments(message);
 	if (segments.some((segment) => segment.type === "code")) return mergeAdjacentChunks(segments.flatMap((segment) => segment.type === "code" ? splitFencedCodeBlock(segment.raw, limit) : splitPlainTelegramMessageChunks(segment.raw, limit)), limit);
 	return splitPlainTelegramMessageChunks(message, limit);
-}
-function splitOversizedStreamingToken(token, maxTokenLength) {
-	if (token.length <= maxTokenLength || /\s/.test(token)) return [token];
-	const chunks = [];
-	for (let index = 0; index < token.length; index += maxTokenLength) chunks.push(token.slice(index, index + maxTokenLength));
-	return chunks;
-}
-function getStreamingTokens(message, maxTokenLength) {
-	return (message.match(/[^\s]+(?:[ \t]+)?|\n+/g) ?? [message]).flatMap((token) => splitOversizedStreamingToken(token, maxTokenLength));
-}
-/**
-* Break formatted text into smaller visible pieces for draft streaming. Natural
-* boundaries are preferred, but long uninterrupted text is still forced to move
-* forward so the stream never stalls.
-*/
-function buildStreamingPieces(message, targetCharactersPerPiece = 120) {
-	if (!message) return [];
-	const tokens = getStreamingTokens(message, Math.max(1, targetCharactersPerPiece));
-	const pieces = [];
-	let current = "";
-	for (const token of tokens) {
-		current += token;
-		const minimumNaturalBoundaryLength = Math.max(1, Math.ceil(targetCharactersPerPiece * .85));
-		if (!(current.trim().length > 0 && (current.length >= targetCharactersPerPiece || (current.endsWith("\n\n") || current.endsWith("\n")) && current.length >= minimumNaturalBoundaryLength))) continue;
-		if (current) pieces.push(current);
-		current = "";
-	}
-	if (current) pieces.push(current);
-	return pieces;
-}
-function buildStreamingSegmentPieces(segment, targetCharactersPerPiece) {
-	if (segment.type === "code") return [segment.raw];
-	return buildStreamingPieces(segment.raw, targetCharactersPerPiece);
-}
-/**
-* Build progressively longer formatted frames for project-local draft
-* streaming. Each next frame is simply "all previous raw text plus one more
-* piece", independently re-formatted into valid MarkdownV2. This avoids
-* invalid partial escape sequences that occur when slicing pre-formatted text.
-* Fenced code blocks are only introduced as complete units so every draft frame
-* remains valid Telegram MarkdownV2.
-*/
-function buildStreamingFrames(message, options) {
-	if (!message) return [];
-	const formattedMessage = formatTelegramMessage(message);
-	const desiredFrameCount = Math.max(options.minFrames, Math.min(options.maxFrames, Math.ceil(formattedMessage.length / 120)));
-	const targetCharactersPerPiece = Math.max(1, Math.ceil(message.length / desiredFrameCount));
-	const pieces = parseMessageSegments(message).flatMap((segment) => buildStreamingSegmentPieces(segment, targetCharactersPerPiece));
-	const frames = [];
-	let currentRaw = "";
-	for (const piece of pieces) {
-		currentRaw += piece;
-		const formatted = formatTelegramMessage(currentRaw);
-		if (formatted !== frames.at(-1)) frames.push(formatted);
-	}
-	if (formattedMessage !== frames.at(-1)) frames.push(formattedMessage);
-	return frames;
 }
 //#endregion
 //#region src/inputs.ts
@@ -76684,7 +76627,6 @@ function readRawActionInputs() {
 		message: getInput("message", { required: false }),
 		messageFile: getInput("message_file", { required: false }),
 		messageUrl: getInput("message_url", { required: false }),
-		streamResponse: getInput("stream_response", { required: false }) || "false",
 		buttons: getInput("buttons", { required: false }),
 		topicId: getOptionalEnv("TELEGRAM_TOPIC_ID"),
 		replyToMessageId: getOptionalEnv("TELEGRAM_REPLY_TO_MESSAGE_ID"),
@@ -76807,8 +76749,6 @@ function assertInputConsistency(rawInputs, attachmentType) {
 	if (hasAttachment && hasAttachments) throw new Error("\"attachment\" and \"attachments\" cannot be used together");
 	if (hasAttachments && (rawInputs.attachmentType || rawInputs.attachmentFilename)) throw new Error("\"attachment_type\" and \"attachment_filename\" cannot be used with \"attachments\"");
 	if (messageSourceCount === 0 && !hasAttachment && !hasAttachments) throw new Error("either a message source, \"attachment\", or \"attachments\" must be provided");
-	if (rawInputs.streamResponse === "true" && messageSourceCount === 0) throw new Error("\"stream_response\" requires \"message\", \"message_file\", or \"message_url\"");
-	if (rawInputs.streamResponse === "true" && (hasAttachment || hasAttachments)) throw new Error("\"stream_response\" currently supports text-only messages and cannot be combined with attachments");
 	if (hasAttachment && !attachmentType) throw new Error("attachment_type is required when \"attachment\" is provided");
 	if (!hasAttachment && attachmentType) throw new Error("\"attachment\" is required when attachment_type is provided");
 	if (rawInputs.supportsStreaming === "true" && !hasAttachment) throw new Error("\"supports_streaming\" requires a single \"attachment\" with attachment_type \"video\"");
@@ -76836,7 +76776,6 @@ async function parseActionInputs(rawInputs) {
 		botToken: rawInputs.botToken,
 		chatId: rawInputs.chatId,
 		message,
-		streamResponse: parseBooleanInput("stream_response", rawInputs.streamResponse),
 		disableLinkPreview: parseBooleanInput("disable_link_preview", rawInputs.disableLinkPreview),
 		topicId: parseOptionalIntegerInput("topic_id", rawInputs.topicId),
 		replyMessageId: parseOptionalIntegerInput("reply_to_message_id", rawInputs.replyToMessageId),
@@ -76851,19 +76790,6 @@ async function parseActionInputs(rawInputs) {
 //#region src/telegram.ts
 function sleep(ms) {
 	return new Promise((resolve) => setTimeout(resolve, ms));
-}
-/**
-* Compute an inter-frame delay proportional to the new content size so shorter
-* pieces fly by and longer ones pause a bit longer — matching how a human
-* would perceive streaming text.
-*/
-function computeFrameDelay(pieceLength) {
-	const scaled = 150 + pieceLength * .4;
-	return Math.min(400, Math.max(100, scaled));
-}
-function getFramesPerChunk(chunkCount) {
-	if (chunkCount <= 1) return 15;
-	return Math.max(1, Math.min(8, Math.floor(20 / chunkCount)));
 }
 function getRetryAfterSeconds(error) {
 	if (!(error instanceof Error) || !("error_code" in error) || error.error_code !== 429) return;
@@ -76931,17 +76857,6 @@ async function sendFormattedMessage(bot, request, rawChunk, formattedChunk, repl
 		});
 	}
 }
-async function sendDraftFrame(bot, chatId, draftId, frame) {
-	try {
-		await retryOnRateLimit(() => bot.api.sendMessageDraft(chatId, draftId, frame, createDraftMessageOptions()), {
-			maxRetries: 5,
-			label: "Draft frame"
-		});
-	} catch (error) {
-		if (isDraftParseError(error)) return;
-		throw error;
-	}
-}
 async function closeBotResources(bot) {
 	if ("raw" in bot.api && typeof bot.api.raw === "object" && bot.api.raw !== null) {
 		const maybeClose = Reflect.get(bot.api.raw, "close");
@@ -76987,23 +76902,12 @@ function createMessageOptions(request, replyMessageId, includeReplyMarkup = true
 		...replyParameters ? { reply_parameters: replyParameters } : {}
 	};
 }
-function createDraftMessageOptions() {
-	return { parse_mode: "MarkdownV2" };
-}
-async function sendTypingIndicatorForTarget(bot, chatId, topicId) {
-	try {
-		await bot.api.sendChatAction(chatId, "typing", { ...topicId !== void 0 ? { message_thread_id: topicId } : {} });
-	} catch (error) {
-		logger.warn(`Failed to send typing indicator: ${getTelegramErrorDescription(error)} (chatId=${chatId}, topicId=${topicId ?? "none"})`);
-	}
-}
 async function sendTypingIndicator(bot, request) {
-	await sendTypingIndicatorForTarget(bot, request.chatId, request.topicId);
-}
-function getDraftStreamingChatId(chatId) {
-	if (!/^\d+$/.test(chatId)) return;
-	const parsedChatId = Number.parseInt(chatId, 10);
-	return parsedChatId > 0 ? parsedChatId : void 0;
+	try {
+		await bot.api.sendChatAction(request.chatId, "typing", { ...request.topicId !== void 0 ? { message_thread_id: request.topicId } : {} });
+	} catch (error) {
+		logger.warn(`Failed to send typing indicator: ${getTelegramErrorDescription(error)} (chatId=${request.chatId}, topicId=${request.topicId ?? "none"})`);
+	}
 }
 /**
 * Send a sequence of preformatted text chunks, optionally attaching buttons to the last one.
@@ -77016,43 +76920,6 @@ async function sendMessageChunks(bot, request, chunks, initialReplyMessageId, at
 		const result = await sendFormattedMessage(bot, request, chunk.raw, chunk.formatted, replyMessageId, attachReplyMarkupToLast && isLastChunk);
 		lastMessageId = result.message_id;
 		replyMessageId = result.message_id;
-	}
-	return lastMessageId;
-}
-/**
-* Stream text through project-local Telegram draft updates in supported private chats.
-*/
-async function streamTextWithDraftApi(bot, request, chunks, draftChatId) {
-	const draftSeed = Date.now();
-	const framesPerChunk = getFramesPerChunk(chunks.length);
-	let replyMessageId;
-	let lastMessageId;
-	await sendTypingIndicatorForTarget(bot, draftChatId, request.topicId);
-	let lastTypingTime = Date.now();
-	for (const [chunkIndex, chunk] of chunks.entries()) {
-		const isLastChunk = chunkIndex === chunks.length - 1;
-		const draftId = draftSeed + chunkIndex + 1;
-		const frames = buildStreamingFrames(chunk.raw, {
-			minFrames: framesPerChunk,
-			maxFrames: framesPerChunk
-		});
-		let previousFrameLength = 0;
-		for (const [frameIndex, frame] of frames.entries()) {
-			if (frameIndex > 0) await sleep(computeFrameDelay(frame.length - previousFrameLength));
-			if (Date.now() - lastTypingTime > 5e3) {
-				await sendTypingIndicatorForTarget(bot, draftChatId, request.topicId);
-				lastTypingTime = Date.now();
-			}
-			await sendDraftFrame(bot, draftChatId, draftId, frame);
-			previousFrameLength = frame.length;
-		}
-		const result = await sendFormattedMessage(bot, request, chunk.raw, chunk.formatted, replyMessageId, isLastChunk);
-		lastMessageId = result.message_id;
-		replyMessageId = result.message_id;
-		if (!isLastChunk) {
-			await sendTypingIndicatorForTarget(bot, draftChatId, request.topicId);
-			lastTypingTime = Date.now();
-		}
 	}
 	return lastMessageId;
 }
@@ -77138,8 +77005,6 @@ function buildAttachmentCaptionPlan(message) {
 */
 function describeTextSendMethod(request) {
 	const messageChunks = splitTelegramMessageChunks(request.message ?? "", TELEGRAM_MESSAGE_LIMIT);
-	const draftChatId = request.streamResponse ? getDraftStreamingChatId(request.chatId) : void 0;
-	if (request.streamResponse && draftChatId !== void 0) return messageChunks.length > 1 ? `sendMessageDraft -> sendMessage x${messageChunks.length}` : "sendMessageDraft -> sendMessage";
 	return messageChunks.length > 1 ? `sendMessage x${messageChunks.length}` : "sendMessage";
 }
 /**
@@ -77147,9 +77012,8 @@ function describeTextSendMethod(request) {
 */
 async function sendTextMessage(bot, request) {
 	const messageChunks = splitTelegramMessageChunks(request.message ?? "", TELEGRAM_MESSAGE_LIMIT);
-	const draftChatId = request.streamResponse ? getDraftStreamingChatId(request.chatId) : void 0;
-	if (draftChatId === void 0 && messageChunks.length > 0) await sendTypingIndicator(bot, request);
-	const lastMessageId = draftChatId !== void 0 ? await streamTextWithDraftApi(bot, request, messageChunks, draftChatId) : await sendMessageChunks(bot, request, messageChunks, void 0, true);
+	if (messageChunks.length > 0) await sendTypingIndicator(bot, request);
+	const lastMessageId = await sendMessageChunks(bot, request, messageChunks, void 0, true);
 	if (!lastMessageId) throw new Error("failed to send any Telegram messages");
 	return { message_id: lastMessageId };
 }

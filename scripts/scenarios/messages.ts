@@ -57,48 +57,5 @@ export function createMessageScenarios(): ScenarioDefinition[] {
         buttons: '[{"text":"Open repository","url":"https://github.com/aliuq/telegram-action"}]',
       },
     }),
-    createScenario({
-      id: 'message-streaming-response',
-      description: 'Text-only message streamed with Telegram drafts in supported private chats',
-      inputs: {
-        message: [
-          'Streaming response demo',
-          '',
-          'This message is revealed progressively so long-running jobs can post visible incremental output.',
-          '',
-          '- Step 1: prepare',
-          '- Step 2: build',
-          '- Step 3: publish',
-        ].join('\n'),
-        stream_response: 'true',
-      },
-    }),
-    createScenario({
-      id: 'message-streaming-with-buttons',
-      description:
-        'Streaming response should attach buttons only after the final streamed message is finalized',
-      inputs: {
-        message: [
-          'Streaming response with buttons',
-          '',
-          'The message should update progressively and expose buttons only after it reaches the final text.',
-        ].join('\n'),
-        stream_response: 'true',
-        buttons: '[{"text":"Open repository","url":"https://github.com/aliuq/telegram-action"}]',
-      },
-    }),
-    createScenario({
-      id: 'message-streaming-long-thread',
-      description:
-        'Long streaming response should continue through draft updates and finalize as reply-chained messages when it exceeds Telegram limits',
-      inputs: {
-        message: Array.from(
-          { length: 80 },
-          (_, index) =>
-            `Chunk ${index + 1}: streaming output keeps arriving with enough detail to exercise Telegram draft streaming and final message chaining.`,
-        ).join('\n\n'),
-        stream_response: 'true',
-      },
-    }),
   ];
 }

@@ -27,7 +27,6 @@ export function readRawActionInputs(): RawActionInputs {
     message: core.getInput('message', { required: false }),
     messageFile: core.getInput('message_file', { required: false }),
     messageUrl: core.getInput('message_url', { required: false }),
-    streamResponse: core.getInput('stream_response', { required: false }) || 'false',
     buttons: core.getInput('buttons', { required: false }),
     topicId: getOptionalEnv('TELEGRAM_TOPIC_ID'),
     replyToMessageId: getOptionalEnv('TELEGRAM_REPLY_TO_MESSAGE_ID'),
@@ -260,16 +259,6 @@ function assertInputConsistency(rawInputs: RawActionInputs, attachmentType?: Att
     throw new Error('either a message source, "attachment", or "attachments" must be provided');
   }
 
-  if (rawInputs.streamResponse === 'true' && messageSourceCount === 0) {
-    throw new Error('"stream_response" requires "message", "message_file", or "message_url"');
-  }
-
-  if (rawInputs.streamResponse === 'true' && (hasAttachment || hasAttachments)) {
-    throw new Error(
-      '"stream_response" currently supports text-only messages and cannot be combined with attachments',
-    );
-  }
-
   if (hasAttachment && !attachmentType) {
     throw new Error('attachment_type is required when "attachment" is provided');
   }
@@ -333,7 +322,6 @@ export async function parseActionInputs(rawInputs: RawActionInputs): Promise<Par
     botToken: rawInputs.botToken,
     chatId: rawInputs.chatId,
     message,
-    streamResponse: parseBooleanInput('stream_response', rawInputs.streamResponse),
     disableLinkPreview: parseBooleanInput('disable_link_preview', rawInputs.disableLinkPreview),
     topicId: parseOptionalIntegerInput('topic_id', rawInputs.topicId),
     replyMessageId: parseOptionalIntegerInput('reply_to_message_id', rawInputs.replyToMessageId),

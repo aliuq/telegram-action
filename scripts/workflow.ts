@@ -9,7 +9,6 @@ const ACTION_INPUT_NAMES = [
   'message',
   'message_file',
   'message_url',
-  'stream_response',
   'buttons',
   'disable_link_preview',
   'attachment',

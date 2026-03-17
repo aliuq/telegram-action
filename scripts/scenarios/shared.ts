@@ -8,7 +8,6 @@ export function createScenarioInputs(overrides: Partial<ScenarioInputs>): Scenar
     message: '',
     message_file: '',
     message_url: '',
-    stream_response: 'false',
     disable_link_preview: 'true',
     buttons: '',
     attachment: '',
