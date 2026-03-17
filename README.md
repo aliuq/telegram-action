@@ -1,24 +1,22 @@
 # Telegram Message Notification Action
 
-A GitHub Action for sending Telegram notifications. It supports plain messages, inline buttons, file attachments, replies to existing messages, and local validation flows for maintainers.
+A GitHub Action for sending Telegram messages from workflows. It handles plain text, inline buttons, file attachments, replies, topics, and the local test flows used to maintain the project.
 
 For Chinese documentation, see [README.zh-CN.md](./README.zh-CN.md). The English README is the primary source of truth for behavior, inputs, and development notes.
 
 ## Features
 
-- Send plain text messages with MarkdownV2 formatting
-- Split overlong text into a reply chain automatically
-- Stream text responses through project-local Telegram draft updates in supported private chats
-- Send inline keyboard buttons using flat or nested JSON
+- Send MarkdownV2-formatted text
+- Split long text into a reply chain automatically
+- Stream text in supported private chats with `sendMessageDraft`
+- Attach inline keyboard buttons in flat or nested JSON
 - Load message text from inline input, local files, or remote URLs
-- Send media and documents from local files, public URLs, or Telegram file IDs
-- Send multiple media items with the `attachments` JSON input
-- Reply to an existing message
-- Post into a Telegram topic/thread via `TELEGRAM_TOPIC_ID`
-- Enable or disable link previews explicitly
-- Post to Telegram channels that already have discussion comments enabled
-- Validate the shared scenario catalog locally before running live integrations
-- Run example workflows locally with `act`
+- Send media from local files, public URLs, or Telegram file IDs
+- Send multiple items with the `attachments` JSON input
+- Reply to an existing message or post into a topic with environment variables
+- Control link previews explicitly
+- Validate scenarios locally before running live sends
+- Run the repository workflow locally with `act`
 
 ## Usage
 
@@ -118,14 +116,14 @@ When a text message exceeds Telegram's limit, the action splits it automatically
 
 Set `stream_response: "true"` when you want a text-only message to appear progressively, similar to an AI assistant or a long-running command log.
 
-The implementation follows Telegram's current Bot API capabilities:
+The implementation follows the current Bot API limits:
 
-- in supported private chats, the action uses the official `sendMessageDraft` API through the action's built-in draft streamer, then posts the final persisted message(s)
-- in groups, channels, or any chat that cannot use `sendMessageDraft`, the action falls back to the normal `sendMessage` flow without simulated streaming edits
+- in supported private chats, the action uses `sendMessageDraft`, then posts the final persisted message
+- in groups, channels, or any other chat that cannot use `sendMessageDraft`, it falls back to the normal `sendMessage` flow
 
 If the final text exceeds Telegram's message limit, the action sends it as multiple reply-chained messages so the output stays readable.
 
-The draft-streaming path displays a "typing…" indicator at the top of the chat while frames arrive, and adds a natural inter-frame delay (100–400 ms, scaled by piece length) so Telegram mobile clients render visible, progressive text. The typing indicator is refreshed at most once every 5 seconds to stay within Telegram's documented chat-action lifetime/rate guidance.
+The draft-streaming path also sends a "typing…" indicator while frames arrive. Frame timing stays in the 100–400 ms range, scaled by piece length, so Telegram clients have enough time to show visible progress. The typing indicator is refreshed at most once every 5 seconds to stay within Telegram's documented chat-action guidance.
 
 ```yaml
 - name: Stream a Telegram response
@@ -143,7 +141,7 @@ The draft-streaming path displays a "typing…" indicator at the top of the chat
       Uploading artifacts
 ```
 
-Use streaming for text that benefits from visible progress. Keep regular `message` sends for short, final notifications. `stream_response` is intentionally limited to text-only messages and cannot be combined with `attachment` or `attachments`.
+Use streaming when visible progress helps. For short final notifications, a normal `message` send is usually simpler. `stream_response` only works for text and cannot be combined with `attachment` or `attachments`.
 
 ### Message with attachments
 
@@ -269,19 +267,19 @@ Telegram channel comments are not controlled by a per-message Bot API flag. If y
 
 | Input | Description | Required | Default |
 |------|------|------|--------|
-| `message` | Inline message text. Mutually exclusive with `message_file` and `message_url`. Used as the caption when an attachment is sent and it fits Telegram's caption limit | No | `""` |
+| `message` | Inline message text. Mutually exclusive with `message_file` and `message_url`. For a single attachment it becomes the caption when it fits Telegram's caption limit; with `attachments`, it is sent as a separate text message before the media batches | No | `""` |
 | `message_file` | Repository-local UTF-8 text file whose contents become the message body. Mutually exclusive with `message` and `message_url` | No | `""` |
 | `message_url` | Remote HTTP(S) URL whose response body becomes the message body. Mutually exclusive with `message` and `message_file` | No | `""` |
 | `stream_response` | Stream a text-only response in supported private chats using the action's built-in `sendMessageDraft` flow. Long outputs are finalized as reply-chained messages. Other chats fall back to normal `sendMessage` behavior. Accepts only `"true"` or `"false"` | No | `"false"` |
 | `buttons` | Inline keyboard JSON in flat or nested format | No | `""` |
 | `disable_link_preview` | Whether to disable link previews. Accepts only `"true"` or `"false"` | No | `"true"` |
 | `attachment` | Local file path, public URL, or Telegram file ID to send as an attachment | No | `""` |
-| `attachments` | JSON array for sending multiple attachment items. Each item supports `type`, `source`, optional `filename`, and optional `caption` | No | `""` |
+| `attachments` | JSON array for sending multiple attachment items. Each item supports `type`, `source`, optional `filename`, optional `caption`, and optional `supports_streaming` for videos | No | `""` |
 | `attachment_type` | Attachment type: `photo`, `video`, `audio`, `animation`, or `document` | No | `""` |
 | `attachment_filename` | Optional filename override for local file uploads | No | `""` |
 | `supports_streaming` | Enable Telegram streaming mode for single `video` attachments. Accepts only `"true"` or `"false"` | No | `"false"` |
 
-Exactly one of `message`, `message_file`, and `message_url` may be set. You must still provide at least one message source or an `attachment`.
+Exactly one of `message`, `message_file`, and `message_url` may be set. You must still provide at least one message source, `attachment`, or `attachments`.
 `attachment` and `attachments` are mutually exclusive. When `attachments` is used, do not set `attachment_type` or `attachment_filename`.
 `stream_response` currently supports text-only messages. Do not combine it with `attachment` or `attachments`.
 Telegram's true draft streaming is private-chat-only, so non-private chats automatically fall back to the normal non-streaming send path.
@@ -296,7 +294,7 @@ For `attachments`, set streaming per item inside the JSON payload with `supports
 
 ## Code layout
 
-The runtime is intentionally split into a few focused modules:
+The runtime is split into a few focused modules:
 
 - `src/index.ts`: tiny entry point and top-level error handling
 - `src/env.ts`: shared environment variable helpers for the action and local tooling
@@ -308,14 +306,14 @@ The runtime is intentionally split into a few focused modules:
 - `src/telegram.ts`: Telegram API request construction and dispatch
 - `src/act-logging.ts`: local-only debug logging for `act`
 
-This layout keeps behavior unchanged for action consumers while making the internals easier to extend and review.
+That split keeps the public behavior stable while making the internals easier to work on.
 
 ## Local testing
 
-Use this order locally:
+For local work, this order is usually enough:
 
-1. Run `bun run test` to send selected scenarios directly to Telegram.
-   You can also run `bun run test -- <scenarioId>` or `bun run test -- --all`.
+1. Run `bun run test` to open the local runner.
+   If you pass scenario ids or `--all` without `--mode`, the runner will still ask which environment to use, but it will skip the scenario picker because the selection is already known.
 2. Run `bun run test:unit` for fast local unit tests with `vitest`.
 3. Run `bun run test:validate` when you only want parser-level validation without sending messages.
 4. Run `bun run test:act` when you want to execute selected scenarios through `act` against `.github/workflows/test.yaml`.
@@ -342,17 +340,17 @@ bun run test -- buttons-flat
 bun run test -- --all
 ```
 
-Bun automatically loads the repository-root `.env` file for `bun run`, so the sender does not need its own custom `.env` parser or an explicit `--env-file` flag. By default, `bun run test` opens an interactive runner that first lets you filter scenarios by id or description, then sends the chosen scenarios directly to Telegram. Expected-failure scenarios are treated as pass cases only when they fail as intended.
+Bun automatically loads the repository-root `.env` file for `bun run`, so the sender does not need its own `.env` parser or an explicit `--env-file` flag. Plain `bun run test` opens the interactive runner. If you already know which scenario you want, `bun run test -- <scenarioId>` skips only the scenario picker; you still choose `source`, `act`, or `validate` first. Expected-failure scenarios still count as passing only when they fail for the reason the catalog expects.
 
 ### 2. Unified interactive runner
 
-The repository includes a single local runner built with [@clack/prompts](https://github.com/bombshell-dev/clack). It supports three modes:
+The repository has one local runner built with [@clack/prompts](https://github.com/bombshell-dev/clack). It supports three modes:
 
 - `source`: run the source-mode Telegram sender directly from the current workspace
 - `act`: execute the GitHub Actions workflow locally through `act`
 - `validate`: check the scenario catalog without sending messages
 
-Every run stores the exact rerun command plus a log file in `.test-history/`, and the prompt can quickly rerun the previous command. The shared logger prefixes each emitted line with an ISO 8601 timestamp so local reruns, Docker sessions, and saved logs are easier to correlate.
+Every run stores the exact rerun command plus a log file in `.test-history/`, and the prompt can quickly rerun the previous command. The shared logger adds ISO 8601 timestamps to each emitted line, which makes local reruns, Docker sessions, and saved logs easier to compare.
 
 Before running it, create a repository-root `.env` file:
 
@@ -374,13 +372,13 @@ bun run test -- --all
 bun run test:validate -- buttons-flat
 ```
 
-The runner lets you choose the environment first, then pick either a manual scenario subset or the full catalog. The `act` mode preserves ANSI colors and saves the full colored output to `.test-history/logs/`. GitHub Actions keeps collapsible log groups, while plain Node or Docker runs fall back to regular timestamped text output instead of raw `::group::` control lines. In CI-style environments, the runner also downgrades `@clack/prompts` summary boxes to plain log lines so saved logs and workflow output stay readable.
+If you do not pass a mode, the runner asks where you want to run first. When the CLI already includes scenario ids or `--all`, it reuses that selection and skips the scenario prompt. The `act` mode preserves ANSI colors and saves the full colored output to `.test-history/logs/`. In GitHub Actions, logs still use collapsible groups. In plain Node, Docker, or CI-style environments, the runner falls back to timestamped text output and plain summary lines.
 
-During local `act` runs, the action prints an extra debug group with the scenario id, Telegram method, masked chat id, button counts, attachment source kind, and nested network error details when a request fails.
+During local `act` runs, the action prints an extra debug group with the scenario id, Telegram method, masked chat id, button counts, attachment source kind, and nested error details when a request fails.
 
 The `invalid-buttons` test case is expected to fail because the action rejects malformed button payloads instead of silently skipping them. The `video-url` scenario depends on Telegram being able to fetch the public video URL.
 
-### 4. Direct `act` usage
+### 3. Direct `act` usage
 
 You can also invoke the bundled workflow directly. The workflow accepts a single `scenario_ids` input and runs the selected scenarios sequentially inside one `notification` job through `scripts/workflow.ts`.
 
@@ -407,9 +405,9 @@ This action uses `node24`, so use a recent version of `act`.
 - **Telegram rejects the message formatting**: start with plain text, then add Markdown gradually so you can see which characters need escaping.
 - **Replies or topic posts fail**: confirm that `TELEGRAM_CHAT_ID`, `TELEGRAM_TOPIC_ID`, and `TELEGRAM_REPLY_TO_MESSAGE_ID` all belong to the same chat/thread context, and only set the variables you actually need.
 
-## Full example workflow
+## Workflow file used in this repository
 
-See [.github/workflows/run.yaml](.github/workflows/run.yaml) for the full integration example used by the repository.
+The repository's test workflow lives at [.github/workflows/test.yaml](.github/workflows/test.yaml).
 
 ## License
 

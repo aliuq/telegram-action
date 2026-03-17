@@ -31,9 +31,7 @@ function formatDuration(durationMs: number): string {
   return `${minutes}m ${seconds}s`;
 }
 
-/**
- * Entry point for the interactive local runner.
- */
+/** Main entry point for the local runner. */
 async function main(runStartedAt: number): Promise<void> {
   const cli = parseCliOptions(process.argv.slice(2));
 
@@ -52,8 +50,7 @@ async function main(runStartedAt: number): Promise<void> {
     logFile: logFilePath,
   };
 
-  // Persist the rerun command before execution starts so failed runs can be
-  // resumed easily after fixing the underlying issue.
+  // Save the rerun command up front so a failed run can be repeated quickly.
   saveHistoryEntry(historyEntry);
 
   try {

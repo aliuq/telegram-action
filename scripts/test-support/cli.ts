@@ -47,10 +47,16 @@ export function parseCliOptions(argv: string[]): CliOptions {
   };
 }
 
-/**
- * Prompt for the execution mode when it was not provided on the CLI.
- */
-async function promptMode(history: TestHistoryState): Promise<TestMode | 'last'> {
+/** Ask for the run mode when the CLI did not provide one. */
+async function promptMode(history: TestHistoryState, includeLast: false): Promise<TestMode>;
+async function promptMode(
+  history: TestHistoryState,
+  includeLast?: true,
+): Promise<TestMode | 'last'>;
+async function promptMode(
+  history: TestHistoryState,
+  includeLast = true,
+): Promise<TestMode | 'last'> {
   const options = [
     {
       value: 'source',
@@ -69,7 +75,7 @@ async function promptMode(history: TestHistoryState): Promise<TestMode | 'last'>
     },
   ];
 
-  if (history.lastRun) {
+  if (includeLast && history.lastRun) {
     options.unshift({
       value: 'last',
       label: 'Run last command',
@@ -79,7 +85,7 @@ async function promptMode(history: TestHistoryState): Promise<TestMode | 'last'>
 
   const mode = await p.select({
     message: 'Which environment would you like to run?',
-    initialValue: history.lastRun ? 'last' : 'source',
+    initialValue: includeLast && history.lastRun ? 'last' : 'source',
     options,
   });
 
@@ -91,9 +97,7 @@ async function promptMode(history: TestHistoryState): Promise<TestMode | 'last'>
   return mode as TestMode | 'last';
 }
 
-/**
- * Prompt for either a manual scenario subset or the full catalog.
- */
+/** Ask whether to pick a subset of scenarios or run the whole catalog. */
 async function promptScenarioSelection(
   allScenarios: ScenarioDefinition[],
   mode: TestMode,
@@ -153,9 +157,7 @@ async function promptScenarioSelection(
   };
 }
 
-/**
- * Resolve the final run selection from CLI flags, history, or interactive prompts.
- */
+/** Resolve the final run selection from CLI flags, history, or prompts. */
 export async function resolveSelection(
   allScenarios: ScenarioDefinition[],
   cli: CliOptions,
@@ -195,6 +197,35 @@ export async function resolveSelection(
     return promptScenarioSelection(allScenarios, cli.mode);
   }
 
+  if (cli.runAll || cli.scenarioIds.length > 0) {
+    if (!process.stdout.isTTY) {
+      return cli.runAll
+        ? {
+            mode: 'source',
+            runAll: true,
+            scenarioIds: allScenarios.map((scenario) => scenario.id),
+          }
+        : {
+            mode: 'source',
+            runAll: false,
+            scenarioIds: cli.scenarioIds,
+          };
+    }
+
+    const promptedMode = await promptMode(history, false);
+    return cli.runAll
+      ? {
+          mode: promptedMode,
+          runAll: true,
+          scenarioIds: allScenarios.map((scenario) => scenario.id),
+        }
+      : {
+          mode: promptedMode,
+          runAll: false,
+          scenarioIds: cli.scenarioIds,
+        };
+  }
+
   if (!process.stdout.isTTY) {
     throw new Error(
       'Interactive selection requires a TTY. Pass --mode with scenario ids, --all, or --last.',
@@ -217,9 +248,7 @@ export async function resolveSelection(
   return promptScenarioSelection(allScenarios, promptedMode);
 }
 
-/**
- * Map the selected ids back to the full scenario objects.
- */
+/** Map the selected ids back to the full scenario objects. */
 export function resolveScenarios(
   allScenarios: ScenarioDefinition[],
   selection: TestSelection,

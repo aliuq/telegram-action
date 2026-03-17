@@ -3,7 +3,7 @@ author: "AliuQ"
 description: "Send Telegram messages, attachments, buttons, optional topic-targeted posts via TELEGRAM_TOPIC_ID, and optional replies via TELEGRAM_REPLY_TO_MESSAGE_ID"
 inputs:
   message:
-    description: "Message text to send, or the caption when an attachment is provided"
+    description: "Message text to send. For a single attachment it becomes the caption when it fits Telegram's caption limit; for attachments it is sent as a separate text message before media batches."
     required: false
     default: ""
   message_file:
@@ -15,7 +15,7 @@ inputs:
     required: false
     default: ""
   stream_response:
-    description: 'Stream a text-only response in supported private chats using the action''s built-in sendMessageDraft flow. Long outputs become reply-chained final messages. Other chats fall back to normal sendMessage behavior. Only "true" and "false" are accepted.'
+    description: 'Stream a text-only response in supported private chats using the action''s built-in sendMessageDraft flow. Long outputs become reply-chained final messages. Other chats fall back to normal sendMessage behavior. The typing indicator is refreshed at most once every 5 seconds. Only "true" and "false" are accepted.'
     required: false
     default: "false"
   buttons:
@@ -36,7 +36,7 @@ inputs:
   attachments:
     description: >
       JSON array of attachment objects for multi-media sends.
-      Each item supports: {"type":"photo|video|audio|animation|document","source":"...","filename":"optional","caption":"optional"}
+      Each item supports: {"type":"photo|video|audio|animation|document","source":"...","filename":"optional","caption":"optional","supports_streaming":"optional for video"}
     required: false
     default: ""
   attachment_type:
@@ -44,7 +44,7 @@ inputs:
     required: false
     default: ""
   attachment_filename:
-    description: "Optional filename override when uploading a local file."
+    description: "Optional filename override when uploading a local file for a single attachment send."
     required: false
     default: ""
   supports_streaming:
