@@ -3,7 +3,11 @@ import type { InlineKeyboardButton } from 'grammy/types';
 import { resolveAttachmentSource } from './attachments.js';
 import { ATTACHMENT_TYPES, BUTTON_ACTION_FIELDS } from './constants.js';
 import { getOptionalEnv, getRequiredEnv } from './env.js';
-import { formatTelegramMessage, resolveMessageText, TELEGRAM_CAPTION_LIMIT } from './messages.js';
+import {
+  formatTelegramMessage,
+  resolveMessageText,
+  TELEGRAM_CAPTION_LIMIT,
+} from './messages.js';
 import type {
   AttachmentType,
   InlineKeyboardMatrix,
@@ -27,30 +31,41 @@ export function readRawActionInputs(): RawActionInputs {
     message: core.getInput('message', { required: false }),
     messageFile: core.getInput('message_file', { required: false }),
     messageUrl: core.getInput('message_url', { required: false }),
-    streamResponse: core.getInput('stream_response', { required: false }) || 'false',
+    streamResponse:
+      core.getInput('stream_response', { required: false }) || 'false',
     buttons: core.getInput('buttons', { required: false }),
     topicId: getOptionalEnv('TELEGRAM_TOPIC_ID'),
     replyToMessageId: getOptionalEnv('TELEGRAM_REPLY_TO_MESSAGE_ID'),
-    disableLinkPreview: core.getInput('disable_link_preview', { required: false }) || 'true',
+    disableLinkPreview:
+      core.getInput('disable_link_preview', { required: false }) || 'true',
     attachment: core.getInput('attachment', { required: false }),
     attachments: core.getInput('attachments', { required: false }),
     attachmentType: core.getInput('attachment_type', { required: false }),
-    attachmentFilename: core.getInput('attachment_filename', { required: false }),
-    supportsStreaming: core.getInput('supports_streaming', { required: false }) || 'false',
+    attachmentFilename: core.getInput('attachment_filename', {
+      required: false,
+    }),
+    supportsStreaming:
+      core.getInput('supports_streaming', { required: false }) || 'false',
   };
 }
 
 /**
  * Validate that an unknown JSON value matches Telegram's inline button shape.
  */
-function assertInlineKeyboardButton(input: unknown): asserts input is InlineKeyboardButton {
+function assertInlineKeyboardButton(
+  input: unknown,
+): asserts input is InlineKeyboardButton {
   if (typeof input !== 'object' || input === null || Array.isArray(input)) {
-    throw new Error(`each button must be a plain object, got: ${JSON.stringify(input)}`);
+    throw new Error(
+      `each button must be a plain object, got: ${JSON.stringify(input)}`,
+    );
   }
 
   const button = input as Record<string, unknown>;
   if (typeof button.text !== 'string' || !button.text) {
-    throw new Error(`button is missing required "text" field: ${JSON.stringify(input)}`);
+    throw new Error(
+      `button is missing required "text" field: ${JSON.stringify(input)}`,
+    );
   }
 
   const actionFields = BUTTON_ACTION_FIELDS.filter((field) => field in button);
@@ -93,7 +108,9 @@ function parseButtons(input: string): InlineKeyboardMatrix {
     throw new Error('buttons must be a non-empty JSON array');
   }
 
-  const rows: unknown[][] = Array.isArray(data[0]) ? (data as unknown[][]) : [data];
+  const rows: unknown[][] = Array.isArray(data[0])
+    ? (data as unknown[][])
+    : [data];
 
   return rows.map((row) => {
     if (!Array.isArray(row)) {
@@ -120,13 +137,18 @@ function parseBooleanInput(name: string, value: string): boolean {
     return false;
   }
 
-  throw new Error(`${name} must be either "true" or "false", received "${value}"`);
+  throw new Error(
+    `${name} must be either "true" or "false", received "${value}"`,
+  );
 }
 
 /**
  * Parse an optional integer input. Empty strings are treated as omitted values.
  */
-function parseOptionalIntegerInput(name: string, value: string): number | undefined {
+function parseOptionalIntegerInput(
+  name: string,
+  value: string,
+): number | undefined {
   if (!value) {
     return undefined;
   }
@@ -142,7 +164,9 @@ function parseOptionalIntegerInput(name: string, value: string): number | undefi
 /**
  * Parse an optional attachment type and validate it against the supported set.
  */
-function parseOptionalAttachmentType(value: string): AttachmentType | undefined {
+function parseOptionalAttachmentType(
+  value: string,
+): AttachmentType | undefined {
   if (!value) {
     return undefined;
   }
@@ -151,32 +175,49 @@ function parseOptionalAttachmentType(value: string): AttachmentType | undefined 
     return value;
   }
 
-  throw new Error(`attachment_type must be one of: ${ATTACHMENT_TYPES.join(', ')}`);
+  throw new Error(
+    `attachment_type must be one of: ${ATTACHMENT_TYPES.join(', ')}`,
+  );
 }
 
-function assertRawAttachmentItem(input: unknown): asserts input is RawAttachmentItemInput {
+function assertRawAttachmentItem(
+  input: unknown,
+): asserts input is RawAttachmentItemInput {
   if (typeof input !== 'object' || input === null || Array.isArray(input)) {
-    throw new Error(`each attachments item must be a plain object, got: ${JSON.stringify(input)}`);
+    throw new Error(
+      `each attachments item must be a plain object, got: ${JSON.stringify(input)}`,
+    );
   }
 
   const item = input as Record<string, unknown>;
   if (typeof item.type !== 'string' || !isAttachmentType(item.type)) {
-    throw new Error(`attachments item must include a valid "type": ${JSON.stringify(input)}`);
+    throw new Error(
+      `attachments item must include a valid "type": ${JSON.stringify(input)}`,
+    );
   }
 
   if (typeof item.source !== 'string' || !item.source) {
-    throw new Error(`attachments item must include a non-empty "source": ${JSON.stringify(input)}`);
+    throw new Error(
+      `attachments item must include a non-empty "source": ${JSON.stringify(input)}`,
+    );
   }
 
   if ('filename' in item && typeof item.filename !== 'string') {
-    throw new Error(`attachments item "filename" must be a string: ${JSON.stringify(input)}`);
+    throw new Error(
+      `attachments item "filename" must be a string: ${JSON.stringify(input)}`,
+    );
   }
 
   if ('caption' in item && typeof item.caption !== 'string') {
-    throw new Error(`attachments item "caption" must be a string: ${JSON.stringify(input)}`);
+    throw new Error(
+      `attachments item "caption" must be a string: ${JSON.stringify(input)}`,
+    );
   }
 
-  if ('supports_streaming' in item && typeof item.supports_streaming !== 'boolean') {
+  if (
+    'supports_streaming' in item &&
+    typeof item.supports_streaming !== 'boolean'
+  ) {
     throw new Error(
       `attachments item "supports_streaming" must be a boolean: ${JSON.stringify(input)}`,
     );
@@ -208,10 +249,14 @@ function parseAttachments(input: string): ParsedAttachmentItem[] {
     const source = resolveAttachmentSource(item.source, item.filename);
 
     if (item.filename && !source.isLocalFile) {
-      throw new Error('attachments item filename can only be used with a local attachment path');
+      throw new Error(
+        'attachments item filename can only be used with a local attachment path',
+      );
     }
 
-    const caption = item.caption ? formatTelegramMessage(item.caption) : undefined;
+    const caption = item.caption
+      ? formatTelegramMessage(item.caption)
+      : undefined;
     if (caption && caption.length > TELEGRAM_CAPTION_LIMIT) {
       throw new Error(
         `attachments item caption exceeds Telegram limit (${TELEGRAM_CAPTION_LIMIT} characters after formatting)`,
@@ -231,7 +276,10 @@ function parseAttachments(input: string): ParsedAttachmentItem[] {
 /**
  * Validate relationships between related inputs before building the final request.
  */
-function assertInputConsistency(rawInputs: RawActionInputs, attachmentType?: AttachmentType): void {
+function assertInputConsistency(
+  rawInputs: RawActionInputs,
+  attachmentType?: AttachmentType,
+): void {
   const messageSourceCount = [
     rawInputs.message,
     rawInputs.messageFile,
@@ -241,39 +289,55 @@ function assertInputConsistency(rawInputs: RawActionInputs, attachmentType?: Att
   const hasAttachments = Boolean(rawInputs.attachments);
 
   if (messageSourceCount > 1) {
-    throw new Error('only one of "message", "message_file", or "message_url" may be provided');
+    throw new Error(
+      'only one of "message", "message_file", or "message_url" may be provided',
+    );
   }
 
   if (hasAttachment && hasAttachments) {
     throw new Error('"attachment" and "attachments" cannot be used together');
   }
 
-  if (hasAttachments && (rawInputs.attachmentType || rawInputs.attachmentFilename)) {
+  if (
+    hasAttachments &&
+    (rawInputs.attachmentType || rawInputs.attachmentFilename)
+  ) {
     throw new Error(
       '"attachment_type" and "attachment_filename" cannot be used with "attachments"',
     );
   }
 
   if (messageSourceCount === 0 && !hasAttachment && !hasAttachments) {
-    throw new Error('either a message source, "attachment", or "attachments" must be provided');
+    throw new Error(
+      'either a message source, "attachment", or "attachments" must be provided',
+    );
   }
 
   if (rawInputs.streamResponse === 'true' && messageSourceCount === 0) {
-    throw new Error('"stream_response" requires "message", "message_file", or "message_url"');
+    throw new Error(
+      '"stream_response" requires "message", "message_file", or "message_url"',
+    );
   }
 
-  if (rawInputs.streamResponse === 'true' && (hasAttachment || hasAttachments)) {
+  if (
+    rawInputs.streamResponse === 'true' &&
+    (hasAttachment || hasAttachments)
+  ) {
     throw new Error(
       '"stream_response" currently supports text-only messages and cannot be combined with attachments',
     );
   }
 
   if (hasAttachment && !attachmentType) {
-    throw new Error('attachment_type is required when "attachment" is provided');
+    throw new Error(
+      'attachment_type is required when "attachment" is provided',
+    );
   }
 
   if (!hasAttachment && attachmentType) {
-    throw new Error('"attachment" is required when attachment_type is provided');
+    throw new Error(
+      '"attachment" is required when attachment_type is provided',
+    );
   }
 
   if (rawInputs.supportsStreaming === 'true' && !hasAttachment) {
@@ -282,8 +346,13 @@ function assertInputConsistency(rawInputs: RawActionInputs, attachmentType?: Att
     );
   }
 
-  if (rawInputs.supportsStreaming === 'true' && rawInputs.attachmentType !== 'video') {
-    throw new Error('"supports_streaming" can only be used with attachment_type "video"');
+  if (
+    rawInputs.supportsStreaming === 'true' &&
+    rawInputs.attachmentType !== 'video'
+  ) {
+    throw new Error(
+      '"supports_streaming" can only be used with attachment_type "video"',
+    );
   }
 
   if (rawInputs.supportsStreaming === 'true' && hasAttachments) {
@@ -302,19 +371,30 @@ function assertInputConsistency(rawInputs: RawActionInputs, attachmentType?: Att
 /**
  * Parse and validate raw action inputs into a normalized request object.
  */
-export async function parseActionInputs(rawInputs: RawActionInputs): Promise<ParsedActionInputs> {
+export async function parseActionInputs(
+  rawInputs: RawActionInputs,
+): Promise<ParsedActionInputs> {
   const attachmentType = parseOptionalAttachmentType(rawInputs.attachmentType);
   assertInputConsistency(rawInputs, attachmentType);
 
   const attachmentSource = rawInputs.attachment
-    ? resolveAttachmentSource(rawInputs.attachment, rawInputs.attachmentFilename || undefined)
+    ? resolveAttachmentSource(
+        rawInputs.attachment,
+        rawInputs.attachmentFilename || undefined,
+      )
     : undefined;
   const attachmentItems = rawInputs.attachments
     ? parseAttachments(rawInputs.attachments)
     : undefined;
 
-  if (rawInputs.attachmentFilename && attachmentSource && !attachmentSource.isLocalFile) {
-    throw new Error('attachment_filename can only be used with a local attachment path');
+  if (
+    rawInputs.attachmentFilename &&
+    attachmentSource &&
+    !attachmentSource.isLocalFile
+  ) {
+    throw new Error(
+      'attachment_filename can only be used with a local attachment path',
+    );
   }
 
   const replyMarkup = rawInputs.buttons
@@ -331,14 +411,26 @@ export async function parseActionInputs(rawInputs: RawActionInputs): Promise<Par
     botToken: rawInputs.botToken,
     chatId: rawInputs.chatId,
     message,
-    streamResponse: parseBooleanInput('stream_response', rawInputs.streamResponse),
-    disableLinkPreview: parseBooleanInput('disable_link_preview', rawInputs.disableLinkPreview),
+    streamResponse: parseBooleanInput(
+      'stream_response',
+      rawInputs.streamResponse,
+    ),
+    disableLinkPreview: parseBooleanInput(
+      'disable_link_preview',
+      rawInputs.disableLinkPreview,
+    ),
     topicId: parseOptionalIntegerInput('topic_id', rawInputs.topicId),
-    replyMessageId: parseOptionalIntegerInput('reply_to_message_id', rawInputs.replyToMessageId),
+    replyMessageId: parseOptionalIntegerInput(
+      'reply_to_message_id',
+      rawInputs.replyToMessageId,
+    ),
     replyMarkup,
     attachmentType,
     attachmentSource,
     attachmentItems,
-    supportsStreaming: parseBooleanInput('supports_streaming', rawInputs.supportsStreaming),
+    supportsStreaming: parseBooleanInput(
+      'supports_streaming',
+      rawInputs.supportsStreaming,
+    ),
   };
 }

@@ -1,7 +1,11 @@
 import * as p from '@clack/prompts';
 import type { TestHistoryEntry } from '../src/types.ts';
 import { loadScenarios } from './scenarios/index.ts';
-import { parseCliOptions, resolveScenarios, resolveSelection } from './test-support/cli.ts';
+import {
+  parseCliOptions,
+  resolveScenarios,
+  resolveSelection,
+} from './test-support/cli.ts';
 import {
   runActSelection,
   runSourceSelection,
@@ -93,7 +97,9 @@ async function main(runStartedAt: number): Promise<void> {
 const runStartedAt = Date.now();
 
 void main(runStartedAt).catch((error) => {
-  console.error(error instanceof Error ? (error.stack ?? error.message) : String(error));
+  console.error(
+    error instanceof Error ? (error.stack ?? error.message) : String(error),
+  );
   p.outro(`❌  Failed after ${formatDuration(Date.now() - runStartedAt)}`);
   process.exit(1);
 });

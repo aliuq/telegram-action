@@ -29,9 +29,11 @@ export function createPhotoScenarios(): ScenarioDefinition[] {
     }),
     createScenario({
       id: 'photo-as-document',
-      description: 'Send a local photo as a document file (no Telegram compression)',
+      description:
+        'Send a local photo as a document file (no Telegram compression)',
       inputs: {
-        message: '📎 Photo sent as a document (original quality, no compression)',
+        message:
+          '📎 Photo sent as a document (original quality, no compression)',
         attachment: 'scripts/fixtures/sample-photo.webp',
         attachment_type: 'document',
         attachment_filename: 'sample-photo.webp',
@@ -66,7 +68,8 @@ export function createPhotoScenarios(): ScenarioDefinition[] {
     }),
     createScenario({
       id: 'media-group-10-items',
-      description: 'Send 10 photo items in a single max-sized media group batch',
+      description:
+        'Send 10 photo items in a single max-sized media group batch',
       inputs: {
         message: '10 photo items',
         attachments: createPhotoAttachmentBatch(10),
@@ -74,7 +77,8 @@ export function createPhotoScenarios(): ScenarioDefinition[] {
     }),
     createScenario({
       id: 'media-group-15-items',
-      description: 'Send 15 photo items split across multiple media group batches',
+      description:
+        'Send 15 photo items split across multiple media group batches',
       inputs: {
         message: '15 photo items',
         attachments: createPhotoAttachmentBatch(15),
@@ -82,10 +86,12 @@ export function createPhotoScenarios(): ScenarioDefinition[] {
     }),
     createScenario({
       id: 'attachment-long-caption-fallback',
-      description: 'Long attachment text should send leading chunks before the attachment',
+      description:
+        'Long attachment text should send leading chunks before the attachment',
       inputs: {
         message: `Attachment fallback start\n\n${'C'.repeat(10000)}`,
-        buttons: '[{"text":"Open repository","url":"https://github.com/aliuq/telegram-action"}]',
+        buttons:
+          '[{"text":"Open repository","url":"https://github.com/aliuq/telegram-action"}]',
         attachment: 'scripts/fixtures/sample-photo.webp',
         attachment_type: 'photo',
         attachment_filename: 'sample-photo.webp',

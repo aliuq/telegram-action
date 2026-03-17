@@ -127,8 +127,12 @@ export function resolveScenarioSelection(
 /**
  * Build the GitHub Actions matrix format expected by the integration workflow.
  */
-export function buildWorkflowScenarioMatrix(selection: ScenarioSelection): WorkflowScenarioMatrix {
+export function buildWorkflowScenarioMatrix(
+  selection: ScenarioSelection,
+): WorkflowScenarioMatrix {
   return {
-    include: selection.selectedScenarios.map((scenario) => ({ scenario_id: scenario.id })),
+    include: selection.selectedScenarios.map((scenario) => ({
+      scenario_id: scenario.id,
+    })),
   };
 }

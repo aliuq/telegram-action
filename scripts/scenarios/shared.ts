@@ -3,7 +3,9 @@ import type { ScenarioDefinition, ScenarioInputs } from '../../src/types.ts';
 /**
  * Build a scenario input payload from the shared defaults used across examples.
  */
-export function createScenarioInputs(overrides: Partial<ScenarioInputs>): ScenarioInputs {
+export function createScenarioInputs(
+  overrides: Partial<ScenarioInputs>,
+): ScenarioInputs {
   return {
     message: '',
     message_file: '',
@@ -23,7 +25,9 @@ export function createScenarioInputs(overrides: Partial<ScenarioInputs>): Scenar
 /**
  * Create a scenario definition while keeping the repeated input boilerplate centralized.
  */
-export function createScenario(definition: CreateScenarioOptions): ScenarioDefinition {
+export function createScenario(
+  definition: CreateScenarioOptions,
+): ScenarioDefinition {
   return {
     ...definition,
     expect_failure: definition.expect_failure ?? false,
@@ -31,7 +35,10 @@ export function createScenario(definition: CreateScenarioOptions): ScenarioDefin
   };
 }
 
-type CreateScenarioOptions = Omit<ScenarioDefinition, 'inputs' | 'expect_failure'> & {
+type CreateScenarioOptions = Omit<
+  ScenarioDefinition,
+  'inputs' | 'expect_failure'
+> & {
   inputs: Partial<ScenarioInputs>;
   expect_failure?: boolean;
 };

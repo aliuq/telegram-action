@@ -11,7 +11,8 @@ export function createFailureScenarios(): ScenarioDefinition[] {
       description: 'Invalid button payload should fail',
       expect_failure: true,
       inputs: {
-        message: '⚠️ This run should fail because the buttons payload is invalid.',
+        message:
+          '⚠️ This run should fail because the buttons payload is invalid.',
         buttons: '[{"url":"https://google.com"}]',
       },
     }),
@@ -31,7 +32,8 @@ export function createFailureScenarios(): ScenarioDefinition[] {
       inputs: {
         attachment: 'scripts/fixtures/sample-document.txt',
         attachment_type: 'document',
-        attachments: '[{"type":"document","source":"scripts/fixtures/sample-document.txt"}]',
+        attachments:
+          '[{"type":"document","source":"scripts/fixtures/sample-document.txt"}]',
       },
     }),
     createScenario({
@@ -39,7 +41,8 @@ export function createFailureScenarios(): ScenarioDefinition[] {
       description: 'Streaming text mode should reject attachment sends',
       expect_failure: true,
       inputs: {
-        message: 'This should fail because streaming responses are text-only for now.',
+        message:
+          'This should fail because streaming responses are text-only for now.',
         stream_response: 'true',
         attachment: 'scripts/fixtures/sample-photo.webp',
         attachment_type: 'photo',
@@ -47,7 +50,8 @@ export function createFailureScenarios(): ScenarioDefinition[] {
     }),
     createScenario({
       id: 'stream-response-missing-message',
-      description: 'Streaming mode should fail when no text message source is provided',
+      description:
+        'Streaming mode should fail when no text message source is provided',
       expect_failure: true,
       inputs: {
         stream_response: 'true',

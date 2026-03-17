@@ -1,11 +1,19 @@
 import { spawn } from 'node:child_process';
 import { createWriteStream, existsSync, writeFileSync } from 'node:fs';
 import * as p from '@clack/prompts';
-import { formatActErrorDetails, formatActRequestSummary } from '../../src/act-logging.ts';
+import {
+  formatActErrorDetails,
+  formatActRequestSummary,
+} from '../../src/act-logging.ts';
 import { parseActionInputs } from '../../src/inputs.ts';
 import { sendTelegramMessage } from '../../src/telegram.ts';
 import type { ScenarioDefinition, TestSelection } from '../../src/types.ts';
-import { buildRawActionInputs, describeRequestMethod, ROOT, SECRET_FILE_PATH } from './shared.ts';
+import {
+  buildRawActionInputs,
+  describeRequestMethod,
+  ROOT,
+  SECRET_FILE_PATH,
+} from './shared.ts';
 
 /**
  * Ensure act mode has a repository-root secret file to read from.
@@ -51,7 +59,9 @@ function shellEscape(arg: string): string {
  * Format the act invocation as a shell command for prompts and logs.
  */
 function formatActCommand(selection: TestSelection): string {
-  return ['act', ...buildActArgs(selection)].map((arg) => shellEscape(arg)).join(' ');
+  return ['act', ...buildActArgs(selection)]
+    .map((arg) => shellEscape(arg))
+    .join(' ');
 }
 
 /**
@@ -134,7 +144,9 @@ export async function runSourceSelection(
     for (const scenario of scenarios) {
       if (scenario.expect_failure) {
         try {
-          const request = await parseActionInputs(buildRawActionInputs(scenario, true));
+          const request = await parseActionInputs(
+            buildRawActionInputs(scenario, true),
+          );
           const requestSummary = formatActRequestSummary({
             scenarioId: request.scenarioId,
             method: describeRequestMethod(request),
@@ -165,7 +177,9 @@ export async function runSourceSelection(
         );
       }
 
-      const request = await parseActionInputs(buildRawActionInputs(scenario, true));
+      const request = await parseActionInputs(
+        buildRawActionInputs(scenario, true),
+      );
       const requestSummary = formatActRequestSummary({
         scenarioId: request.scenarioId,
         method: describeRequestMethod(request),
@@ -207,7 +221,8 @@ export async function runValidationSelection(
   const logLines: string[] = [];
 
   for (const scenario of scenarios) {
-    const runValidation = () => parseActionInputs(buildRawActionInputs(scenario, false));
+    const runValidation = () =>
+      parseActionInputs(buildRawActionInputs(scenario, false));
 
     if (scenario.expect_failure) {
       try {

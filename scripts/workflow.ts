@@ -1,5 +1,11 @@
 import { spawn } from 'node:child_process';
-import { appendFileSync, mkdtempSync, readFileSync, rmSync, writeFileSync } from 'node:fs';
+import {
+  appendFileSync,
+  mkdtempSync,
+  readFileSync,
+  rmSync,
+  writeFileSync,
+} from 'node:fs';
 import { tmpdir } from 'node:os';
 import { dirname, join } from 'node:path';
 import { getRequiredEnv } from '../src/env.ts';
@@ -94,7 +100,9 @@ async function runLoggedCommand(
   args: string[],
   env: NodeJS.ProcessEnv,
 ): Promise<number> {
-  console.info(`$ ${[command, ...args].map((arg) => shellEscape(arg)).join(' ')}`);
+  console.info(
+    `$ ${[command, ...args].map((arg) => shellEscape(arg)).join(' ')}`,
+  );
 
   const child = spawn(command, args, {
     cwd: process.cwd(),
@@ -113,7 +121,10 @@ async function runLoggedCommand(
  */
 async function writeMatrix(): Promise<void> {
   const scenarios = await loadScenarios();
-  const selection = resolveScenarioSelection(scenarios, process.env.SCENARIO_IDS);
+  const selection = resolveScenarioSelection(
+    scenarios,
+    process.env.SCENARIO_IDS,
+  );
   const matrix = buildWorkflowScenarioMatrix(selection);
 
   writeOutput('matrix', JSON.stringify(matrix));
@@ -131,20 +142,30 @@ async function writeScenarioOutputs(): Promise<void> {
   writeOutput('message_file', scenario.inputs.message_file ?? '');
   writeOutput('message_url', scenario.inputs.message_url ?? '');
   writeOutput('stream_response', scenario.inputs.stream_response ?? 'false');
-  writeOutput('disable_link_preview', scenario.inputs.disable_link_preview ?? 'true');
+  writeOutput(
+    'disable_link_preview',
+    scenario.inputs.disable_link_preview ?? 'true',
+  );
   writeOutput('buttons', scenario.inputs.buttons ?? '');
   writeOutput('attachment', scenario.inputs.attachment ?? '');
   writeOutput('attachments', scenario.inputs.attachments ?? '');
   writeOutput('attachment_type', scenario.inputs.attachment_type ?? '');
   writeOutput('attachment_filename', scenario.inputs.attachment_filename ?? '');
-  writeOutput('supports_streaming', scenario.inputs.supports_streaming ?? 'false');
+  writeOutput(
+    'supports_streaming',
+    scenario.inputs.supports_streaming ?? 'false',
+  );
   writeOutput('expect_failure', String(Boolean(scenario.expect_failure)));
 }
 
 /**
  * Verify that the action outcome matches the scenario's expected pass/fail state.
  */
-function assertScenarioOutcome(scenarioId: string, expectFailure: boolean, outcome: string): void {
+function assertScenarioOutcome(
+  scenarioId: string,
+  expectFailure: boolean,
+  outcome: string,
+): void {
   const expectedOutcome = expectFailure ? 'failure' : 'success';
 
   if (outcome !== expectedOutcome) {
@@ -166,7 +187,10 @@ function assertScenarioOutcomeFromEnv(): void {
 
 async function runSelectedScenarios(): Promise<void> {
   const scenarios = await loadScenarios();
-  const selection = resolveScenarioSelection(scenarios, process.env.SCENARIO_IDS);
+  const selection = resolveScenarioSelection(
+    scenarios,
+    process.env.SCENARIO_IDS,
+  );
 
   console.info(`Resolved ${selection.selectedScenarios.length} scenario(s).`);
 
@@ -179,14 +203,21 @@ async function runSelectedScenarios(): Promise<void> {
         ...process.env,
         ACT_SCENARIO_ID: scenario.id,
         GITHUB_OUTPUT: outputFilePath,
-        TELEGRAM_ACTION_EXPECT_FAILURE: scenario.expect_failure ? 'true' : 'false',
+        TELEGRAM_ACTION_EXPECT_FAILURE: scenario.expect_failure
+          ? 'true'
+          : 'false',
       };
 
       for (const inputName of ACTION_INPUT_NAMES) {
-        actionEnv[`INPUT_${inputName.toUpperCase()}`] = scenario.inputs[inputName] ?? '';
+        actionEnv[`INPUT_${inputName.toUpperCase()}`] =
+          scenario.inputs[inputName] ?? '';
       }
 
-      const exitCode = await runLoggedCommand('node', ['dist/index.js'], actionEnv);
+      const exitCode = await runLoggedCommand(
+        'node',
+        ['dist/index.js'],
+        actionEnv,
+      );
       const outputs = parseGitHubOutputFile(outputFilePath);
       const outcome = exitCode === 0 ? 'success' : 'failure';
 
@@ -239,6 +270,8 @@ async function main(): Promise<void> {
 }
 
 void main().catch((error) => {
-  console.error(error instanceof Error ? (error.stack ?? error.message) : String(error));
+  console.error(
+    error instanceof Error ? (error.stack ?? error.message) : String(error),
+  );
   process.exit(1);
 });

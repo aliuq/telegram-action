@@ -2,14 +2,22 @@ import { ATTACHMENT_METHOD_NAMES } from '../../src/constants.ts';
 import { getOptionalEnv, getRequiredEnv } from '../../src/env.ts';
 import { parseActionInputs } from '../../src/inputs.ts';
 import { describeTextSendMethod } from '../../src/telegram.ts';
-import type { ParsedActionInputs, RawActionInputs, ScenarioDefinition } from '../../src/types.ts';
+import type {
+  ParsedActionInputs,
+  RawActionInputs,
+  ScenarioDefinition,
+} from '../../src/types.ts';
 
 export const ROOT = new URL('../..', import.meta.url).pathname;
 export const SECRET_FILE_PATH = new URL('../../.env', import.meta.url).pathname;
-export const HISTORY_DIR = new URL('../../.test-history', import.meta.url).pathname;
-export const LOG_DIR = new URL('../../.test-history/logs', import.meta.url).pathname;
-export const HISTORY_FILE_PATH = new URL('../../.test-history/test-history.json', import.meta.url)
+export const HISTORY_DIR = new URL('../../.test-history', import.meta.url)
   .pathname;
+export const LOG_DIR = new URL('../../.test-history/logs', import.meta.url)
+  .pathname;
+export const HISTORY_FILE_PATH = new URL(
+  '../../.test-history/test-history.json',
+  import.meta.url,
+).pathname;
 export const TEST_BOT_TOKEN = 'test-bot-token';
 export const TEST_CHAT_ID = '123456';
 export const RUNNER_BANNER = [
@@ -40,7 +48,9 @@ export function buildRawActionInputs(
 ): RawActionInputs {
   return {
     scenarioId: scenario.id,
-    botToken: useRealEnv ? getRequiredEnv('TELEGRAM_BOT_TOKEN') : TEST_BOT_TOKEN,
+    botToken: useRealEnv
+      ? getRequiredEnv('TELEGRAM_BOT_TOKEN')
+      : TEST_BOT_TOKEN,
     chatId: useRealEnv ? getRequiredEnv('TELEGRAM_CHAT_ID') : TEST_CHAT_ID,
     message: scenario.inputs.message,
     messageFile: scenario.inputs.message_file,
@@ -48,7 +58,9 @@ export function buildRawActionInputs(
     streamResponse: scenario.inputs.stream_response,
     buttons: scenario.inputs.buttons,
     topicId: useRealEnv ? getOptionalEnv('TELEGRAM_TOPIC_ID') : '',
-    replyToMessageId: useRealEnv ? getOptionalEnv('TELEGRAM_REPLY_TO_MESSAGE_ID') : '',
+    replyToMessageId: useRealEnv
+      ? getOptionalEnv('TELEGRAM_REPLY_TO_MESSAGE_ID')
+      : '',
     disableLinkPreview: scenario.inputs.disable_link_preview,
     attachment: scenario.inputs.attachment,
     attachments: scenario.inputs.attachments,
@@ -76,7 +88,9 @@ export function describeRequestMethod(request: ParsedActionInputs): string {
 /**
  * Validate the scenario catalog against the shared action parser.
  */
-export async function validateScenarioCatalog(scenarios: ScenarioDefinition[]): Promise<void> {
+export async function validateScenarioCatalog(
+  scenarios: ScenarioDefinition[],
+): Promise<void> {
   const seen = new Set<string>();
 
   for (const scenario of scenarios) {
@@ -85,7 +99,8 @@ export async function validateScenarioCatalog(scenarios: ScenarioDefinition[]): 
     }
     seen.add(scenario.id);
 
-    const runValidation = () => parseActionInputs(buildRawActionInputs(scenario, false));
+    const runValidation = () =>
+      parseActionInputs(buildRawActionInputs(scenario, false));
 
     if (scenario.expect_failure) {
       try {

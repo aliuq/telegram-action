@@ -10,7 +10,8 @@ export function createMessageScenarios(): ScenarioDefinition[] {
       id: 'basic',
       description: 'Basic text message',
       inputs: {
-        message: '🚀 Hello from telegram-action!\n\nThis is a basic test message.',
+        message:
+          '🚀 Hello from telegram-action!\n\nThis is a basic test message.',
       },
     }),
     createScenario({
@@ -32,7 +33,8 @@ export function createMessageScenarios(): ScenarioDefinition[] {
       id: 'message-from-url',
       description: 'Message body loaded from a remote URL',
       inputs: {
-        message_url: 'https://raw.githubusercontent.com/aliuq/aliuq/refs/heads/master/README.md',
+        message_url:
+          'https://raw.githubusercontent.com/aliuq/aliuq/refs/heads/master/README.md',
       },
     }),
     createScenario({
@@ -51,15 +53,18 @@ export function createMessageScenarios(): ScenarioDefinition[] {
     }),
     createScenario({
       id: 'message-long-with-buttons',
-      description: 'Long text message with buttons should keep buttons on the final chunk',
+      description:
+        'Long text message with buttons should keep buttons on the final chunk',
       inputs: {
         message: `Long message with buttons\n\n${'B'.repeat(5000)}`,
-        buttons: '[{"text":"Open repository","url":"https://github.com/aliuq/telegram-action"}]',
+        buttons:
+          '[{"text":"Open repository","url":"https://github.com/aliuq/telegram-action"}]',
       },
     }),
     createScenario({
       id: 'message-streaming-response',
-      description: 'Text-only message streamed with Telegram drafts in supported private chats',
+      description:
+        'Text-only message streamed with Telegram drafts in supported private chats',
       inputs: {
         message: [
           'Streaming response demo',
@@ -84,7 +89,8 @@ export function createMessageScenarios(): ScenarioDefinition[] {
           'The message should update progressively and expose buttons only after it reaches the final text.',
         ].join('\n'),
         stream_response: 'true',
-        buttons: '[{"text":"Open repository","url":"https://github.com/aliuq/telegram-action"}]',
+        buttons:
+          '[{"text":"Open repository","url":"https://github.com/aliuq/telegram-action"}]',
       },
     }),
     createScenario({

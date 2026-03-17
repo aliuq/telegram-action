@@ -92,7 +92,10 @@ describe('splitTelegramMessageChunks', () => {
   });
 
   test('returns both raw and formatted for each chunk', () => {
-    const chunks = splitTelegramMessageChunks('Hello **world**', TELEGRAM_MESSAGE_LIMIT);
+    const chunks = splitTelegramMessageChunks(
+      'Hello **world**',
+      TELEGRAM_MESSAGE_LIMIT,
+    );
     expect(chunks).toHaveLength(1);
     expect(chunks[0].raw).toBe('Hello **world**');
     expect(chunks[0].formatted).toBeTruthy();
@@ -117,7 +120,9 @@ describe('splitTelegramMessageChunks', () => {
 
     expect(chunks.length).toBeGreaterThan(1);
     for (const chunk of chunks) {
-      expect(chunk.formatted.length).toBeLessThanOrEqual(TELEGRAM_MESSAGE_LIMIT);
+      expect(chunk.formatted.length).toBeLessThanOrEqual(
+        TELEGRAM_MESSAGE_LIMIT,
+      );
     }
   });
 
@@ -126,12 +131,17 @@ describe('splitTelegramMessageChunks', () => {
       { length: 30 },
       (_, i) => `Paragraph ${i}: ${'content '.repeat(40)}`,
     ).join('\n\n');
-    const chunks = splitTelegramMessageChunks(paragraphs, TELEGRAM_MESSAGE_LIMIT);
+    const chunks = splitTelegramMessageChunks(
+      paragraphs,
+      TELEGRAM_MESSAGE_LIMIT,
+    );
 
     // Each chunk (except possibly the last) should end at a natural boundary
     for (const chunk of chunks.slice(0, -1)) {
       const endsNaturally =
-        chunk.raw.endsWith('\n\n') || chunk.raw.endsWith('\n') || chunk.raw.endsWith(' ');
+        chunk.raw.endsWith('\n\n') ||
+        chunk.raw.endsWith('\n') ||
+        chunk.raw.endsWith(' ');
       expect(endsNaturally).toBe(true);
     }
   });
@@ -141,26 +151,37 @@ describe('splitTelegramMessageChunks', () => {
 
 describe('buildStreamingFrames', () => {
   test('returns empty array for empty input', () => {
-    expect(buildStreamingFrames('', { minFrames: 5, maxFrames: 10 })).toEqual([]);
+    expect(buildStreamingFrames('', { minFrames: 5, maxFrames: 10 })).toEqual(
+      [],
+    );
   });
 
   test('generates at least minFrames for normal text', () => {
     const message =
       'Hello world, this is a test message with enough content to generate multiple frames.';
-    const frames = buildStreamingFrames(message, { minFrames: 3, maxFrames: 10 });
+    const frames = buildStreamingFrames(message, {
+      minFrames: 3,
+      maxFrames: 10,
+    });
     expect(frames.length).toBeGreaterThanOrEqual(1);
   });
 
   test('last frame equals full formatted message', () => {
     const message = 'Hello **bold** and _italic_ text with `code`.';
-    const frames = buildStreamingFrames(message, { minFrames: 3, maxFrames: 10 });
+    const frames = buildStreamingFrames(message, {
+      minFrames: 3,
+      maxFrames: 10,
+    });
     const fullFormatted = formatTelegramMessage(message);
     expect(frames.at(-1)).toBe(fullFormatted);
   });
 
   test('frames are progressively longer', () => {
     const message = 'word '.repeat(100);
-    const frames = buildStreamingFrames(message, { minFrames: 5, maxFrames: 15 });
+    const frames = buildStreamingFrames(message, {
+      minFrames: 5,
+      maxFrames: 15,
+    });
 
     for (let i = 1; i < frames.length; i++) {
       expect(frames[i].length).toBeGreaterThanOrEqual(frames[i - 1].length);
@@ -169,7 +190,10 @@ describe('buildStreamingFrames', () => {
 
   test('all frames are valid formatted text (no duplicates in sequence)', () => {
     const message = 'Section one.\n\nSection two.\n\nSection three.';
-    const frames = buildStreamingFrames(message, { minFrames: 2, maxFrames: 5 });
+    const frames = buildStreamingFrames(message, {
+      minFrames: 2,
+      maxFrames: 5,
+    });
 
     for (let i = 1; i < frames.length; i++) {
       expect(frames[i]).not.toBe(frames[i - 1]);
@@ -178,7 +202,10 @@ describe('buildStreamingFrames', () => {
 
   test('handles code blocks atomically', () => {
     const message = 'Before\n```js\nconst x = 1;\n```\nAfter';
-    const frames = buildStreamingFrames(message, { minFrames: 2, maxFrames: 5 });
+    const frames = buildStreamingFrames(message, {
+      minFrames: 2,
+      maxFrames: 5,
+    });
 
     // Code blocks should appear complete, not partially
     for (const frame of frames) {
@@ -210,7 +237,8 @@ describe('edge cases', () => {
   });
 
   test('message with many special characters needing escape', () => {
-    const special = 'Price: $100 + $50 = $150 (total) [link](http://example.com)';
+    const special =
+      'Price: $100 + $50 = $150 (total) [link](http://example.com)';
     const chunks = splitTelegramMessage(special, TELEGRAM_MESSAGE_LIMIT);
     expect(chunks).toHaveLength(1);
     expect(chunks[0].length).toBeGreaterThan(special.length); // escaping adds characters

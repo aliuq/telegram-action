@@ -7,7 +7,12 @@ import type {
   InputMediaVideo,
 } from 'grammy/types';
 
-export type AttachmentType = 'photo' | 'video' | 'audio' | 'animation' | 'document';
+export type AttachmentType =
+  | 'photo'
+  | 'video'
+  | 'audio'
+  | 'animation'
+  | 'document';
 
 /**
  * Shared Telegram attachment option surface used by all supported senders.
