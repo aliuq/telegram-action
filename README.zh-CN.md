@@ -254,7 +254,7 @@ bun run test:act
 bun run test:validate
 ```
 
-测试脚本会把最近一次执行命令和日志保存在 `.test-history/` 里，并支持快速重跑上一次命令。`act` 模式会保留彩色输出。
+测试脚本会把最近一次执行命令和日志保存在 `.test-history/` 里，并支持快速重跑上一次命令。`act` 模式会保留彩色输出。GitHub Actions 中的 `notification` job 现在也会在单个 runner 里顺序执行所选场景，而不是为每个场景单独起一个 job。
 
 ## 常见问题
 

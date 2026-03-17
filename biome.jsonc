@@ -1,12 +1,14 @@
 {
   "$schema": "https://biomejs.dev/schemas/2.4.7/schema.json",
+  // 根配置文件（monorepo 子包可设 root: false 并 extends 此文件）
+  "root": true,
   "vcs": {
-    "enabled": false,
+    "enabled": true,
     "clientKind": "git",
-    "useIgnoreFile": false
+    "useIgnoreFile": true
   },
   "files": {
-    "ignoreUnknown": false,
+    "ignoreUnknown": true,
     "includes": [
       "**",
       "!**/.test-history",
@@ -16,7 +18,9 @@
   "formatter": {
     "enabled": true,
     "indentStyle": "space",
-    "lineWidth": 100
+    "indentWidth": 2,
+    "lineWidth": 100,
+    "lineEnding": "lf"
   },
   "assist": {
     "actions": {
@@ -36,13 +40,15 @@
   },
   "javascript": {
     "formatter": {
-      "quoteStyle": "double",
-      "lineWidth": 120
+      "quoteStyle": "single",
+      "trailingCommas": "all",
+      "semicolons": "always",
+      "arrowParentheses": "always"
     }
   },
   "json": {
     "formatter": {
-      "enabled": false
+      "trailingCommas": "none"
     }
   }
 }

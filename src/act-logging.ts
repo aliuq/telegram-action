@@ -137,7 +137,7 @@ export function logActErrorDetails(error: unknown): void {
 
   core.startGroup("[act] Telegram request failure details");
   for (const detail of formatActErrorDetails(error).split("\n")) {
-    core.error(detail);
+    core.info(detail);
   }
   core.endGroup();
 }

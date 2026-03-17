@@ -381,10 +381,10 @@ The `invalid-buttons` test case is expected to fail because the action rejects m
 
 ### 4. Direct `act` usage
 
-You can also invoke the bundled workflow directly. The workflow accepts a single `scenario_ids` input, and a dedicated setup job builds the matrix dynamically from the TypeScript scenario catalog.
+You can also invoke the bundled workflow directly. The workflow accepts a single `scenario_ids` input and runs the selected scenarios sequentially inside one `notification` job.
 
 ```bash
-act workflow_dispatch -n -W .github/workflows/run.yaml -j notification \
+act workflow_dispatch -n -W .github/workflows/test.yaml -j notification \
   --input scenario_ids=all \
   --secret-file .env
 ```
@@ -392,7 +392,7 @@ act workflow_dispatch -n -W .github/workflows/run.yaml -j notification \
 To execute it for real, provide the required secrets:
 
 ```bash
-act workflow_dispatch -W .github/workflows/run.yaml -j notification \
+act workflow_dispatch -W .github/workflows/test.yaml -j notification \
   --input scenario_ids=basic,photo-local,photo-as-document,video-as-document,document-local,video-url \
   --secret-file .env
 ```

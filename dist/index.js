@@ -16078,10 +16078,10 @@ function formatActErrorDetails(error) {
 * Print nested causes for local failures so maintainers can quickly distinguish
 * parser problems from network and `act` transport issues.
 */
-function logActErrorDetails(error$2) {
+function logActErrorDetails(error) {
 	if (!isActRun()) return;
 	startGroup("[act] Telegram request failure details");
-	for (const detail of formatActErrorDetails(error$2).split("\n")) error(detail);
+	for (const detail of formatActErrorDetails(error).split("\n")) info(detail);
 	endGroup();
 }
 //#endregion
@@ -77126,6 +77126,9 @@ async function sendTelegramMessage(request) {
 }
 //#endregion
 //#region src/index.ts
+function shouldSuppressFailureAnnotations() {
+	return process.env.TELEGRAM_ACTION_EXPECT_FAILURE === "true";
+}
 /**
 * Read, normalize, and execute the action request.
 *
@@ -77138,14 +77141,20 @@ async function run() {
 		setOutput("message_id", result.message_id.toString());
 		setOutput("status", "success");
 		if (isActRun()) info(`[act] Sent Telegram message successfully (message_id=${result.message_id})`);
-	} catch (error$1) {
-		error(error$1 instanceof Error ? error$1.stack ?? error$1.message : String(error$1));
-		logActErrorDetails(error$1);
-		if (error$1 instanceof Error) {
-			setFailed(error$1.message);
+	} catch (error) {
+		const message = error instanceof Error ? error.message : "An unexpected error occurred";
+		const details = error instanceof Error ? error.stack ?? error.message : String(error);
+		if (!isActRun()) {
+			startGroup("telegram-action failure");
+			for (const line of details.split("\n")) info(line);
+			endGroup();
+		}
+		logActErrorDetails(error);
+		if (shouldSuppressFailureAnnotations()) {
+			process.exitCode = 1;
 			return;
 		}
-		setFailed("An unexpected error occurred");
+		setFailed(message);
 	}
 }
 run();
