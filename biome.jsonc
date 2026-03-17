@@ -9,11 +9,7 @@
   },
   "files": {
     "ignoreUnknown": true,
-    "includes": [
-      "**",
-      "!**/.test-history",
-      "!**/dist"
-    ]
+    "includes": ["**", "!**/.test-history", "!**/dist"]
   },
   "formatter": {
     "enabled": true,

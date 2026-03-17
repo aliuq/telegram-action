@@ -1,6 +1,6 @@
-import { existsSync, readFileSync } from "node:fs";
-import telegramifyMarkdown from "telegramify-markdown";
-import { isRemoteUrl, resolveWorkspacePath } from "./source-utils.js";
+import { existsSync, readFileSync } from 'node:fs';
+import telegramifyMarkdown from 'telegramify-markdown';
+import { isRemoteUrl, resolveWorkspacePath } from './source-utils.js';
 
 export const TELEGRAM_MESSAGE_LIMIT = 4096;
 export const TELEGRAM_MESSAGE_SOFT_LIMIT = 4000;
@@ -23,7 +23,7 @@ export interface StreamingFrameOptions {
 }
 
 interface MessageSegment {
-  type: "text" | "code";
+  type: 'text' | 'code';
   raw: string;
 }
 
@@ -31,16 +31,18 @@ interface MessageSegment {
  * Convert plain user input into Telegram MarkdownV2 while keeping current behavior.
  */
 export function formatTelegramMessage(message: string): string {
-  return simplifySelfReferentialLinks(telegramifyMarkdown(stripLeadingFrontmatter(message), "keep"));
+  return simplifySelfReferentialLinks(
+    telegramifyMarkdown(stripLeadingFrontmatter(message), 'keep'),
+  );
 }
 
 function stripLeadingFrontmatter(message: string): string {
-  return message.replace(/^---\r?\n[\s\S]*?\r?\n---(?:\r?\n)+/, "");
+  return message.replace(/^---\r?\n[\s\S]*?\r?\n---(?:\r?\n)+/, '');
 }
 
 function simplifySelfReferentialLinks(message: string): string {
   const markdownCodePattern = /(```[\s\S]*?```|`[^`\n]*`)/g;
-  let result = "";
+  let result = '';
   let lastIndex = 0;
 
   for (const match of message.matchAll(markdownCodePattern)) {
@@ -57,16 +59,19 @@ function simplifySelfReferentialLinks(message: string): string {
 function replaceSelfReferentialLinks(message: string): string {
   const simplifiedLinks = message.replace(
     /\[([^\]]+)\]\((https?:\/\/[^)\s]+)\)/g,
-    (fullMatch, label: string, target: string) => (label.replaceAll("\\", "") === target ? label : fullMatch),
+    (fullMatch, label: string, target: string) =>
+      label.replaceAll('\\', '') === target ? label : fullMatch,
   );
 
-  return simplifiedLinks.replace(/(?<!\\)[<>]/g, "\\$&");
+  return simplifiedLinks.replace(/(?<!\\)[<>]/g, '\\$&');
 }
 
 /**
  * Resolve message text from inline input, a local file, or a remote URL.
  */
-export async function resolveMessageText(options: MessageSourceOptions): Promise<string | undefined> {
+export async function resolveMessageText(
+  options: MessageSourceOptions,
+): Promise<string | undefined> {
   if (options.message) {
     return options.message;
   }
@@ -77,17 +82,19 @@ export async function resolveMessageText(options: MessageSourceOptions): Promise
       throw new Error(`message_file path does not exist: ${options.messageFile}`);
     }
 
-    return readFileSync(resolvedPath, "utf8");
+    return readFileSync(resolvedPath, 'utf8');
   }
 
   if (options.messageUrl) {
     if (!isRemoteUrl(options.messageUrl)) {
-      throw new Error("message_url must start with http:// or https://");
+      throw new Error('message_url must start with http:// or https://');
     }
 
     const response = await fetch(options.messageUrl, { signal: AbortSignal.timeout(30_000) });
     if (!response.ok) {
-      throw new Error(`message_url request failed with status ${response.status}: ${options.messageUrl}`);
+      throw new Error(
+        `message_url request failed with status ${response.status}: ${options.messageUrl}`,
+      );
     }
 
     return await response.text();
@@ -128,7 +135,7 @@ function findMaximumFittingPrefix(message: string, limit: number): number {
 }
 
 function findNaturalSplitIndex(candidate: string): number | undefined {
-  for (const separator of ["\n\n", "\n", " "]) {
+  for (const separator of ['\n\n', '\n', ' ']) {
     const separatorIndex = candidate.lastIndexOf(separator);
     if (separatorIndex > 0) {
       return separatorIndex + separator.length;
@@ -205,13 +212,13 @@ function parseMessageSegments(message: string): MessageSegment[] {
     const matchIndex = match.index ?? 0;
     if (matchIndex > lastIndex) {
       segments.push({
-        type: "text",
+        type: 'text',
         raw: message.slice(lastIndex, matchIndex),
       });
     }
 
     segments.push({
-      type: "code",
+      type: 'code',
       raw: match[0],
     });
     lastIndex = matchIndex + match[0].length;
@@ -219,7 +226,7 @@ function parseMessageSegments(message: string): MessageSegment[] {
 
   if (lastIndex < message.length) {
     segments.push({
-      type: "text",
+      type: 'text',
       raw: message.slice(lastIndex),
     });
   }
@@ -241,11 +248,13 @@ function splitOversizedCodeLine(line: string, maxLength: number): string[] {
 }
 
 function splitFencedCodeBlock(rawBlock: string, limit: number): TelegramMessageChunk[] {
-  const firstNewlineIndex = rawBlock.indexOf("\n");
-  const openingFence = firstNewlineIndex === -1 ? "```" : rawBlock.slice(0, firstNewlineIndex + 1);
-  const closingFence = "\n```";
+  const firstNewlineIndex = rawBlock.indexOf('\n');
+  const openingFence = firstNewlineIndex === -1 ? '```' : rawBlock.slice(0, firstNewlineIndex + 1);
+  const closingFence = '\n```';
   const body =
-    firstNewlineIndex === -1 ? "" : rawBlock.slice(firstNewlineIndex + 1, rawBlock.length - 3).replace(/\n$/, "");
+    firstNewlineIndex === -1
+      ? ''
+      : rawBlock.slice(firstNewlineIndex + 1, rawBlock.length - 3).replace(/\n$/, '');
   const fullFormatted = formatTelegramMessage(rawBlock);
 
   if (fullFormatted.length <= limit) {
@@ -254,18 +263,18 @@ function splitFencedCodeBlock(rawBlock: string, limit: number): TelegramMessageC
 
   const staticOverhead = getFormattedLength(`${openingFence}${closingFence}`);
   const bodyBudget = Math.max(1, limit - staticOverhead);
-  const lines = body.split("\n");
+  const lines = body.split('\n');
   const normalizedLines = lines.flatMap((line, lineIndex) => {
-    const suffix = lineIndex === lines.length - 1 ? "" : "\n";
+    const suffix = lineIndex === lines.length - 1 ? '' : '\n';
     return splitOversizedCodeLine(`${line}${suffix}`, bodyBudget);
   });
 
   const chunks: TelegramMessageChunk[] = [];
-  let currentBody = "";
+  let currentBody = '';
 
   for (const line of normalizedLines) {
     const candidateBody = currentBody + line;
-    const candidateRaw = `${openingFence}${candidateBody}${candidateBody.endsWith("\n") ? "" : "\n"}\`\`\``;
+    const candidateRaw = `${openingFence}${candidateBody}${candidateBody.endsWith('\n') ? '' : '\n'}\`\`\``;
 
     if (getFormattedLength(candidateRaw) <= limit) {
       currentBody = candidateBody;
@@ -273,23 +282,26 @@ function splitFencedCodeBlock(rawBlock: string, limit: number): TelegramMessageC
     }
 
     if (!currentBody) {
-      throw new Error("failed to split fenced code block into Telegram-safe chunks");
+      throw new Error('failed to split fenced code block into Telegram-safe chunks');
     }
 
-    const currentRaw = `${openingFence}${currentBody}${currentBody.endsWith("\n") ? "" : "\n"}\`\`\``;
+    const currentRaw = `${openingFence}${currentBody}${currentBody.endsWith('\n') ? '' : '\n'}\`\`\``;
     chunks.push({ raw: currentRaw, formatted: formatTelegramMessage(currentRaw) });
     currentBody = line;
   }
 
   if (currentBody) {
-    const currentRaw = `${openingFence}${currentBody}${currentBody.endsWith("\n") ? "" : "\n"}\`\`\``;
+    const currentRaw = `${openingFence}${currentBody}${currentBody.endsWith('\n') ? '' : '\n'}\`\`\``;
     chunks.push({ raw: currentRaw, formatted: formatTelegramMessage(currentRaw) });
   }
 
   return chunks;
 }
 
-function mergeAdjacentChunks(chunks: TelegramMessageChunk[], limit: number): TelegramMessageChunk[] {
+function mergeAdjacentChunks(
+  chunks: TelegramMessageChunk[],
+  limit: number,
+): TelegramMessageChunk[] {
   if (chunks.length <= 1) {
     return chunks;
   }
@@ -326,9 +338,9 @@ export function splitTelegramMessageChunks(message: string, limit: number): Tele
   }
 
   const segments = parseMessageSegments(message);
-  if (segments.some((segment) => segment.type === "code")) {
+  if (segments.some((segment) => segment.type === 'code')) {
     const segmentChunks = segments.flatMap((segment) =>
-      segment.type === "code"
+      segment.type === 'code'
         ? splitFencedCodeBlock(segment.raw, limit)
         : splitPlainTelegramMessageChunks(segment.raw, limit),
     );
@@ -369,7 +381,7 @@ function buildStreamingPieces(message: string, targetCharactersPerPiece = 120): 
   const maxTokenLength = Math.max(1, targetCharactersPerPiece);
   const tokens = getStreamingTokens(message, maxTokenLength);
   const pieces: string[] = [];
-  let current = "";
+  let current = '';
 
   for (const token of tokens) {
     current += token;
@@ -377,7 +389,8 @@ function buildStreamingPieces(message: string, targetCharactersPerPiece = 120): 
     const shouldEmit =
       current.trim().length > 0 &&
       (current.length >= targetCharactersPerPiece ||
-        ((current.endsWith("\n\n") || current.endsWith("\n")) && current.length >= minimumNaturalBoundaryLength));
+        ((current.endsWith('\n\n') || current.endsWith('\n')) &&
+          current.length >= minimumNaturalBoundaryLength));
 
     if (!shouldEmit) {
       continue;
@@ -386,7 +399,7 @@ function buildStreamingPieces(message: string, targetCharactersPerPiece = 120): 
     if (current) {
       pieces.push(current);
     }
-    current = "";
+    current = '';
   }
 
   if (current) {
@@ -396,8 +409,11 @@ function buildStreamingPieces(message: string, targetCharactersPerPiece = 120): 
   return pieces;
 }
 
-function buildStreamingSegmentPieces(segment: MessageSegment, targetCharactersPerPiece: number): string[] {
-  if (segment.type === "code") {
+function buildStreamingSegmentPieces(
+  segment: MessageSegment,
+  targetCharactersPerPiece: number,
+): string[] {
+  if (segment.type === 'code') {
     // Code blocks are revealed atomically to avoid unclosed pre-entity parse errors.
     return [segment.raw];
   }
@@ -429,7 +445,7 @@ export function buildStreamingFrames(message: string, options: StreamingFrameOpt
     buildStreamingSegmentPieces(segment, targetCharactersPerPiece),
   );
   const frames: string[] = [];
-  let currentRaw = "";
+  let currentRaw = '';
 
   for (const piece of pieces) {
     currentRaw += piece;

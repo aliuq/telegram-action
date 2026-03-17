@@ -12,11 +12,7 @@
     "editor.defaultFormatter": "biomejs.biome",
     "editor.formatOnSave": true
   },
-  "cSpell.words": [
-    "changelogithub",
-    "grammyjs",
-    "tsgo"
-  ],
+  "cSpell.words": ["changelogithub", "grammyjs", "tsgo"],
   "github.copilot.chat.commitMessageGeneration.instructions": [
     {
       "file": ".github/commit-instructions.md"

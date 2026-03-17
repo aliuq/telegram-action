@@ -1,20 +1,20 @@
-import type { Bot, InputFile } from "grammy";
+import type { Bot, InputFile } from 'grammy';
 import type {
   InlineKeyboardMarkup,
   InputMediaAudio,
   InputMediaDocument,
   InputMediaPhoto,
   InputMediaVideo,
-} from "grammy/types";
+} from 'grammy/types';
 
-export type AttachmentType = "photo" | "video" | "audio" | "animation" | "document";
+export type AttachmentType = 'photo' | 'video' | 'audio' | 'animation' | 'document';
 
 /**
  * Shared Telegram attachment option surface used by all supported senders.
  */
 export interface AttachmentSendOptions {
   caption?: string;
-  parse_mode?: "MarkdownV2";
+  parse_mode?: 'MarkdownV2';
   reply_markup?: InlineKeyboardMarkup;
   message_thread_id?: number;
   reply_parameters?: { message_id: number };
@@ -106,7 +106,11 @@ export interface ParsedAttachmentItem {
   supportsStreaming?: boolean;
 }
 
-export type TelegramMediaGroupItem = InputMediaAudio | InputMediaDocument | InputMediaPhoto | InputMediaVideo;
+export type TelegramMediaGroupItem =
+  | InputMediaAudio
+  | InputMediaDocument
+  | InputMediaPhoto
+  | InputMediaVideo;
 
 /**
  * Raw scenario input shape used by local tooling and workflow helpers.
@@ -154,7 +158,7 @@ export interface WorkflowScenarioMatrix {
 /**
  * Supported execution modes for the local runner.
  */
-export type TestMode = "source" | "act" | "validate";
+export type TestMode = 'source' | 'act' | 'validate';
 
 /**
  * Raw CLI options before interactive prompts fill in missing selections.
@@ -197,7 +201,7 @@ export interface TestHistoryState {
 /**
  * Convenience alias for Telegram's nested inline-keyboard structure.
  */
-export type InlineKeyboardMatrix = InlineKeyboardMarkup["inline_keyboard"];
+export type InlineKeyboardMatrix = InlineKeyboardMarkup['inline_keyboard'];
 
 /**
  * Data shown in local request previews and failure diagnostics.

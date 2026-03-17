@@ -1,9 +1,9 @@
-import { defineConfig } from "tsdown";
+import { defineConfig } from 'tsdown';
 
 export default defineConfig({
   sourcemap: true,
   clean: true,
-  outExtensions: () => ({ js: ".js" }),
+  outExtensions: () => ({ js: '.js' }),
   deps: {
     onlyBundle: false,
   },

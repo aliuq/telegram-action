@@ -1,10 +1,19 @@
-import * as p from "@clack/prompts";
-import type { TestHistoryEntry } from "../src/types.ts";
-import { loadScenarios } from "./scenarios/index.ts";
-import { parseCliOptions, resolveScenarios, resolveSelection } from "./test-support/cli.ts";
-import { runActSelection, runSourceSelection, runValidationSelection } from "./test-support/execution.ts";
-import { buildRunnerCommand, createLogFilePath, loadHistoryState, saveHistoryEntry } from "./test-support/history.ts";
-import { printBanner, validateScenarioCatalog } from "./test-support/shared.ts";
+import * as p from '@clack/prompts';
+import type { TestHistoryEntry } from '../src/types.ts';
+import { loadScenarios } from './scenarios/index.ts';
+import { parseCliOptions, resolveScenarios, resolveSelection } from './test-support/cli.ts';
+import {
+  runActSelection,
+  runSourceSelection,
+  runValidationSelection,
+} from './test-support/execution.ts';
+import {
+  buildRunnerCommand,
+  createLogFilePath,
+  loadHistoryState,
+  saveHistoryEntry,
+} from './test-support/history.ts';
+import { printBanner, validateScenarioCatalog } from './test-support/shared.ts';
 
 function formatDuration(durationMs: number): string {
   if (durationMs < 1000) {
@@ -47,9 +56,9 @@ async function main(runStartedAt: number): Promise<void> {
   saveHistoryEntry(historyEntry);
 
   try {
-    if (selection.mode === "source") {
+    if (selection.mode === 'source') {
       await runSourceSelection(scenarios, logFilePath);
-    } else if (selection.mode === "act") {
+    } else if (selection.mode === 'act') {
       await runActSelection(selection, logFilePath);
     } else {
       await runValidationSelection(scenarios, logFilePath);
@@ -71,13 +80,13 @@ async function main(runStartedAt: number): Promise<void> {
     durationMs,
     durationText: duration,
   });
-  p.note(historyEntry.command, "Rerun command");
-  p.note(logFilePath, "Saved log");
-  p.note(duration, "Elapsed");
+  p.note(historyEntry.command, 'Rerun command');
+  p.note(logFilePath, 'Saved log');
+  p.note(duration, 'Elapsed');
   p.outro(
     selection.runAll
       ? `✅  Completed ${scenarios.length} scenarios in ${selection.mode} mode in ${duration}`
-      : `✅  Completed ${scenarios.map((scenario) => scenario.id).join(", ")} in ${selection.mode} mode in ${duration}`,
+      : `✅  Completed ${scenarios.map((scenario) => scenario.id).join(', ')} in ${selection.mode} mode in ${duration}`,
   );
 }
 

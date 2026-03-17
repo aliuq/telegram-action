@@ -1,34 +1,34 @@
-import { InputMediaBuilder } from "grammy";
-import type { AttachmentSender, AttachmentType, TelegramMediaGroupItem } from "./types.js";
+import { InputMediaBuilder } from 'grammy';
+import type { AttachmentSender, AttachmentType, TelegramMediaGroupItem } from './types.js';
 
 /**
  * Telegram inline keyboard fields that count as button actions.
  */
 export const BUTTON_ACTION_FIELDS = [
-  "url",
-  "callback_data",
-  "web_app",
-  "login_url",
-  "switch_inline_query",
-  "switch_inline_query_current_chat",
-  "switch_inline_query_chosen_chat",
-  "copy_text",
-  "callback_game",
-  "pay",
+  'url',
+  'callback_data',
+  'web_app',
+  'login_url',
+  'switch_inline_query',
+  'switch_inline_query_current_chat',
+  'switch_inline_query_chosen_chat',
+  'copy_text',
+  'callback_game',
+  'pay',
 ] as const;
 
 /**
  * Attachment kinds supported by this action.
  */
-export const ATTACHMENT_TYPES = ["photo", "video", "audio", "animation", "document"] as const;
+export const ATTACHMENT_TYPES = ['photo', 'video', 'audio', 'animation', 'document'] as const;
 
 /** Mapping from attachment kinds to Telegram Bot API method names. */
 export const ATTACHMENT_METHOD_NAMES: Record<AttachmentType, string> = {
-  photo: "sendPhoto",
-  video: "sendVideo",
-  audio: "sendAudio",
-  animation: "sendAnimation",
-  document: "sendDocument",
+  photo: 'sendPhoto',
+  video: 'sendVideo',
+  audio: 'sendAudio',
+  animation: 'sendAnimation',
+  document: 'sendDocument',
 };
 
 /** Concrete sender implementations for each supported attachment kind. */
@@ -43,7 +43,7 @@ export const ATTACHMENT_SENDERS: Record<AttachmentType, AttachmentSender> = {
 /**
  * Media types that Telegram supports inside `sendMediaGroup`.
  */
-export const MEDIA_GROUP_ATTACHMENT_TYPES = ["photo", "video", "audio", "document"] as const;
+export const MEDIA_GROUP_ATTACHMENT_TYPES = ['photo', 'video', 'audio', 'document'] as const;
 
 /**
  * Maximum items allowed by Telegram in a single media group request.
@@ -56,10 +56,10 @@ export const TELEGRAM_MEDIA_GROUP_LIMIT = 10;
 export const MEDIA_GROUP_BUILDERS: Record<
   (typeof MEDIA_GROUP_ATTACHMENT_TYPES)[number],
   (
-    source: string | import("grammy").InputFile,
+    source: string | import('grammy').InputFile,
     options?: {
       caption?: string;
-      parse_mode?: "MarkdownV2";
+      parse_mode?: 'MarkdownV2';
       disable_content_type_detection?: boolean;
       supports_streaming?: boolean;
     },

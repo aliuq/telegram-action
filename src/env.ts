@@ -14,5 +14,5 @@ export function getRequiredEnv(name: string): string {
  * Read an optional environment variable and normalize missing values to `""`.
  */
 export function getOptionalEnv(name: string): string {
-  return process.env[name]?.trim() ?? "";
+  return process.env[name]?.trim() ?? '';
 }

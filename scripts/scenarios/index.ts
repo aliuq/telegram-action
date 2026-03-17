@@ -1,11 +1,15 @@
-import type { ScenarioDefinition, ScenarioSelection, WorkflowScenarioMatrix } from "../../src/types.ts";
-import { createButtonScenarios } from "./buttons.ts";
-import { createDocumentScenarios } from "./documents.ts";
-import { createFailureScenarios } from "./failures.ts";
-import { createMessageScenarios } from "./messages.ts";
-import { createPhotoScenarios } from "./photos.ts";
-import { createReplyScenarios } from "./replies.ts";
-import { createVideoScenarios } from "./videos.ts";
+import type {
+  ScenarioDefinition,
+  ScenarioSelection,
+  WorkflowScenarioMatrix,
+} from '../../src/types.ts';
+import { createButtonScenarios } from './buttons.ts';
+import { createDocumentScenarios } from './documents.ts';
+import { createFailureScenarios } from './failures.ts';
+import { createMessageScenarios } from './messages.ts';
+import { createPhotoScenarios } from './photos.ts';
+import { createReplyScenarios } from './replies.ts';
+import { createVideoScenarios } from './videos.ts';
 
 /**
  * Assemble the full scenario catalog in the order used by local and CI tooling.
@@ -43,7 +47,10 @@ export async function loadScenarios(): Promise<ScenarioDefinition[]> {
 /**
  * Resolve a single scenario id into its definition.
  */
-export function findScenarioById(scenarios: ScenarioDefinition[], scenarioId: string): ScenarioDefinition {
+export function findScenarioById(
+  scenarios: ScenarioDefinition[],
+  scenarioId: string,
+): ScenarioDefinition {
   const scenario = scenarios.find((entry) => entry.id === scenarioId);
 
   if (!scenario) {
@@ -56,16 +63,19 @@ export function findScenarioById(scenarios: ScenarioDefinition[], scenarioId: st
 /**
  * Parse comma-separated workflow input into a normalized selection object.
  */
-export function parseScenarioIds(input?: string | null): { runAll: boolean; scenarioIds: string[] } {
-  const normalizedInput = (input ?? "all").trim().toLowerCase();
-  if (normalizedInput === "" || normalizedInput === "all") {
+export function parseScenarioIds(input?: string | null): {
+  runAll: boolean;
+  scenarioIds: string[];
+} {
+  const normalizedInput = (input ?? 'all').trim().toLowerCase();
+  if (normalizedInput === '' || normalizedInput === 'all') {
     return { runAll: true, scenarioIds: [] };
   }
 
   return {
     runAll: false,
     scenarioIds: normalizedInput
-      .split(",")
+      .split(',')
       .map((value) => value.trim())
       .filter(Boolean),
   };
@@ -74,7 +84,10 @@ export function parseScenarioIds(input?: string | null): { runAll: boolean; scen
 /**
  * Convert a raw scenario selection string into concrete scenario definitions.
  */
-export function resolveScenarioSelection(scenarios: ScenarioDefinition[], input?: string | null): ScenarioSelection {
+export function resolveScenarioSelection(
+  scenarios: ScenarioDefinition[],
+  input?: string | null,
+): ScenarioSelection {
   const parsedSelection = parseScenarioIds(input);
 
   if (parsedSelection.runAll) {
@@ -101,7 +114,7 @@ export function resolveScenarioSelection(scenarios: ScenarioDefinition[], input?
   }
 
   if (unknownIds.length > 0) {
-    throw new Error(`Unknown scenario ids: ${unknownIds.join(", ")}`);
+    throw new Error(`Unknown scenario ids: ${unknownIds.join(', ')}`);
   }
 
   return {

@@ -1,50 +1,54 @@
-import { ATTACHMENT_METHOD_NAMES } from "../../src/constants.ts";
-import { getOptionalEnv, getRequiredEnv } from "../../src/env.ts";
-import { parseActionInputs } from "../../src/inputs.ts";
-import { describeTextSendMethod } from "../../src/telegram.ts";
-import type { ParsedActionInputs, RawActionInputs, ScenarioDefinition } from "../../src/types.ts";
+import { ATTACHMENT_METHOD_NAMES } from '../../src/constants.ts';
+import { getOptionalEnv, getRequiredEnv } from '../../src/env.ts';
+import { parseActionInputs } from '../../src/inputs.ts';
+import { describeTextSendMethod } from '../../src/telegram.ts';
+import type { ParsedActionInputs, RawActionInputs, ScenarioDefinition } from '../../src/types.ts';
 
-export const ROOT = new URL("../..", import.meta.url).pathname;
-export const SECRET_FILE_PATH = new URL("../../.env", import.meta.url).pathname;
-export const HISTORY_DIR = new URL("../../.test-history", import.meta.url).pathname;
-export const LOG_DIR = new URL("../../.test-history/logs", import.meta.url).pathname;
-export const HISTORY_FILE_PATH = new URL("../../.test-history/test-history.json", import.meta.url).pathname;
-export const TEST_BOT_TOKEN = "test-bot-token";
-export const TEST_CHAT_ID = "123456";
+export const ROOT = new URL('../..', import.meta.url).pathname;
+export const SECRET_FILE_PATH = new URL('../../.env', import.meta.url).pathname;
+export const HISTORY_DIR = new URL('../../.test-history', import.meta.url).pathname;
+export const LOG_DIR = new URL('../../.test-history/logs', import.meta.url).pathname;
+export const HISTORY_FILE_PATH = new URL('../../.test-history/test-history.json', import.meta.url)
+  .pathname;
+export const TEST_BOT_TOKEN = 'test-bot-token';
+export const TEST_CHAT_ID = '123456';
 export const RUNNER_BANNER = [
-  "████████╗███████╗██╗     ███████╗ ██████╗ ██████╗  █████╗ ███╗   ███╗",
-  "╚══██╔══╝██╔════╝██║     ██╔════╝██╔════╝ ██╔══██╗██╔══██╗████╗ ████║",
-  "   ██║   █████╗  ██║     █████╗  ██║  ███╗██████╔╝███████║██╔████╔██║",
-  "   ██║   ██╔══╝  ██║     ██╔══╝  ██║   ██║██╔══██╗██╔══██║██║╚██╔╝██║",
-  "   ██║   ███████╗███████╗███████╗╚██████╔╝██║  ██║██║  ██║██║ ╚═╝ ██║",
-  "   ╚═╝   ╚══════╝╚══════╝╚══════╝ ╚═════╝ ╚═╝  ╚═╝╚═╝  ╚═╝╚═╝     ╚═╝",
-  "",
-  "┌  Unified Test Runner",
-  "│",
+  '████████╗███████╗██╗     ███████╗ ██████╗ ██████╗  █████╗ ███╗   ███╗',
+  '╚══██╔══╝██╔════╝██║     ██╔════╝██╔════╝ ██╔══██╗██╔══██╗████╗ ████║',
+  '   ██║   █████╗  ██║     █████╗  ██║  ███╗██████╔╝███████║██╔████╔██║',
+  '   ██║   ██╔══╝  ██║     ██╔══╝  ██║   ██║██╔══██╗██╔══██║██║╚██╔╝██║',
+  '   ██║   ███████╗███████╗███████╗╚██████╔╝██║  ██║██║  ██║██║ ╚═╝ ██║',
+  '   ╚═╝   ╚══════╝╚══════╝╚══════╝ ╚═════╝ ╚═╝  ╚═╝╚═╝  ╚═╝╚═╝     ╚═╝',
+  '',
+  '┌  Unified Test Runner',
+  '│',
 ] as const;
 
 /**
  * Print the interactive runner banner.
  */
 export function printBanner(): void {
-  console.log(RUNNER_BANNER.join("\n"));
+  console.log(RUNNER_BANNER.join('\n'));
 }
 
 /**
  * Build the raw action input payload for a scenario in source, validate, or act mode.
  */
-export function buildRawActionInputs(scenario: ScenarioDefinition, useRealEnv: boolean): RawActionInputs {
+export function buildRawActionInputs(
+  scenario: ScenarioDefinition,
+  useRealEnv: boolean,
+): RawActionInputs {
   return {
     scenarioId: scenario.id,
-    botToken: useRealEnv ? getRequiredEnv("TELEGRAM_BOT_TOKEN") : TEST_BOT_TOKEN,
-    chatId: useRealEnv ? getRequiredEnv("TELEGRAM_CHAT_ID") : TEST_CHAT_ID,
+    botToken: useRealEnv ? getRequiredEnv('TELEGRAM_BOT_TOKEN') : TEST_BOT_TOKEN,
+    chatId: useRealEnv ? getRequiredEnv('TELEGRAM_CHAT_ID') : TEST_CHAT_ID,
     message: scenario.inputs.message,
     messageFile: scenario.inputs.message_file,
     messageUrl: scenario.inputs.message_url,
     streamResponse: scenario.inputs.stream_response,
     buttons: scenario.inputs.buttons,
-    topicId: useRealEnv ? getOptionalEnv("TELEGRAM_TOPIC_ID") : "",
-    replyToMessageId: useRealEnv ? getOptionalEnv("TELEGRAM_REPLY_TO_MESSAGE_ID") : "",
+    topicId: useRealEnv ? getOptionalEnv('TELEGRAM_TOPIC_ID') : '',
+    replyToMessageId: useRealEnv ? getOptionalEnv('TELEGRAM_REPLY_TO_MESSAGE_ID') : '',
     disableLinkPreview: scenario.inputs.disable_link_preview,
     attachment: scenario.inputs.attachment,
     attachments: scenario.inputs.attachments,
@@ -90,7 +94,9 @@ export async function validateScenarioCatalog(scenarios: ScenarioDefinition[]): 
         continue;
       }
 
-      throw new Error(`Scenario "${scenario.id}" is marked as expect_failure but the parser accepted it`);
+      throw new Error(
+        `Scenario "${scenario.id}" is marked as expect_failure but the parser accepted it`,
+      );
     }
 
     await runValidation();

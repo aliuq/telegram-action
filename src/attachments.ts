@@ -1,8 +1,8 @@
-import { existsSync, readFileSync } from "node:fs";
-import { basename } from "node:path";
-import { InputFile } from "grammy";
-import { isRemoteUrl, looksLikeLocalPath, resolveWorkspacePath } from "./source-utils.js";
-import type { ResolvedAttachmentSource } from "./types.js";
+import { existsSync, readFileSync } from 'node:fs';
+import { basename } from 'node:path';
+import { InputFile } from 'grammy';
+import { isRemoteUrl, looksLikeLocalPath, resolveWorkspacePath } from './source-utils.js';
+import type { ResolvedAttachmentSource } from './types.js';
 
 /**
  * Resolve local attachments eagerly and reject missing path-like values.
@@ -10,7 +10,10 @@ import type { ResolvedAttachmentSource } from "./types.js";
  * The existence check runs before path heuristics so valid repository-relative
  * paths such as `scripts/fixtures/sample-photo.webp` work as expected.
  */
-export function resolveAttachmentSource(input: string, filename?: string): ResolvedAttachmentSource {
+export function resolveAttachmentSource(
+  input: string,
+  filename?: string,
+): ResolvedAttachmentSource {
   const resolvedPath = resolveWorkspacePath(input);
   if (existsSync(resolvedPath)) {
     return {

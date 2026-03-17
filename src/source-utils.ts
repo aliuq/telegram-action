@@ -1,15 +1,15 @@
-import { resolve } from "node:path";
+import { resolve } from 'node:path';
 
 /**
  * Distinguish path-like inputs from opaque identifiers such as Telegram file ids.
  */
 export function looksLikeLocalPath(input: string): boolean {
   return (
-    input.startsWith("./") ||
-    input.startsWith("../") ||
-    input.startsWith("/") ||
-    input.includes("/") ||
-    input.includes("\\")
+    input.startsWith('./') ||
+    input.startsWith('../') ||
+    input.startsWith('/') ||
+    input.includes('/') ||
+    input.includes('\\')
   );
 }
 

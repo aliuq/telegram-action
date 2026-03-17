@@ -1,6 +1,6 @@
-import { existsSync, mkdirSync, readFileSync, writeFileSync } from "node:fs";
-import type { TestHistoryEntry, TestHistoryState, TestSelection } from "../../src/types.ts";
-import { HISTORY_FILE_PATH, LOG_DIR } from "./shared.ts";
+import { existsSync, mkdirSync, readFileSync, writeFileSync } from 'node:fs';
+import type { TestHistoryEntry, TestHistoryState, TestSelection } from '../../src/types.ts';
+import { HISTORY_FILE_PATH, LOG_DIR } from './shared.ts';
 
 /**
  * Ensure the local history and log directories exist before reading or writing state.
@@ -18,7 +18,7 @@ export function loadHistoryState(): TestHistoryState {
     return { runs: [] };
   }
 
-  return JSON.parse(readFileSync(HISTORY_FILE_PATH, "utf8")) as TestHistoryState;
+  return JSON.parse(readFileSync(HISTORY_FILE_PATH, 'utf8')) as TestHistoryState;
 }
 
 /**
@@ -26,7 +26,10 @@ export function loadHistoryState(): TestHistoryState {
  */
 export function saveHistoryEntry(entry: TestHistoryEntry): void {
   const state = loadHistoryState();
-  const runs = [entry, ...state.runs.filter((run) => run.createdAt !== entry.createdAt)].slice(0, 20);
+  const runs = [entry, ...state.runs.filter((run) => run.createdAt !== entry.createdAt)].slice(
+    0,
+    20,
+  );
   writeFileSync(HISTORY_FILE_PATH, JSON.stringify({ lastRun: entry, runs }, null, 2));
 }
 
@@ -45,14 +48,14 @@ export function shellEscape(arg: string): string {
  * Reconstruct the runner command for history and rerun hints.
  */
 export function buildRunnerCommand(selection: TestSelection): string {
-  const args = ["bun", "scripts/test.ts", "--mode", selection.mode];
+  const args = ['bun', 'scripts/test.ts', '--mode', selection.mode];
   if (selection.runAll) {
-    args.push("--all");
+    args.push('--all');
   } else {
     args.push(...selection.scenarioIds);
   }
 
-  return args.map(shellEscape).join(" ");
+  return args.map(shellEscape).join(' ');
 }
 
 /**
@@ -60,7 +63,7 @@ export function buildRunnerCommand(selection: TestSelection): string {
  */
 export function createLogFilePath(selection: TestSelection): string {
   ensureHistoryDirs();
-  const timestamp = new Date().toISOString().replaceAll(":", "-");
-  const label = selection.runAll ? "all" : selection.scenarioIds.join("-");
-  return `${LOG_DIR}/${timestamp}-${selection.mode}-${label || "interactive"}.log`;
+  const timestamp = new Date().toISOString().replaceAll(':', '-');
+  const label = selection.runAll ? 'all' : selection.scenarioIds.join('-');
+  return `${LOG_DIR}/${timestamp}-${selection.mode}-${label || 'interactive'}.log`;
 }

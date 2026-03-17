@@ -1,5 +1,5 @@
-import * as core from "@actions/core";
-import type { ActRequestSummaryOptions, ResolvedAttachmentSource } from "./types.js";
+import * as core from '@actions/core';
+import type { ActRequestSummaryOptions, ResolvedAttachmentSource } from './types.js';
 
 /**
  * Detect whether the action is running inside a local `act` session.
@@ -8,7 +8,7 @@ import type { ActRequestSummaryOptions, ResolvedAttachmentSource } from "./types
  * not get cluttered with local-only debugging output.
  */
 export function isActRun(): boolean {
-  return process.env.ACT === "true" || Boolean(process.env.ACT_SCENARIO_ID);
+  return process.env.ACT === 'true' || Boolean(process.env.ACT_SCENARIO_ID);
 }
 
 /**
@@ -27,21 +27,21 @@ function maskIdentifier(value: string): string {
  */
 function describeAttachmentSource(source: ResolvedAttachmentSource): string {
   if (source.isLocalFile) {
-    return "local-file";
+    return 'local-file';
   }
 
-  if (typeof source.value === "string" && /^https?:\/\//.test(source.value)) {
-    return "remote-url";
+  if (typeof source.value === 'string' && /^https?:\/\//.test(source.value)) {
+    return 'remote-url';
   }
 
-  return "telegram-file-id";
+  return 'telegram-file-id';
 }
 
 /**
  * Render booleans in a friendlier debug format.
  */
 function formatToggle(enabled: boolean): string {
-  return enabled ? "enabled" : "disabled";
+  return enabled ? 'enabled' : 'disabled';
 }
 
 /**
@@ -49,9 +49,9 @@ function formatToggle(enabled: boolean): string {
  */
 function indentBlock(value: string): string {
   return value
-    .split("\n")
+    .split('\n')
     .map((line) => `  ${line}`)
-    .join("\n");
+    .join('\n');
 }
 
 /**
@@ -61,20 +61,20 @@ export function formatActRequestSummary(options: ActRequestSummaryOptions): stri
   const buttonRows = options.replyMarkup?.inline_keyboard.length ?? 0;
   const buttonCount = options.replyMarkup?.inline_keyboard.flat().length ?? 0;
   const attachmentSummary = options.attachmentType
-    ? `${options.attachmentType} (${options.attachmentSource ? describeAttachmentSource(options.attachmentSource) : "unknown"})`
-    : "none";
+    ? `${options.attachmentType} (${options.attachmentSource ? describeAttachmentSource(options.attachmentSource) : 'unknown'})`
+    : 'none';
 
   return [
     `Method: ${options.method}`,
     `Chat ID: ${maskIdentifier(options.chatId)}`,
     `Message: ${options.message?.length ?? 0} chars`,
     `Link preview: ${formatToggle(!options.disableLinkPreview)}`,
-    `Topic target: ${options.topicId ?? "none"}`,
-    `Reply target: ${options.replyMessageId ?? "none"}`,
+    `Topic target: ${options.topicId ?? 'none'}`,
+    `Reply target: ${options.replyMessageId ?? 'none'}`,
     `Buttons: ${buttonRows} row(s), ${buttonCount} button(s)`,
     `Attachment: ${attachmentSummary}`,
     `Working directory: ${process.cwd()}`,
-  ].join("\n");
+  ].join('\n');
 }
 
 /**
@@ -85,8 +85,10 @@ export function logActRequestSummary(options: ActRequestSummaryOptions): void {
     return;
   }
 
-  core.startGroup(`[act] Telegram request debug${options.scenarioId ? ` (${options.scenarioId})` : ""}`);
-  for (const line of formatActRequestSummary(options).split("\n")) {
+  core.startGroup(
+    `[act] Telegram request debug${options.scenarioId ? ` (${options.scenarioId})` : ''}`,
+  );
+  for (const line of formatActRequestSummary(options).split('\n')) {
     core.info(line);
   }
   core.endGroup();
@@ -104,7 +106,7 @@ export function formatActErrorDetails(error: unknown): string {
       details.push(`Stack:\n${indentBlock(error.stack)}`);
     }
 
-    const nestedError = Reflect.get(error, "error");
+    const nestedError = Reflect.get(error, 'error');
     if (nestedError instanceof Error) {
       details.push(`Nested error: ${nestedError.name}: ${nestedError.message}`);
       if (nestedError.stack) {
@@ -112,7 +114,7 @@ export function formatActErrorDetails(error: unknown): string {
       }
     }
 
-    const directCause = Reflect.get(error, "cause");
+    const directCause = Reflect.get(error, 'cause');
     if (directCause instanceof Error) {
       details.push(`Cause: ${directCause.name}: ${directCause.message}`);
       if (directCause.stack) {
@@ -123,7 +125,7 @@ export function formatActErrorDetails(error: unknown): string {
     details.push(`Error: ${String(error)}`);
   }
 
-  return details.join("\n");
+  return details.join('\n');
 }
 
 /**
@@ -135,8 +137,8 @@ export function logActErrorDetails(error: unknown): void {
     return;
   }
 
-  core.startGroup("[act] Telegram request failure details");
-  for (const detail of formatActErrorDetails(error).split("\n")) {
+  core.startGroup('[act] Telegram request failure details');
+  for (const detail of formatActErrorDetails(error).split('\n')) {
     core.info(detail);
   }
   core.endGroup();
