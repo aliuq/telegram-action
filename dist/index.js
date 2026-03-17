@@ -76874,6 +76874,7 @@ function getRetryAfterSeconds(error) {
 async function sleepWithWarningCountdown(message, seconds) {
 	if (!process.stderr.isTTY) {
 		logger.warn(message);
+		logger.warn(`Retrying in ${seconds}s...`);
 		await sleep(seconds * 1e3);
 		return;
 	}
