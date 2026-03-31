@@ -32,7 +32,7 @@ inputs:
   attachments:
     description: >
       JSON array of attachment objects for multi-media sends.
-      Each item supports: {"type":"photo|video|audio|animation|document","source":"...","filename":"optional","caption":"optional","supports_streaming":"optional for video"}
+      Each item supports: {"type":"photo|video|audio|animation|document","source":"...","filename":"optional","caption":"optional","supports_streaming":true} (boolean flag, video only)
     required: false
     default: ""
   attachment_type:

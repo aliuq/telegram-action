@@ -5,10 +5,18 @@ on:
     branches: [master]
     paths:
       - "dist/**"
+      - "src/**"
+      - "scripts/**"
+      - "package.json"
+      - "bun.lock*"
   pull_request:
     branches: [master]
     paths:
       - "dist/**"
+      - "src/**"
+      - "scripts/**"
+      - "package.json"
+      - "bun.lock*"
   workflow_dispatch:
     inputs:
       scenario_ids:
