@@ -395,7 +395,7 @@ async function sendAttachmentBatch(
         items.map((item) => createMediaGroupItem(item)),
         {
           ...(request.topicId !== undefined ? { message_thread_id: request.topicId } : {}),
-          ...(replyMessageId ? { reply_parameters: { message_id: replyMessageId } } : {}),
+          ...(replyMessageId !== undefined ? { reply_parameters: { message_id: replyMessageId } } : {}),
         },
       ),
     {
@@ -423,11 +423,11 @@ async function sendAttachmentItems(
     bot,
     request,
     introChunks,
-    undefined,
+    request.replyMessageId,
     Boolean(request.replyMarkup),
   );
 
-  let previousMessageId = introTailMessageId;
+  let previousMessageId = introTailMessageId ?? request.replyMessageId;
   const batches = createMediaGroupBatches(request.attachmentItems ?? []);
 
   for (const batch of batches) {
@@ -494,7 +494,7 @@ export async function sendTextMessage(
     await sendTypingIndicator(bot, request);
   }
 
-  const lastMessageId = await sendMessageChunks(bot, request, messageChunks, undefined, true);
+  const lastMessageId = await sendMessageChunks(bot, request, messageChunks, request.replyMessageId, true);
 
   if (!lastMessageId) {
     throw new Error('failed to send any Telegram messages');
@@ -552,7 +552,7 @@ export async function sendTelegramMessage(
         bot,
         request,
         captionPlan.leadingChunks,
-        undefined,
+        request.replyMessageId,
         attachReplyMarkupToText,
       );
 
@@ -565,7 +565,7 @@ export async function sendTelegramMessage(
             createAttachmentOptions(
               request,
               attachmentType,
-              chainTailMessageId,
+              chainTailMessageId ?? request.replyMessageId,
               captionPlan.caption,
               !attachReplyMarkupToText,
               request.supportsStreaming,

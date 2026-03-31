@@ -29,7 +29,7 @@ export async function run(): Promise<void> {
     const message = error instanceof Error ? error.message : 'An unexpected error occurred';
     const details = error instanceof Error ? (error.stack ?? error.message) : String(error);
 
-    if (!isActRun()) {
+    if (isActRun()) {
       await logger.withGroup('telegram-action failure', () => {
         logger.info(details);
       });
