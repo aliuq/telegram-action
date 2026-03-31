@@ -25,5 +25,8 @@
     {
       "file": ".github/commit-instructions.md"
     }
-  ]
+  ],
+  "files.associations": {
+    "**/.github/workflows/*.{yml,yaml}": "github-actions-workflow"
+  }
 }

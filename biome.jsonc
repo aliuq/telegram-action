@@ -1,5 +1,5 @@
 {
-  "$schema": "https://biomejs.dev/schemas/2.4.7/schema.json",
+  "$schema": "node_modules/@biomejs/biome/configuration_schema.json",
   // 根配置文件（monorepo 子包可设 root: false 并 extends 此文件）
   "root": true,
   "vcs": {
