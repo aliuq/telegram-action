@@ -13,7 +13,7 @@
     "test:unit": "vitest run",
     "test:validate": "bun scripts/test.ts --mode validate",
     "test:act": "bun scripts/test.ts --mode act",
-    "release": "bun run build && bunx bumpp --push --tag --commit --all && bunx changelogithub"
+    "release": "bun run build && bunx bumpp --push --tag --commit --all"
   },
   "keywords": [
     "github",
