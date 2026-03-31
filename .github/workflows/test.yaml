@@ -3,8 +3,12 @@ name: Scenario Test
 on:
   push:
     branches: [master]
+    paths:
+      - "dist/**"
   pull_request:
     branches: [master]
+    paths:
+      - "dist/**"
   workflow_dispatch:
     inputs:
       scenario_ids:
