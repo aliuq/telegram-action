@@ -4,6 +4,10 @@ import os, { EOL } from "os";
 import * as crypto from "crypto";
 import * as fs from "fs";
 import { constants, promises } from "fs";
+import * as path from "path";
+import * as events from "events";
+import "child_process";
+import "timers";
 import { existsSync, readFileSync } from "node:fs";
 import { basename, resolve } from "node:path";
 //#region \0rolldown/runtime.js
@@ -153,7 +157,7 @@ var require_tunnel$1 = /* @__PURE__ */ __commonJSMin(((exports) => {
 	__require("tls");
 	var http$2 = __require("http");
 	__require("https");
-	var events = __require("events");
+	var events$1 = __require("events");
 	__require("assert");
 	var util$3 = __require("util");
 	function TunnelingAgent(options) {
@@ -177,7 +181,7 @@ var require_tunnel$1 = /* @__PURE__ */ __commonJSMin(((exports) => {
 			self.removeSocket(socket);
 		});
 	}
-	util$3.inherits(TunnelingAgent, events.EventEmitter);
+	util$3.inherits(TunnelingAgent, events$1.EventEmitter);
 	TunnelingAgent.prototype.addRequest = function addRequest(req, host, port, localAddress) {
 		var self = this;
 		var options = mergeOptions({ request: req }, self.options, toOptions(host, port, localAddress));
@@ -15893,10 +15897,191 @@ var Summary = class {
 	}
 };
 new Summary();
+//#endregion
+//#region node_modules/@actions/io/lib/io-util.js
+var __awaiter$5 = function(thisArg, _arguments, P, generator) {
+	function adopt(value) {
+		return value instanceof P ? value : new P(function(resolve) {
+			resolve(value);
+		});
+	}
+	return new (P || (P = Promise))(function(resolve, reject) {
+		function fulfilled(value) {
+			try {
+				step(generator.next(value));
+			} catch (e) {
+				reject(e);
+			}
+		}
+		function rejected(value) {
+			try {
+				step(generator["throw"](value));
+			} catch (e) {
+				reject(e);
+			}
+		}
+		function step(result) {
+			result.done ? resolve(result.value) : adopt(result.value).then(fulfilled, rejected);
+		}
+		step((generator = generator.apply(thisArg, _arguments || [])).next());
+	});
+};
 const { chmod, copyFile, lstat, mkdir, open, readdir, rename, rm, rmdir, stat, symlink, unlink } = fs.promises;
-process.platform;
+const IS_WINDOWS$1 = process.platform === "win32";
 fs.constants.O_RDONLY;
+/**
+* On OSX/Linux, true if path starts with '/'. On Windows, true for paths like:
+* \, \hello, \\hello\share, C:, and C:\hello (and corresponding alternate separator cases).
+*/
+function isRooted(p) {
+	p = normalizeSeparators(p);
+	if (!p) throw new Error("isRooted() parameter \"p\" cannot be empty");
+	if (IS_WINDOWS$1) return p.startsWith("\\") || /^[A-Z]:/i.test(p);
+	return p.startsWith("/");
+}
+/**
+* Best effort attempt to determine whether a file exists and is executable.
+* @param filePath    file path to check
+* @param extensions  additional file extensions to try
+* @return if file exists and is executable, returns the file path. otherwise empty string.
+*/
+function tryGetExecutablePath(filePath, extensions) {
+	return __awaiter$5(this, void 0, void 0, function* () {
+		let stats = void 0;
+		try {
+			stats = yield stat(filePath);
+		} catch (err) {
+			if (err.code !== "ENOENT") console.log(`Unexpected error attempting to determine if executable file exists '${filePath}': ${err}`);
+		}
+		if (stats && stats.isFile()) {
+			if (IS_WINDOWS$1) {
+				const upperExt = path.extname(filePath).toUpperCase();
+				if (extensions.some((validExt) => validExt.toUpperCase() === upperExt)) return filePath;
+			} else if (isUnixExecutable(stats)) return filePath;
+		}
+		const originalFilePath = filePath;
+		for (const extension of extensions) {
+			filePath = originalFilePath + extension;
+			stats = void 0;
+			try {
+				stats = yield stat(filePath);
+			} catch (err) {
+				if (err.code !== "ENOENT") console.log(`Unexpected error attempting to determine if executable file exists '${filePath}': ${err}`);
+			}
+			if (stats && stats.isFile()) {
+				if (IS_WINDOWS$1) {
+					try {
+						const directory = path.dirname(filePath);
+						const upperName = path.basename(filePath).toUpperCase();
+						for (const actualName of yield readdir(directory)) if (upperName === actualName.toUpperCase()) {
+							filePath = path.join(directory, actualName);
+							break;
+						}
+					} catch (err) {
+						console.log(`Unexpected error attempting to determine the actual case of the file '${filePath}': ${err}`);
+					}
+					return filePath;
+				} else if (isUnixExecutable(stats)) return filePath;
+			}
+		}
+		return "";
+	});
+}
+function normalizeSeparators(p) {
+	p = p || "";
+	if (IS_WINDOWS$1) {
+		p = p.replace(/\//g, "\\");
+		return p.replace(/\\\\+/g, "\\");
+	}
+	return p.replace(/\/\/+/g, "/");
+}
+function isUnixExecutable(stats) {
+	return (stats.mode & 1) > 0 || (stats.mode & 8) > 0 && process.getgid !== void 0 && stats.gid === process.getgid() || (stats.mode & 64) > 0 && process.getuid !== void 0 && stats.uid === process.getuid();
+}
+//#endregion
+//#region node_modules/@actions/io/lib/io.js
+var __awaiter$4 = function(thisArg, _arguments, P, generator) {
+	function adopt(value) {
+		return value instanceof P ? value : new P(function(resolve) {
+			resolve(value);
+		});
+	}
+	return new (P || (P = Promise))(function(resolve, reject) {
+		function fulfilled(value) {
+			try {
+				step(generator.next(value));
+			} catch (e) {
+				reject(e);
+			}
+		}
+		function rejected(value) {
+			try {
+				step(generator["throw"](value));
+			} catch (e) {
+				reject(e);
+			}
+		}
+		function step(result) {
+			result.done ? resolve(result.value) : adopt(result.value).then(fulfilled, rejected);
+		}
+		step((generator = generator.apply(thisArg, _arguments || [])).next());
+	});
+};
+/**
+* Returns path of a tool had the tool actually been invoked.  Resolves via paths.
+* If you check and the tool does not exist, it will throw.
+*
+* @param     tool              name of the tool
+* @param     check             whether to check if tool exists
+* @returns   Promise<string>   path to tool
+*/
+function which(tool, check) {
+	return __awaiter$4(this, void 0, void 0, function* () {
+		if (!tool) throw new Error("parameter 'tool' is required");
+		if (check) {
+			const result = yield which(tool, false);
+			if (!result) if (IS_WINDOWS$1) throw new Error(`Unable to locate executable file: ${tool}. Please verify either the file path exists or the file can be found within a directory specified by the PATH environment variable. Also verify the file has a valid extension for an executable file.`);
+			else throw new Error(`Unable to locate executable file: ${tool}. Please verify either the file path exists or the file can be found within a directory specified by the PATH environment variable. Also check the file mode to verify the file is executable.`);
+			return result;
+		}
+		const matches = yield findInPath(tool);
+		if (matches && matches.length > 0) return matches[0];
+		return "";
+	});
+}
+/**
+* Returns a list of all occurrences of the given tool on the system path.
+*
+* @returns   Promise<string[]>  the paths of the tool
+*/
+function findInPath(tool) {
+	return __awaiter$4(this, void 0, void 0, function* () {
+		if (!tool) throw new Error("parameter 'tool' is required");
+		const extensions = [];
+		if (IS_WINDOWS$1 && process.env["PATHEXT"]) {
+			for (const extension of process.env["PATHEXT"].split(path.delimiter)) if (extension) extensions.push(extension);
+		}
+		if (isRooted(tool)) {
+			const filePath = yield tryGetExecutablePath(tool, extensions);
+			if (filePath) return [filePath];
+			return [];
+		}
+		if (tool.includes(path.sep)) return [];
+		const directories = [];
+		if (process.env.PATH) {
+			for (const p of process.env.PATH.split(path.delimiter)) if (p) directories.push(p);
+		}
+		const matches = [];
+		for (const directory of directories) {
+			const filePath = yield tryGetExecutablePath(path.join(directory, tool), extensions);
+			if (filePath) matches.push(filePath);
+		}
+		return matches;
+	});
+}
 process.platform;
+events.EventEmitter;
+events.EventEmitter;
 os.platform();
 os.arch();
 /**
