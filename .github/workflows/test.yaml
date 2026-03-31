@@ -1,0 +1,45 @@
+name: Scenario Test
+
+on:
+  push:
+    branches: [master]
+    paths:
+      - "dist/**"
+      - "src/**"
+      - "scripts/**"
+      - "package.json"
+      - "bun.lock*"
+  pull_request:
+    branches: [master]
+    paths:
+      - "dist/**"
+      - "src/**"
+      - "scripts/**"
+      - "package.json"
+      - "bun.lock*"
+  workflow_dispatch:
+    inputs:
+      scenario_ids:
+        description: "Comma-separated scenario ids to run, or 'all'"
+        required: false
+        default: "all"
+
+jobs:
+  notification:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+
+      - name: Run selected scenarios
+        env:
+          SCENARIO_IDS: ${{ inputs.scenario_ids || 'all' }}
+          TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
+          TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
+          TELEGRAM_TOPIC_ID: ${{ secrets.TELEGRAM_TOPIC_ID }}
+          TELEGRAM_REPLY_TO_MESSAGE_ID: ${{ secrets.TELEGRAM_REPLY_TO_MESSAGE_ID }}
+        run: |
+          npm install bun -g
+          bun install
+          bun run test:unit
+          bun run test:validate --all
+          bun run scripts/workflow.ts

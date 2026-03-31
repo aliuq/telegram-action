@@ -1,36 +1,61 @@
 name: "Telegram Message Notification"
 author: "AliuQ"
-description: "Send message to Telegram"
+description: "Send Telegram messages, attachments, buttons, optional topic-targeted posts via TELEGRAM_TOPIC_ID, and optional replies via TELEGRAM_REPLY_TO_MESSAGE_ID"
 inputs:
-  bot_token:
-    description: "Telegram Bot Token"
-    required: true
-  chat_id:
-    description: "Telegram Chat ID"
-    required: true
   message:
-    description: "Message to send"
-    required: true
+    description: "Message text to send. For a single attachment it becomes the caption when it fits Telegram's caption limit; for attachments it is sent as a separate text message before media batches."
+    required: false
     default: ""
-  reply_to_message_id:
-    description: "Topic ID"
+  message_file:
+    description: "Repository-local file path whose UTF-8 contents become the message body."
+    required: false
+    default: ""
+  message_url:
+    description: "Remote HTTP(S) URL whose response body becomes the message body."
     required: false
     default: ""
   buttons:
-    description: "JSON string of button configuration"
+    description: >
+      Inline keyboard buttons in JSON. Supports two formats:
+      flat array (single row): [{"text":"…","url":"…"}]
+      nested array (multi-row): [[{"text":"…","url":"…"}],[{"text":"…","url":"…"}]]
     required: false
     default: ""
   disable_link_preview:
-    description: "Disable link preview"
+    description: 'Disable link previews. Only "true" and "false" are accepted.'
     required: false
     default: "true"
+  attachment:
+    description: "Attachment source. Supports local file paths, public URLs, or Telegram file_ids."
+    required: false
+    default: ""
+  attachments:
+    description: >
+      JSON array of attachment objects for multi-media sends.
+      Each item supports: {"type":"photo|video|audio|animation|document","source":"...","filename":"optional","caption":"optional","supports_streaming":true} (boolean flag, video only)
+    required: false
+    default: ""
+  attachment_type:
+    description: 'Attachment type. Supported values: "photo", "video", "audio", "animation", and "document".'
+    required: false
+    default: ""
+  attachment_filename:
+    description: "Optional filename override when uploading a local file for a single attachment send."
+    required: false
+    default: ""
+  supports_streaming:
+    description: 'Enable Telegram streaming mode for single video sends. Only "true" and "false" are accepted.'
+    required: false
+    default: "false"
 
 outputs:
   message_id:
-    description: "ID of the sent message"
+    description: "ID of the last sent message"
+  status:
+    description: "Status of the action ('success')"
 
 runs:
-  using: "node20"
+  using: "node24"
   main: "dist/index.js"
 
 branding:

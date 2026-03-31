@@ -1,3 +1,6 @@
 .env
-.history
+.test-history
 node_modules
+
+.*/skills
+package-lock.json

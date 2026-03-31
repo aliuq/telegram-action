@@ -1,72 +1,48 @@
-import * as core from "@actions/core";
-import { Bot } from "grammy";
-import telegramifyMarkdown from "telegramify-markdown";
+import * as core from '@actions/core';
+import { isActRun, logActErrorDetails } from './act-logging.js';
+import { parseActionInputs, readRawActionInputs } from './inputs.js';
+import { logger } from './logger.js';
+import { sendTelegramMessage } from './telegram.js';
 
-async function run() {
+function shouldSuppressFailureAnnotations(): boolean {
+  return process.env.TELEGRAM_ACTION_EXPECT_FAILURE === 'true';
+}
+
+/**
+ * Read, normalize, and execute the action request.
+ *
+ * The entry point stays intentionally small so the behavior is easy to follow:
+ * read inputs, normalize them, send the request, then expose outputs.
+ */
+export async function run(): Promise<void> {
   try {
-    const botToken = core.getInput("bot_token", { required: true });
-    const chatId = core.getInput("chat_id", { required: true });
-    const message = core.getInput("message", { required: true });
-    const buttons = core.getInput("buttons", { required: false });
-    const replyToMessageId = core.getInput("reply_to_message_id", {
-      required: false,
-    });
-    const disableLinkPreview = core.getInput("disable_link_preview", {
-      required: false,
-    });
+    const request = await parseActionInputs(readRawActionInputs());
+    const result = await sendTelegramMessage(request);
 
-    const bot = new Bot(botToken);
-    const params: Parameters<typeof bot.api.sendMessage>[2] = {
-      parse_mode: "MarkdownV2",
-      link_preview_options: {
-        is_disabled: disableLinkPreview === "true",
-      }
-    };
+    core.setOutput('message_id', result.message_id.toString());
+    core.setOutput('status', 'success');
 
-    if (replyToMessageId) {
-      params.reply_parameters = {
-        message_id: Number.parseInt(replyToMessageId),
-      };
+    if (isActRun()) {
+      logger.info(`[act] Sent Telegram message successfully (message_id=${result.message_id})`);
     }
-
-    // 解析按钮配置
-    if (buttons) {
-      try {
-        // [
-        //   [
-        //     { "text": "查看", "url": "https://google.com" },
-        //     { "text": "测试", "url": "https://x.com" }
-        //   ],
-        //   [
-        //     { "text": "访问仓库", "url": "https://github.com/${{ github.repository }}" }
-        //   ]
-        // ]
-        const buttonData = JSON.parse(buttons);
-
-        params.reply_markup = {
-          inline_keyboard: buttonData,
-          resize_keyboard: true,
-        };
-      } catch (e) {
-        core.warning("Invalid buttons format, skipping buttons");
-      }
-    }
-
-    const result = await bot.api.sendMessage(
-      chatId,
-      telegramifyMarkdown(message, "keep"),
-      params,
-    );
-
-    core.setOutput("message_id", result.message_id.toString());
-    core.setOutput("status", "success");
   } catch (error) {
-    if (error instanceof Error) {
-      core.setFailed(error.message);
-    } else {
-      core.setFailed("An unexpected error occurred");
+    const message = error instanceof Error ? error.message : 'An unexpected error occurred';
+    const details = error instanceof Error ? (error.stack ?? error.message) : String(error);
+
+    if (isActRun()) {
+      await logger.withGroup('telegram-action failure', () => {
+        logger.info(details);
+      });
     }
+    logActErrorDetails(error);
+
+    if (shouldSuppressFailureAnnotations()) {
+      process.exitCode = 1;
+      return;
+    }
+
+    logger.fail(message);
   }
 }
 
-run();
+void run();
