@@ -6,10 +6,12 @@ import * as fs from "fs";
 import { constants, promises } from "fs";
 import * as path from "path";
 import * as events from "events";
+import { isIP } from "node:net";
 import "child_process";
 import "timers";
-import { existsSync, readFileSync } from "node:fs";
-import { basename, resolve } from "node:path";
+import { existsSync, readFileSync, realpathSync } from "node:fs";
+import { basename, isAbsolute, relative, resolve, sep } from "node:path";
+import * as dns from "node:dns/promises";
 //#region \0rolldown/runtime.js
 var __create = Object.create;
 var __defProp = Object.defineProperty;
@@ -9527,7 +9529,7 @@ var require_dump = /* @__PURE__ */ __commonJSMin(((exports, module) => {
 //#endregion
 //#region node_modules/undici/lib/interceptor/dns.js
 var require_dns = /* @__PURE__ */ __commonJSMin(((exports, module) => {
-	const { isIP } = __require("node:net");
+	const { isIP: isIP$1 } = __require("node:net");
 	const { lookup } = __require("node:dns");
 	const DecoratorHandler = require_decorator_handler();
 	const { InvalidArgumentError, InformationalError } = require_errors();
@@ -9713,7 +9715,7 @@ var require_dns = /* @__PURE__ */ __commonJSMin(((exports, module) => {
 		return (dispatch) => {
 			return function dnsInterceptor(origDispatchOpts, handler) {
 				const origin = origDispatchOpts.origin.constructor === URL ? origDispatchOpts.origin : new URL(origDispatchOpts.origin);
-				if (isIP(origin.hostname) !== 0) return dispatch(origDispatchOpts, handler);
+				if (isIP$1(origin.hostname) !== 0) return dispatch(origDispatchOpts, handler);
 				instance.runLookup(origin, origDispatchOpts, (err, newOrigin) => {
 					if (err) return handler.onError(err);
 					let dispatchOpts = null;
@@ -65834,13 +65836,119 @@ function looksLikeLocalPath(input) {
 function isRemoteUrl(input) {
 	return /^https?:\/\//.test(input);
 }
+function getWorkspaceRoot() {
+	return realpathSync(process.env.GITHUB_WORKSPACE || process.cwd());
+}
+function isWithinBasePath(base, target) {
+	const relativePath = relative(base, target);
+	return relativePath === "" || !relativePath.startsWith(`..${sep}`) && relativePath !== ".." && !isAbsolute(relativePath);
+}
 /**
 * Resolve a repository-relative path against the workspace root.
 * Prefers `GITHUB_WORKSPACE` when running inside GitHub Actions,
 * falling back to `process.cwd()` for local development.
 */
 function resolveWorkspacePath(input) {
-	return resolve(process.env.GITHUB_WORKSPACE || process.cwd(), input);
+	const base = getWorkspaceRoot();
+	const resolvedPath = resolve(base, input);
+	if (!isWithinBasePath(base, resolvedPath)) throw new Error(`path must stay inside the workspace: ${input}`);
+	return resolvedPath;
+}
+/**
+* Resolve an existing workspace file and reject symlinks that escape the workspace.
+*/
+function resolveExistingWorkspacePath(input) {
+	const base = getWorkspaceRoot();
+	const resolvedPath = resolveWorkspacePath(input);
+	if (!existsSync(resolvedPath)) return resolvedPath;
+	const realPath = realpathSync(resolvedPath);
+	if (!isWithinBasePath(base, realPath)) throw new Error(`path must stay inside the workspace: ${input}`);
+	return realPath;
+}
+function ipv4ToNumber(address) {
+	const octets = address.split(".");
+	if (octets.length !== 4) throw new Error(`invalid IPv4 address: ${address}`);
+	return octets.reduce((result, octet) => {
+		const value = Number.parseInt(octet, 10);
+		if (!Number.isInteger(value) || value < 0 || value > 255) throw new Error(`invalid IPv4 address: ${address}`);
+		return result * 256 + value;
+	}, 0);
+}
+function parseIpv4Octets(address) {
+	const octets = address.split(".").map((octet) => {
+		const value = Number.parseInt(octet, 10);
+		if (!Number.isInteger(value) || value < 0 || value > 255) throw new Error(`invalid IPv4 address: ${address}`);
+		return value;
+	});
+	if (octets.length !== 4) throw new Error(`invalid IPv4 address: ${address}`);
+	return octets;
+}
+function expandIpv6(address) {
+	const normalized = address.toLowerCase().split("%")[0];
+	const [head, tail = ""] = normalized.split("::");
+	if (normalized.split("::").length > 2) throw new Error(`invalid IPv6 address: ${address}`);
+	const headGroups = head ? head.split(":").filter(Boolean) : [];
+	const tailGroups = tail ? tail.split(":").filter(Boolean) : [];
+	const groups = [...headGroups];
+	const missingGroups = 8 - (headGroups.length + tailGroups.length);
+	if (missingGroups < 0) throw new Error(`invalid IPv6 address: ${address}`);
+	groups.push(...Array.from({ length: missingGroups }, () => "0"));
+	groups.push(...tailGroups);
+	if (groups.length !== 8) throw new Error(`invalid IPv6 address: ${address}`);
+	return groups.flatMap((group) => {
+		if (group.includes(".")) {
+			const value = ipv4ToNumber(group);
+			return [value >>> 16 & 65535, value & 65535];
+		}
+		const value = Number.parseInt(group, 16);
+		if (!Number.isInteger(value) || value < 0 || value > 65535) throw new Error(`invalid IPv6 address: ${address}`);
+		return [value];
+	});
+}
+function isPrivateIpv4(address) {
+	const [a, b] = parseIpv4Octets(address);
+	return a === 0 || a === 10 || a === 100 && b >= 64 && b <= 127 || a === 127 || a === 169 && b === 254 || a === 172 && b >= 16 && b <= 31 || a === 192 && b === 168 || a >= 224;
+}
+function isPrivateIpv6(address) {
+	const groups = expandIpv6(address);
+	if (groups[0] === 0 && groups[1] === 0 && groups[2] === 0 && groups[3] === 0 && groups[4] === 0) {
+		if (groups[5] === 0 && groups[6] === 0 && groups[7] === 0) return true;
+		if (groups[5] === 0 && groups[6] === 0 && groups[7] === 1) return true;
+		if (groups[5] === 65535) return isPrivateIpv4(`${groups[6] >>> 8}.${groups[6] & 255}.${groups[7] >>> 8}.${groups[7] & 255}`);
+	}
+	if ((groups[0] & 65024) === 64512) return true;
+	if ((groups[0] & 65472) === 65152) return true;
+	if ((groups[0] & 65280) === 65280) return true;
+	return groups[0] === 8193 && groups[1] === 3512;
+}
+function isPrivateIpAddress(address) {
+	const family = isIP(address);
+	if (family === 4) return isPrivateIpv4(address);
+	if (family === 6) return isPrivateIpv6(address);
+	throw new Error(`invalid IP address: ${address}`);
+}
+async function lookupHostname(hostname) {
+	return dns.lookup(hostname, {
+		all: true,
+		verbatim: true
+	});
+}
+/**
+* Reject internal-only hosts before using runner-side fetch.
+*/
+async function assertPublicHttpUrl(input, lookupAddressList = lookupHostname) {
+	const url = new URL(input);
+	if (url.protocol !== "http:" && url.protocol !== "https:") throw new Error("message_url must start with http:// or https://");
+	const hostname = url.hostname.toLowerCase();
+	if (hostname === "localhost" || hostname.endsWith(".localhost")) throw new Error(`message_url must resolve to a public internet host: ${input}`);
+	if (isIP(hostname) !== 0) {
+		if (isPrivateIpAddress(hostname)) throw new Error(`message_url must resolve to a public internet host: ${input}`);
+		return url;
+	}
+	const addresses = await lookupAddressList(hostname);
+	if (addresses.length === 0) throw new Error(`message_url host did not resolve: ${input}`);
+	if (addresses.some((entry) => isPrivateIpAddress(entry.address))) throw new Error(`message_url must resolve to a public internet host: ${input}`);
+	return url;
 }
 //#endregion
 //#region src/attachments.ts
@@ -65851,11 +65959,15 @@ function resolveWorkspacePath(input) {
 * paths such as `scripts/fixtures/sample-photo.webp` work as expected.
 */
 function resolveAttachmentSource(input, filename) {
-	const resolvedPath = resolveWorkspacePath(input);
-	if (existsSync(resolvedPath)) return {
-		value: new import_out.InputFile(readFileSync(resolvedPath), filename || basename(resolvedPath)),
-		isLocalFile: true
-	};
+	try {
+		const resolvedPath = resolveExistingWorkspacePath(input);
+		if (existsSync(resolvedPath)) return {
+			value: new import_out.InputFile(readFileSync(resolvedPath), filename || basename(resolvedPath)),
+			isLocalFile: true
+		};
+	} catch (error) {
+		if (looksLikeLocalPath(input)) throw error;
+	}
 	if (isRemoteUrl(input)) return {
 		value: input,
 		isLocalFile: false
@@ -76618,13 +76730,17 @@ function replaceSelfReferentialLinks(message) {
 async function resolveMessageText(options) {
 	if (options.message) return options.message;
 	if (options.messageFile) {
-		const resolvedPath = resolveWorkspacePath(options.messageFile);
+		const resolvedPath = resolveExistingWorkspacePath(options.messageFile);
 		if (!existsSync(resolvedPath)) throw new Error(`message_file path does not exist: ${options.messageFile}`);
 		return readFileSync(resolvedPath, "utf8");
 	}
 	if (options.messageUrl) {
 		if (!isRemoteUrl(options.messageUrl)) throw new Error("message_url must start with http:// or https://");
-		const response = await fetch(options.messageUrl, { signal: AbortSignal.timeout(3e4) });
+		const messageUrl = await assertPublicHttpUrl(options.messageUrl);
+		const response = await fetch(messageUrl, {
+			redirect: "error",
+			signal: AbortSignal.timeout(3e4)
+		});
 		if (!response.ok) throw new Error(`message_url request failed with status ${response.status}: ${options.messageUrl}`);
 		return await response.text();
 	}
@@ -77153,7 +77269,7 @@ async function sendAttachmentBatch(bot, request, items, replyMessageId) {
 	}
 	const lastMessage = (await retryOnRateLimit(() => bot.api.sendMediaGroup(request.chatId, items.map((item) => createMediaGroupItem(item)), {
 		...request.topicId !== void 0 ? { message_thread_id: request.topicId } : {},
-		...replyMessageId ? { reply_parameters: { message_id: replyMessageId } } : {}
+		...replyMessageId !== void 0 ? { reply_parameters: { message_id: replyMessageId } } : {}
 	}), {
 		maxRetries: 5,
 		label: `Media group batch (${items.length} items)`
@@ -77162,7 +77278,7 @@ async function sendAttachmentBatch(bot, request, items, replyMessageId) {
 	return lastMessage.message_id;
 }
 async function sendAttachmentItems(bot, request) {
-	let previousMessageId = await sendMessageChunks(bot, request, request.message ? splitTelegramMessageChunks(request.message, TELEGRAM_MESSAGE_LIMIT) : [], void 0, Boolean(request.replyMarkup));
+	let previousMessageId = await sendMessageChunks(bot, request, request.message ? splitTelegramMessageChunks(request.message, 4096) : [], request.replyMessageId, Boolean(request.replyMarkup)) ?? request.replyMessageId;
 	const batches = createMediaGroupBatches(request.attachmentItems ?? []);
 	for (const batch of batches) previousMessageId = await sendAttachmentBatch(bot, request, batch, previousMessageId);
 	if (!previousMessageId) throw new Error("failed to send any attachment messages");
@@ -77198,7 +77314,7 @@ function describeTextSendMethod(request) {
 async function sendTextMessage(bot, request) {
 	const messageChunks = splitTelegramMessageChunks(request.message ?? "", TELEGRAM_MESSAGE_LIMIT);
 	if (messageChunks.length > 0) await sendTypingIndicator(bot, request);
-	const lastMessageId = await sendMessageChunks(bot, request, messageChunks, void 0, true);
+	const lastMessageId = await sendMessageChunks(bot, request, messageChunks, request.replyMessageId, true);
 	if (!lastMessageId) throw new Error("failed to send any Telegram messages");
 	return { message_id: lastMessageId };
 }
@@ -77241,8 +77357,8 @@ async function sendTelegramMessage(request) {
 			});
 			const captionPlan = buildAttachmentCaptionPlan(request.message);
 			const attachReplyMarkupToText = Boolean(request.replyMarkup) && !captionPlan.caption;
-			const chainTailMessageId = await sendMessageChunks(bot, request, captionPlan.leadingChunks, void 0, attachReplyMarkupToText);
-			return retryOnRateLimit(() => ATTACHMENT_SENDERS[attachmentType](bot, request.chatId, attachmentSource.value, createAttachmentOptions(request, attachmentType, chainTailMessageId, captionPlan.caption, !attachReplyMarkupToText, request.supportsStreaming)), {
+			const chainTailMessageId = await sendMessageChunks(bot, request, captionPlan.leadingChunks, request.replyMessageId, attachReplyMarkupToText);
+			return retryOnRateLimit(() => ATTACHMENT_SENDERS[attachmentType](bot, request.chatId, attachmentSource.value, createAttachmentOptions(request, attachmentType, chainTailMessageId ?? request.replyMessageId, captionPlan.caption, !attachReplyMarkupToText, request.supportsStreaming)), {
 				maxRetries: 5,
 				label: `Single attachment (${request.attachmentType})`
 			});
@@ -77282,7 +77398,7 @@ async function run() {
 	} catch (error) {
 		const message = error instanceof Error ? error.message : "An unexpected error occurred";
 		const details = error instanceof Error ? error.stack ?? error.message : String(error);
-		if (!isActRun()) await logger.withGroup("telegram-action failure", () => {
+		if (isActRun()) await logger.withGroup("telegram-action failure", () => {
 			logger.info(details);
 		});
 		logActErrorDetails(error);

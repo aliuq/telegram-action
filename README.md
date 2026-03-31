@@ -256,8 +256,8 @@ Telegram channel comments are controlled in Telegram itself. If the target chann
 | Input | Description | Required | Default |
 |------|------|------|--------|
 | `message` | Inline message text. Mutually exclusive with `message_file` and `message_url` | No | `""` |
-| `message_file` | Repository-local UTF-8 text file whose contents become the message body | No | `""` |
-| `message_url` | Remote HTTP(S) URL whose response body becomes the message body | No | `""` |
+| `message_file` | UTF-8 text file inside the workspace whose contents become the message body | No | `""` |
+| `message_url` | Public HTTP(S) URL whose response body becomes the message body | No | `""` |
 | `buttons` | Inline keyboard JSON in flat or nested format | No | `""` |
 | `disable_link_preview` | Link preview toggle. Accepts only `"true"` or `"false"` | No | `"true"` |
 | `attachment` | Local file path, public URL, or Telegram file ID | No | `""` |
@@ -282,6 +282,8 @@ Telegram channel comments are controlled in Telegram itself. If the target chann
 - `attachment_type` and `attachment_filename` cannot be used with `attachments`
 - top-level `supports_streaming` works only with a single `video` attachment
 - inside `attachments`, `supports_streaming` must be set on the video item itself
+- `message_file` and local `attachment` paths must stay inside `GITHUB_WORKSPACE` / the current workspace
+- `message_url` must resolve to a public host; localhost, private/link-local IPs, and redirects are rejected
 - MarkdownV2 parse failures fall back to plain text for that chunk instead of failing the whole run
 
 ## More docs

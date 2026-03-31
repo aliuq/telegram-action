@@ -255,8 +255,8 @@ buttons: |
 | 参数 | 说明 | 必填 | 默认值 |
 |------|------|------|--------|
 | `message` | 内联消息正文，和 `message_file`、`message_url` 互斥 | 否 | `""` |
-| `message_file` | 仓库内 UTF-8 文本文件，文件内容会变成消息正文 | 否 | `""` |
-| `message_url` | 远程 HTTP(S) URL，响应体会变成消息正文 | 否 | `""` |
+| `message_file` | workspace 内的 UTF-8 文本文件，文件内容会变成消息正文 | 否 | `""` |
+| `message_url` | 公网 HTTP(S) URL，响应体会变成消息正文 | 否 | `""` |
 | `buttons` | flat 或 nested 结构的按钮 JSON | 否 | `""` |
 | `disable_link_preview` | 链接预览开关，只接受 `"true"` 或 `"false"` | 否 | `"true"` |
 | `attachment` | 本地路径、公开 URL 或 Telegram file ID | 否 | `""` |
@@ -281,6 +281,8 @@ buttons: |
 - `attachments` 不能再搭配 `attachment_type` 或 `attachment_filename`
 - 顶层 `supports_streaming` 只对单个 `video` 附件有效
 - `attachments` 里的 `supports_streaming` 要写在视频条目本身上
+- `message_file` 和本地 `attachment` 路径必须留在 `GITHUB_WORKSPACE` / 当前 workspace 内
+- `message_url` 必须解析到公网主机；`localhost`、私网 / link-local IP，以及重定向都会被拒绝
 - MarkdownV2 某个分片解析失败时，会退回纯文本，而不是让整次发送直接失败
 
 ## 更多文档

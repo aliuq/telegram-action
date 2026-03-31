@@ -395,7 +395,9 @@ async function sendAttachmentBatch(
         items.map((item) => createMediaGroupItem(item)),
         {
           ...(request.topicId !== undefined ? { message_thread_id: request.topicId } : {}),
-          ...(replyMessageId !== undefined ? { reply_parameters: { message_id: replyMessageId } } : {}),
+          ...(replyMessageId !== undefined
+            ? { reply_parameters: { message_id: replyMessageId } }
+            : {}),
         },
       ),
     {
@@ -494,7 +496,13 @@ export async function sendTextMessage(
     await sendTypingIndicator(bot, request);
   }
 
-  const lastMessageId = await sendMessageChunks(bot, request, messageChunks, request.replyMessageId, true);
+  const lastMessageId = await sendMessageChunks(
+    bot,
+    request,
+    messageChunks,
+    request.replyMessageId,
+    true,
+  );
 
   if (!lastMessageId) {
     throw new Error('failed to send any Telegram messages');

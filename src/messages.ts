@@ -1,6 +1,6 @@
 import { existsSync, readFileSync } from 'node:fs';
 import telegramifyMarkdown from 'telegramify-markdown';
-import { isRemoteUrl, resolveWorkspacePath } from './source-utils.js';
+import { assertPublicHttpUrl, isRemoteUrl, resolveExistingWorkspacePath } from './source-utils.js';
 
 export const TELEGRAM_MESSAGE_LIMIT = 4096;
 export const TELEGRAM_MESSAGE_SOFT_LIMIT = 4000;
@@ -72,7 +72,7 @@ export async function resolveMessageText(
   }
 
   if (options.messageFile) {
-    const resolvedPath = resolveWorkspacePath(options.messageFile);
+    const resolvedPath = resolveExistingWorkspacePath(options.messageFile);
     if (!existsSync(resolvedPath)) {
       throw new Error(`message_file path does not exist: ${options.messageFile}`);
     }
@@ -85,7 +85,9 @@ export async function resolveMessageText(
       throw new Error('message_url must start with http:// or https://');
     }
 
-    const response = await fetch(options.messageUrl, {
+    const messageUrl = await assertPublicHttpUrl(options.messageUrl);
+    const response = await fetch(messageUrl, {
+      redirect: 'error',
       signal: AbortSignal.timeout(30_000),
     });
     if (!response.ok) {

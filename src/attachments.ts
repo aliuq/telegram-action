@@ -1,7 +1,7 @@
 import { existsSync, readFileSync } from 'node:fs';
 import { basename } from 'node:path';
 import { InputFile } from 'grammy';
-import { isRemoteUrl, looksLikeLocalPath, resolveWorkspacePath } from './source-utils.js';
+import { isRemoteUrl, looksLikeLocalPath, resolveExistingWorkspacePath } from './source-utils.js';
 import type { ResolvedAttachmentSource } from './types.js';
 
 /**
@@ -14,12 +14,18 @@ export function resolveAttachmentSource(
   input: string,
   filename?: string,
 ): ResolvedAttachmentSource {
-  const resolvedPath = resolveWorkspacePath(input);
-  if (existsSync(resolvedPath)) {
-    return {
-      value: new InputFile(readFileSync(resolvedPath), filename || basename(resolvedPath)),
-      isLocalFile: true,
-    };
+  try {
+    const resolvedPath = resolveExistingWorkspacePath(input);
+    if (existsSync(resolvedPath)) {
+      return {
+        value: new InputFile(readFileSync(resolvedPath), filename || basename(resolvedPath)),
+        isLocalFile: true,
+      };
+    }
+  } catch (error) {
+    if (looksLikeLocalPath(input)) {
+      throw error;
+    }
   }
 
   if (isRemoteUrl(input)) {

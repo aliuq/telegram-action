@@ -1,12 +1,27 @@
-import { describe, expect, test } from 'vitest';
+import { mkdtempSync, writeFileSync } from 'node:fs';
+import { tmpdir } from 'node:os';
+import { join } from 'node:path';
+import { afterEach, describe, expect, test, vi } from 'vitest';
 import {
   formatTelegramMessage,
+  resolveMessageText,
   splitTelegramMessage,
   splitTelegramMessageChunks,
   TELEGRAM_CAPTION_LIMIT,
   TELEGRAM_MESSAGE_LIMIT,
   TELEGRAM_MESSAGE_SOFT_LIMIT,
 } from '../messages.js';
+
+const originalWorkspace = process.env.GITHUB_WORKSPACE;
+
+afterEach(() => {
+  vi.restoreAllMocks();
+  if (originalWorkspace === undefined) {
+    delete process.env.GITHUB_WORKSPACE;
+  } else {
+    process.env.GITHUB_WORKSPACE = originalWorkspace;
+  }
+});
 
 // ── formatTelegramMessage ────────────────────────────────────────────────────
 
@@ -175,5 +190,73 @@ describe('edge cases', () => {
     expect(TELEGRAM_MESSAGE_LIMIT).toBe(4096);
     expect(TELEGRAM_MESSAGE_SOFT_LIMIT).toBe(4000);
     expect(TELEGRAM_CAPTION_LIMIT).toBe(1024);
+  });
+});
+
+describe('resolveMessageText', () => {
+  test('reads message_file only from inside the workspace', async () => {
+    const workspace = mkdtempSync(join(tmpdir(), 'telegram-action-workspace-'));
+    const filePath = join(workspace, 'message.txt');
+    writeFileSync(filePath, 'hello from file');
+    process.env.GITHUB_WORKSPACE = workspace;
+
+    await expect(
+      resolveMessageText({
+        message: '',
+        messageFile: 'message.txt',
+        messageUrl: '',
+      }),
+    ).resolves.toBe('hello from file');
+  });
+
+  test('rejects message_file traversal outside the workspace', async () => {
+    const workspace = mkdtempSync(join(tmpdir(), 'telegram-action-workspace-'));
+    process.env.GITHUB_WORKSPACE = workspace;
+
+    await expect(
+      resolveMessageText({
+        message: '',
+        messageFile: '/etc/passwd',
+        messageUrl: '',
+      }),
+    ).rejects.toThrow('path must stay inside the workspace: /etc/passwd');
+  });
+
+  test('fetches public message_url with redirect protection', async () => {
+    const fetchMock = vi.fn().mockResolvedValue({
+      ok: true,
+      text: async () => 'remote content',
+    });
+    vi.stubGlobal('fetch', fetchMock);
+
+    await expect(
+      resolveMessageText({
+        message: '',
+        messageFile: '',
+        messageUrl: 'https://93.184.216.34/message.txt',
+      }),
+    ).resolves.toBe('remote content');
+
+    expect(fetchMock).toHaveBeenCalledWith(
+      expect.any(URL),
+      expect.objectContaining({ redirect: 'error' }),
+    );
+  });
+
+  test('rejects non-public message_url before fetching', async () => {
+    const fetchMock = vi.fn();
+    vi.stubGlobal('fetch', fetchMock);
+
+    await expect(
+      resolveMessageText({
+        message: '',
+        messageFile: '',
+        messageUrl: 'http://127.0.0.1/private',
+      }),
+    ).rejects.toThrow(
+      'message_url must resolve to a public internet host: http://127.0.0.1/private',
+    );
+
+    expect(fetchMock).not.toHaveBeenCalled();
   });
 });

@@ -8,6 +8,7 @@
     "build": "tsdown",
     "dev": "tsdown --watch",
     "lint": "tsc --noEmit && biome check .",
+    "format": "biome check . --write",
     "test": "bun scripts/test.ts",
     "test:unit": "vitest run",
     "test:validate": "bun scripts/test.ts --mode validate",
