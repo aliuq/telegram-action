@@ -1,14 +1,39 @@
 import { logger } from './logger.js';
 import type { ActRequestSummaryOptions, ResolvedAttachmentSource } from './types.js';
 
+const LOCAL_DEBUG_MODE_ENV = 'TELEGRAM_ACTION_LOCAL_DEBUG_MODE';
+
 /**
  * Detect whether the action is running inside a local `act` session.
  *
  * The extra diagnostics stay behind this guard so normal GitHub Actions runs do
  * not get cluttered with local-only debugging output.
  */
-export function isActRun(): boolean {
-  return process.env.ACT === 'true' || Boolean(process.env.ACT_SCENARIO_ID);
+export function getLocalDebugMode(
+  env: NodeJS.ProcessEnv = process.env,
+): 'act' | 'source' | undefined {
+  const explicitMode = env[LOCAL_DEBUG_MODE_ENV];
+  if (explicitMode === 'act' || explicitMode === 'source') {
+    return explicitMode;
+  }
+
+  if (env.ACT === 'true' || Boolean(env.ACT_SCENARIO_ID)) {
+    return 'act';
+  }
+
+  return undefined;
+}
+
+export function isLocalDebugRun(env: NodeJS.ProcessEnv = process.env): boolean {
+  return getLocalDebugMode(env) !== undefined;
+}
+
+export function isActRun(env: NodeJS.ProcessEnv = process.env): boolean {
+  return getLocalDebugMode(env) === 'act';
+}
+
+function getLocalDebugPrefix(env: NodeJS.ProcessEnv = process.env): string {
+  return getLocalDebugMode(env) === 'source' ? '[source]' : '[act]';
 }
 
 /**
@@ -81,12 +106,12 @@ export function formatActRequestSummary(options: ActRequestSummaryOptions): stri
  * Emit a concise request summary that helps debug local `act` runs.
  */
 export function logActRequestSummary(options: ActRequestSummaryOptions): void {
-  if (!isActRun()) {
+  if (!isLocalDebugRun()) {
     return;
   }
 
   logger.startGroup(
-    `[act] Telegram request debug${options.scenarioId ? ` (${options.scenarioId})` : ''}`,
+    `${getLocalDebugPrefix()} Telegram request debug${options.scenarioId ? ` (${options.scenarioId})` : ''}`,
   );
   for (const line of formatActRequestSummary(options).split('\n')) {
     logger.info(line);
@@ -133,11 +158,11 @@ export function formatActErrorDetails(error: unknown): string {
  * parser problems from network and `act` transport issues.
  */
 export function logActErrorDetails(error: unknown): void {
-  if (!isActRun()) {
+  if (!isLocalDebugRun()) {
     return;
   }
 
-  logger.startGroup('[act] Telegram request failure details');
+  logger.startGroup(`${getLocalDebugPrefix()} Telegram request failure details`);
   for (const detail of formatActErrorDetails(error).split('\n')) {
     logger.info(detail);
   }

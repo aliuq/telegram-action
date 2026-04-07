@@ -131,11 +131,14 @@ export async function runSourceSelection(
 ): Promise<void> {
   const logLines: string[] = [];
   const previousActScenarioId = process.env.ACT_SCENARIO_ID;
+  const previousLocalDebugMode = process.env.TELEGRAM_ACTION_LOCAL_DEBUG_MODE;
 
-  delete process.env.ACT_SCENARIO_ID;
+  process.env.TELEGRAM_ACTION_LOCAL_DEBUG_MODE = 'source';
 
   try {
     for (const scenario of scenarios) {
+      process.env.ACT_SCENARIO_ID = scenario.id;
+
       if (scenario.expect_failure) {
         try {
           const request = await parseActionInputs(buildRawActionInputs(scenario, true));
@@ -195,6 +198,12 @@ export async function runSourceSelection(
       delete process.env.ACT_SCENARIO_ID;
     } else {
       process.env.ACT_SCENARIO_ID = previousActScenarioId;
+    }
+
+    if (previousLocalDebugMode === undefined) {
+      delete process.env.TELEGRAM_ACTION_LOCAL_DEBUG_MODE;
+    } else {
+      process.env.TELEGRAM_ACTION_LOCAL_DEBUG_MODE = previousLocalDebugMode;
     }
   }
 

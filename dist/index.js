@@ -16261,14 +16261,26 @@ function createLogger(options = {}) {
 const logger = createLogger();
 //#endregion
 //#region src/act-logging.ts
+const LOCAL_DEBUG_MODE_ENV = "TELEGRAM_ACTION_LOCAL_DEBUG_MODE";
 /**
 * Detect whether the action is running inside a local `act` session.
 *
 * The extra diagnostics stay behind this guard so normal GitHub Actions runs do
 * not get cluttered with local-only debugging output.
 */
-function isActRun() {
-	return process.env.ACT === "true" || Boolean(process.env.ACT_SCENARIO_ID);
+function getLocalDebugMode(env = process.env) {
+	const explicitMode = env[LOCAL_DEBUG_MODE_ENV];
+	if (explicitMode === "act" || explicitMode === "source") return explicitMode;
+	if (env.ACT === "true" || Boolean(env.ACT_SCENARIO_ID)) return "act";
+}
+function isLocalDebugRun(env = process.env) {
+	return getLocalDebugMode(env) !== void 0;
+}
+function isActRun(env = process.env) {
+	return getLocalDebugMode(env) === "act";
+}
+function getLocalDebugPrefix(env = process.env) {
+	return getLocalDebugMode(env) === "source" ? "[source]" : "[act]";
 }
 /**
 * Hide most of an identifier while still keeping enough detail for debugging.
@@ -16320,8 +16332,8 @@ function formatActRequestSummary(options) {
 * Emit a concise request summary that helps debug local `act` runs.
 */
 function logActRequestSummary(options) {
-	if (!isActRun()) return;
-	logger.startGroup(`[act] Telegram request debug${options.scenarioId ? ` (${options.scenarioId})` : ""}`);
+	if (!isLocalDebugRun()) return;
+	logger.startGroup(`${getLocalDebugPrefix()} Telegram request debug${options.scenarioId ? ` (${options.scenarioId})` : ""}`);
 	for (const line of formatActRequestSummary(options).split("\n")) logger.info(line);
 	logger.endGroup();
 }
@@ -16351,8 +16363,8 @@ function formatActErrorDetails(error) {
 * parser problems from network and `act` transport issues.
 */
 function logActErrorDetails(error) {
-	if (!isActRun()) return;
-	logger.startGroup("[act] Telegram request failure details");
+	if (!isLocalDebugRun()) return;
+	logger.startGroup(`${getLocalDebugPrefix()} Telegram request failure details`);
 	for (const detail of formatActErrorDetails(error).split("\n")) logger.info(detail);
 	logger.endGroup();
 }
@@ -77208,6 +77220,7 @@ async function sendTypingIndicator(bot, request) {
 	try {
 		await bot.api.sendChatAction(request.chatId, "typing", { ...request.topicId !== void 0 ? { message_thread_id: request.topicId } : {} });
 	} catch (error) {
+		console.log("---------------------------------");
 		logger.warn(`Failed to send typing indicator: ${getTelegramErrorDescription(error)} (chatId=${request.chatId}, topicId=${request.topicId ?? "none"})`);
 	}
 }
