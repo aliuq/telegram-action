@@ -29,18 +29,35 @@ describe('sendTextMessage', () => {
     expect(api.sendMessage).toHaveBeenCalledOnce();
   });
 
-  test('sends typing indicator for non-channel chats', async () => {
+  test('sends typing indicator for private chats without inspecting the chat', async () => {
     const api = {
       editMessageReplyMarkup: vi.fn(),
-      getChat: vi.fn().mockResolvedValue({ type: 'private' }),
+      getChat: vi.fn(),
       sendChatAction: vi.fn().mockResolvedValue(undefined),
       sendMessage: vi.fn().mockResolvedValue({ message_id: 123 }),
     };
 
     await sendTextMessage({ api }, createRequest({ chatId: '123456' }));
 
-    expect(api.getChat).toHaveBeenCalledWith('123456');
+    expect(api.getChat).not.toHaveBeenCalled();
     expect(api.sendChatAction).toHaveBeenCalledWith('123456', 'typing', {});
+    expect(api.sendMessage).toHaveBeenCalledOnce();
+  });
+
+  test('sends typing indicator for topic targets without inspecting the chat', async () => {
+    const api = {
+      editMessageReplyMarkup: vi.fn(),
+      getChat: vi.fn(),
+      sendChatAction: vi.fn().mockResolvedValue(undefined),
+      sendMessage: vi.fn().mockResolvedValue({ message_id: 123 }),
+    };
+
+    await sendTextMessage({ api }, createRequest({ chatId: '-1001234567890', topicId: 42 }));
+
+    expect(api.getChat).not.toHaveBeenCalled();
+    expect(api.sendChatAction).toHaveBeenCalledWith('-1001234567890', 'typing', {
+      message_thread_id: 42,
+    });
     expect(api.sendMessage).toHaveBeenCalledOnce();
   });
 });

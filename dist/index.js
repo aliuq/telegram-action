@@ -77214,14 +77214,19 @@ async function sendTypingIndicator(bot, request) {
 function chatSupportsTypingIndicator(chat) {
 	return chat.type !== "channel";
 }
+function requestLikelySupportsTypingIndicator(request) {
+	if (request.topicId !== void 0) return true;
+	if (/^\d+$/.test(request.chatId)) return true;
+}
 async function supportsTypingIndicator(bot, request) {
+	const localGuess = requestLikelySupportsTypingIndicator(request);
+	if (localGuess !== void 0) return localGuess;
 	try {
 		const chat = await bot.api.getChat(request.chatId);
 		if (chatSupportsTypingIndicator(chat)) return true;
 		logger.info(`Skipping typing indicator for unsupported chat type: ${chat.type} (chatId=${request.chatId}, topicId=${request.topicId ?? "none"})`);
 		return false;
-	} catch (error) {
-		logger.warn(`Failed to inspect chat before typing indicator: ${getTelegramErrorDescription(error)} (chatId=${request.chatId}, topicId=${request.topicId ?? "none"})`);
+	} catch {
 		return false;
 	}
 }

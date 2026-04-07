@@ -275,10 +275,27 @@ function chatSupportsTypingIndicator(chat: TextTransportChat): boolean {
   return chat.type !== 'channel';
 }
 
+function requestLikelySupportsTypingIndicator(request: ParsedActionInputs): boolean | undefined {
+  if (request.topicId !== undefined) {
+    return true;
+  }
+
+  if (/^\d+$/.test(request.chatId)) {
+    return true;
+  }
+
+  return undefined;
+}
+
 async function supportsTypingIndicator(
   bot: TextTransportBot,
   request: ParsedActionInputs,
 ): Promise<boolean> {
+  const localGuess = requestLikelySupportsTypingIndicator(request);
+  if (localGuess !== undefined) {
+    return localGuess;
+  }
+
   try {
     const chat = await bot.api.getChat(request.chatId);
     if (chatSupportsTypingIndicator(chat)) {
@@ -290,11 +307,7 @@ async function supportsTypingIndicator(
         `(chatId=${request.chatId}, topicId=${request.topicId ?? 'none'})`,
     );
     return false;
-  } catch (error) {
-    logger.warn(
-      `Failed to inspect chat before typing indicator: ${getTelegramErrorDescription(error)} ` +
-        `(chatId=${request.chatId}, topicId=${request.topicId ?? 'none'})`,
-    );
+  } catch {
     return false;
   }
 }
