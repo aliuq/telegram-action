@@ -264,7 +264,6 @@ async function sendTypingIndicator(
       ...(request.topicId !== undefined ? { message_thread_id: request.topicId } : {}),
     });
   } catch (error) {
-    console.log('---------------------------------');
     logger.warn(
       `Failed to send typing indicator: ${getTelegramErrorDescription(error)} ` +
         `(chatId=${request.chatId}, topicId=${request.topicId ?? 'none'})`,

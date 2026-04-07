@@ -77220,7 +77220,6 @@ async function sendTypingIndicator(bot, request) {
 	try {
 		await bot.api.sendChatAction(request.chatId, "typing", { ...request.topicId !== void 0 ? { message_thread_id: request.topicId } : {} });
 	} catch (error) {
-		console.log("---------------------------------");
 		logger.warn(`Failed to send typing indicator: ${getTelegramErrorDescription(error)} (chatId=${request.chatId}, topicId=${request.topicId ?? "none"})`);
 	}
 }
