@@ -240,6 +240,7 @@ buttons: |
 ### 频道评论区
 
 频道评论区由 Telegram 自己控制，目标频道如果已经绑定 discussion group，消息发出去后 Telegram 会自动显示评论入口
+对于频道目标，Action 会跳过 typing indicator，因为 Telegram 不支持在那里调用 `sendChatAction`
 
 ## 环境变量
 

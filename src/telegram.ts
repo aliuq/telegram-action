@@ -194,9 +194,10 @@ async function closeBotResources(bot: Bot): Promise<void> {
 
 type TextTransportApi = Pick<
   Bot['api'],
-  'editMessageReplyMarkup' | 'sendChatAction' | 'sendMessage'
+  'editMessageReplyMarkup' | 'getChat' | 'sendChatAction' | 'sendMessage'
 >;
 type TextTransportBot = { api: TextTransportApi };
+type TextTransportChat = Awaited<ReturnType<TextTransportApi['getChat']>>;
 
 /**
  * Build Telegram reply parameters only when a reply target id was provided.
@@ -254,6 +255,10 @@ async function sendTypingIndicator(
   bot: TextTransportBot,
   request: ParsedActionInputs,
 ): Promise<void> {
+  if (!(await supportsTypingIndicator(bot, request))) {
+    return;
+  }
+
   try {
     await bot.api.sendChatAction(request.chatId, 'typing', {
       ...(request.topicId !== undefined ? { message_thread_id: request.topicId } : {}),
@@ -263,6 +268,34 @@ async function sendTypingIndicator(
       `Failed to send typing indicator: ${getTelegramErrorDescription(error)} ` +
         `(chatId=${request.chatId}, topicId=${request.topicId ?? 'none'})`,
     );
+  }
+}
+
+function chatSupportsTypingIndicator(chat: TextTransportChat): boolean {
+  return chat.type !== 'channel';
+}
+
+async function supportsTypingIndicator(
+  bot: TextTransportBot,
+  request: ParsedActionInputs,
+): Promise<boolean> {
+  try {
+    const chat = await bot.api.getChat(request.chatId);
+    if (chatSupportsTypingIndicator(chat)) {
+      return true;
+    }
+
+    logger.info(
+      `Skipping typing indicator for unsupported chat type: ${chat.type} ` +
+        `(chatId=${request.chatId}, topicId=${request.topicId ?? 'none'})`,
+    );
+    return false;
+  } catch (error) {
+    logger.warn(
+      `Failed to inspect chat before typing indicator: ${getTelegramErrorDescription(error)} ` +
+        `(chatId=${request.chatId}, topicId=${request.topicId ?? 'none'})`,
+    );
+    return false;
   }
 }
 

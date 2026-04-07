@@ -241,6 +241,7 @@ With `attachments`, top-level `message` is sent first as a normal text message. 
 ### Channel comments
 
 Telegram channel comments are controlled in Telegram itself. If the target channel is linked to a discussion group, Telegram exposes comments automatically after the post is sent.
+The action skips typing indicators for channel destinations because Telegram does not support `sendChatAction` there.
 
 ## Required environment variables
 

@@ -77204,10 +77204,25 @@ function createMessageOptions(request, replyMessageId, includeReplyMarkup = true
 	};
 }
 async function sendTypingIndicator(bot, request) {
+	if (!await supportsTypingIndicator(bot, request)) return;
 	try {
 		await bot.api.sendChatAction(request.chatId, "typing", { ...request.topicId !== void 0 ? { message_thread_id: request.topicId } : {} });
 	} catch (error) {
 		logger.warn(`Failed to send typing indicator: ${getTelegramErrorDescription(error)} (chatId=${request.chatId}, topicId=${request.topicId ?? "none"})`);
+	}
+}
+function chatSupportsTypingIndicator(chat) {
+	return chat.type !== "channel";
+}
+async function supportsTypingIndicator(bot, request) {
+	try {
+		const chat = await bot.api.getChat(request.chatId);
+		if (chatSupportsTypingIndicator(chat)) return true;
+		logger.info(`Skipping typing indicator for unsupported chat type: ${chat.type} (chatId=${request.chatId}, topicId=${request.topicId ?? "none"})`);
+		return false;
+	} catch (error) {
+		logger.warn(`Failed to inspect chat before typing indicator: ${getTelegramErrorDescription(error)} (chatId=${request.chatId}, topicId=${request.topicId ?? "none"})`);
+		return false;
 	}
 }
 /**
