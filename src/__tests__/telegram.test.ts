@@ -1,5 +1,6 @@
 import { InputFile } from 'grammy/web';
-import { describe, expect, test, vi } from 'vitest';
+import { afterEach, beforeEach, describe, expect, test, vi } from 'vitest';
+import { logger } from '../logger.js';
 import { createTelegramBot, sendTextMessage } from '../telegram.js';
 import type { ParsedActionInputs } from '../types.js';
 
@@ -13,6 +14,16 @@ function createRequest(overrides: Partial<ParsedActionInputs> = {}): ParsedActio
     ...overrides,
   };
 }
+
+beforeEach(() => {
+  vi.spyOn(logger, 'info').mockImplementation(() => undefined);
+  vi.spyOn(logger, 'warn').mockImplementation(() => undefined);
+});
+
+afterEach(() => {
+  vi.useRealTimers();
+  vi.restoreAllMocks();
+});
 
 describe('sendTextMessage', () => {
   test('skips typing indicator for channels', async () => {
@@ -73,5 +84,31 @@ describe('sendTextMessage', () => {
 
     expect(fetch).toHaveBeenCalledOnce();
     expect(fetch.mock.calls[0]?.[1]).toEqual(expect.objectContaining({ duplex: 'half' }));
+  });
+
+  test('retries transient Telegram server errors for text messages', async () => {
+    vi.useFakeTimers();
+
+    const api = {
+      editMessageReplyMarkup: vi.fn(),
+      getChat: vi.fn(),
+      sendChatAction: vi.fn().mockResolvedValue(undefined),
+      sendMessage: vi
+        .fn()
+        .mockRejectedValueOnce(
+          Object.assign(new Error('Internal Server Error'), {
+            error_code: 500,
+            description: 'Internal Server Error',
+          }),
+        )
+        .mockResolvedValue({ message_id: 123 }),
+    };
+
+    const sendPromise = sendTextMessage({ api }, createRequest({ chatId: '123456' }));
+
+    await vi.runAllTimersAsync();
+
+    await expect(sendPromise).resolves.toEqual({ message_id: 123 });
+    expect(api.sendMessage).toHaveBeenCalledTimes(2);
   });
 });

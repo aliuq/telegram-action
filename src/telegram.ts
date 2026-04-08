@@ -20,21 +20,48 @@ function sleep(ms: number): Promise<void> {
   return new Promise((resolve) => setTimeout(resolve, ms));
 }
 
-function getRetryAfterSeconds(error: unknown): number | undefined {
-  if (!(error instanceof Error) || !('error_code' in error) || error.error_code !== 429) {
-    return undefined;
-  }
+interface RetryInstruction {
+  delaySeconds: number;
+  reason: string;
+}
 
+function getRetryInstruction(error: unknown, retries: number): RetryInstruction | undefined {
   if (
-    !('parameters' in error) ||
-    typeof error.parameters !== 'object' ||
-    error.parameters === null
+    !(error instanceof Error) ||
+    !('error_code' in error) ||
+    typeof error.error_code !== 'number'
   ) {
     return undefined;
   }
 
-  const retryAfter = 'retry_after' in error.parameters ? error.parameters.retry_after : undefined;
-  return typeof retryAfter === 'number' ? retryAfter : undefined;
+  if (error.error_code === 429) {
+    if (
+      !('parameters' in error) ||
+      typeof error.parameters !== 'object' ||
+      error.parameters === null
+    ) {
+      return undefined;
+    }
+
+    const retryAfter = 'retry_after' in error.parameters ? error.parameters.retry_after : undefined;
+    if (typeof retryAfter !== 'number') {
+      return undefined;
+    }
+
+    return {
+      delaySeconds: retryAfter,
+      reason: 'rate-limited by Telegram',
+    };
+  }
+
+  if (![500, 502, 503, 504].includes(error.error_code)) {
+    return undefined;
+  }
+
+  return {
+    delaySeconds: Math.min(2 ** (retries - 1), 5),
+    reason: `Telegram server error (${error.error_code})`,
+  };
 }
 
 interface RetryRateLimitOptions {
@@ -58,7 +85,7 @@ async function sleepWithWarningCountdown(message: string, seconds: number): Prom
   process.stderr.write('\n');
 }
 
-async function retryOnRateLimit<T>(
+async function retryOnTelegramRetryableError<T>(
   operation: () => Promise<T>,
   options: RetryRateLimitOptions,
 ): Promise<T> {
@@ -68,21 +95,23 @@ async function retryOnRateLimit<T>(
     try {
       return await operation();
     } catch (error) {
-      const retryAfterSeconds = getRetryAfterSeconds(error);
-      if (retryAfterSeconds === undefined) {
+      retries++;
+
+      const retryInstruction = getRetryInstruction(error, retries);
+      if (retryInstruction === undefined) {
         throw error;
       }
 
-      retries++;
       if (retries >= options.maxRetries) {
         throw new Error(
-          `${options.label} rate-limited ${options.maxRetries} times — aborting to avoid hanging indefinitely.`,
+          `${options.label} hit a retryable Telegram failure ${options.maxRetries} times — aborting to avoid hanging indefinitely.`,
+          { cause: error },
         );
       }
 
       await sleepWithWarningCountdown(
-        `${options.label} rate-limited by Telegram (${retries}/${options.maxRetries}).`,
-        retryAfterSeconds,
+        `${options.label} ${retryInstruction.reason} (${retries}/${options.maxRetries}).`,
+        retryInstruction.delaySeconds,
       );
     }
   }
@@ -141,7 +170,7 @@ async function sendFormattedMessage(
   includeReplyMarkup = false,
 ) {
   try {
-    return await retryOnRateLimit(
+    return await retryOnTelegramRetryableError(
       () =>
         bot.api.sendMessage(
           request.chatId,
@@ -163,7 +192,7 @@ async function sendFormattedMessage(
         `scenarioId=${request.scenarioId} rawLength=${rawChunk.length} formattedLength=${formattedChunk.length} ` +
         `error="${getTelegramErrorDescription(error)}" preview="${summarizeChunkForLogs(rawChunk)}"`,
     );
-    return await retryOnRateLimit(
+    return await retryOnTelegramRetryableError(
       () =>
         bot.api.sendMessage(
           request.chatId,
@@ -430,7 +459,7 @@ async function sendAttachmentBatch(
 ): Promise<number> {
   if (items.length === 1) {
     const [item] = items;
-    const result = await retryOnRateLimit(
+    const result = await retryOnTelegramRetryableError(
       () =>
         ATTACHMENT_SENDERS[item.type](
           bot,
@@ -453,7 +482,7 @@ async function sendAttachmentBatch(
     return result.message_id;
   }
 
-  const messages = await retryOnRateLimit(
+  const messages = await retryOnTelegramRetryableError(
     () =>
       bot.api.sendMediaGroup(
         request.chatId,
@@ -629,7 +658,7 @@ export async function sendTelegramMessage(
         attachReplyMarkupToText,
       );
 
-      return retryOnRateLimit(
+      return retryOnTelegramRetryableError(
         () =>
           ATTACHMENT_SENDERS[attachmentType](
             bot,
