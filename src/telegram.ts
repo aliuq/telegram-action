@@ -1,4 +1,4 @@
-import { Bot } from 'grammy';
+import { Bot } from 'grammy/web';
 import { logActRequestSummary } from './act-logging.js';
 import {
   ATTACHMENT_METHOD_NAMES,

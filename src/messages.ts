@@ -51,11 +51,20 @@ function simplifySelfReferentialLinks(message: string): string {
   return result;
 }
 
+function simplifyMarkdownLinkLabel(label: string): string {
+  const simplifiedLabel = label.replace(/(?<!\\)[*_~|]/g, '');
+  return simplifiedLabel || label;
+}
+
 function replaceSelfReferentialLinks(message: string): string {
   const simplifiedLinks = message.replace(
     /\[([^\]]+)\]\((https?:\/\/[^)\s]+)\)/g,
-    (fullMatch, label: string, target: string) =>
-      label.replaceAll('\\', '') === target ? label : fullMatch,
+    (_fullMatch, label: string, target: string) => {
+      const simplifiedLabel = simplifyMarkdownLinkLabel(label);
+      return simplifiedLabel.replaceAll('\\', '') === target
+        ? simplifiedLabel
+        : `[${simplifiedLabel}](${target})`;
+    },
   );
 
   return simplifiedLinks.replace(/(?<!\\)[<>]/g, '\\$&');

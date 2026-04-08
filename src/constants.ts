@@ -1,4 +1,4 @@
-import { InputMediaBuilder } from 'grammy';
+import { InputMediaBuilder } from 'grammy/web';
 import type { AttachmentSender, AttachmentType, TelegramMediaGroupItem } from './types.js';
 
 /**
@@ -56,7 +56,7 @@ export const TELEGRAM_MEDIA_GROUP_LIMIT = 10;
 export const MEDIA_GROUP_BUILDERS: Record<
   (typeof MEDIA_GROUP_ATTACHMENT_TYPES)[number],
   (
-    source: string | import('grammy').InputFile,
+    source: string | import('grammy/web').InputFile,
     options?: {
       caption?: string;
       parse_mode?: 'MarkdownV2';

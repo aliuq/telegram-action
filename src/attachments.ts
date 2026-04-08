@@ -1,6 +1,6 @@
 import { existsSync, readFileSync } from 'node:fs';
 import { basename } from 'node:path';
-import { InputFile } from 'grammy';
+import { InputFile } from 'grammy/web';
 import { isRemoteUrl, looksLikeLocalPath, resolveExistingWorkspacePath } from './source-utils.js';
 import type { ResolvedAttachmentSource } from './types.js';
 

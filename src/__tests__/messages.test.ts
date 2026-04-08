@@ -40,6 +40,11 @@ describe('formatTelegramMessage', () => {
     expect(result).toContain('*');
   });
 
+  test('simplifies nested formatting inside link labels', () => {
+    const result = formatTelegramMessage('[**openclaw**](https://openclaw.ai)');
+    expect(result.trimEnd()).toBe('[openclaw](https://openclaw.ai)');
+  });
+
   test('preserves code blocks', () => {
     const result = formatTelegramMessage("```js\nconsole.log('hi')\n```");
     expect(result).toContain('```');
