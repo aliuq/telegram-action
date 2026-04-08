@@ -16,6 +16,7 @@ const ACTION_INPUT_NAMES = [
   'attachment_type',
   'attachment_filename',
   'supports_streaming',
+  'exit_on_fail',
 ] as const;
 
 function createGitHubOutputFile(prefix: string): string {

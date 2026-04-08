@@ -11,6 +11,7 @@ function createRequest(overrides: Partial<ParsedActionInputs> = {}): ParsedActio
     message: 'hello',
     disableLinkPreview: true,
     supportsStreaming: false,
+    exitOnFail: true,
     ...overrides,
   };
 }

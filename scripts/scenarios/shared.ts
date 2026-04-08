@@ -15,6 +15,7 @@ export function createScenarioInputs(overrides: Partial<ScenarioInputs>): Scenar
     attachment_type: '',
     attachment_filename: '',
     supports_streaming: 'false',
+    exit_on_fail: 'true',
     ...overrides,
   };
 }

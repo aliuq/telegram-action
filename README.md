@@ -9,10 +9,12 @@ It supports plain text, MarkdownV2 formatting, inline buttons, local and remote 
 - send plain text and MarkdownV2 messages
 - split long messages into a reply chain automatically
 - attach inline keyboard buttons in flat or nested JSON
+- apply Telegram button styles with `primary`, `success`, or `danger`
 - load message text from inline input, local files, or remote URLs
 - send media from local files, public URLs, or Telegram file IDs
 - send multiple media items with the `attachments` JSON input
 - post into a topic or reply to an existing message
+- keep workflow steps green with `exit_on_fail: "false"` when notifications are best-effort
 - validate scenarios locally before running live sends
 
 ## Usage
@@ -92,6 +94,7 @@ The `buttons` input accepts two JSON shapes:
 - nested array for multiple rows
 
 Each button must include `text` and exactly one Telegram action field such as `url` or `callback_data`.
+Telegram also supports an optional `style` field with `primary`, `success`, or `danger`.
 
 Single row:
 
@@ -105,8 +108,8 @@ Single row:
     message: See more details
     buttons: |
       [
-        { "text": "View commit", "url": "https://github.com/${{ github.repository }}/commit/${{ github.sha }}" },
-        { "text": "Open repository", "url": "https://github.com/${{ github.repository }}" }
+        { "text": "View commit", "url": "https://github.com/${{ github.repository }}/commit/${{ github.sha }}", "style": "primary" },
+        { "text": "Open repository", "url": "https://github.com/${{ github.repository }}", "style": "success" }
       ]
 ```
 
@@ -123,6 +126,23 @@ buttons: |
     ]
   ]
 ```
+
+### Non-blocking notifications
+
+Set `exit_on_fail: "false"` when Telegram delivery should stay best-effort and must not fail the main workflow step.
+
+```yaml
+- name: Send best-effort Telegram notification
+  uses: aliuq/telegram-action@master
+  env:
+    TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
+    TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
+  with:
+    message: Build finished
+    exit_on_fail: "false"
+```
+
+When this mode is enabled, send failures are logged as warnings and the `status` output becomes `failure` instead of failing the workflow. The action also accepts `exitOnFail` as a camelCase compatibility alias.
 
 ### Single attachment
 
@@ -266,13 +286,14 @@ The action skips typing indicators for channel destinations because Telegram doe
 | `attachment_type` | One of `photo`, `video`, `audio`, `animation`, or `document` | No | `""` |
 | `attachment_filename` | Optional filename override for a local single attachment | No | `""` |
 | `supports_streaming` | Telegram streaming mode for a single `video` attachment. Accepts only `"true"` or `"false"` | No | `"false"` |
+| `exit_on_fail` | Whether notification errors should fail the workflow step. Accepts only `"true"` or `"false"` | No | `"true"` |
 
 ## Outputs
 
 | Output | Description |
 |------|------|
 | `message_id` | Last Telegram message id produced by the run |
-| `status` | Execution status, currently `"success"` |
+| `status` | Execution status: `"success"` or `"failure"` |
 
 ## Important behavior notes
 
@@ -283,6 +304,8 @@ The action skips typing indicators for channel destinations because Telegram doe
 - `attachment_type` and `attachment_filename` cannot be used with `attachments`
 - top-level `supports_streaming` works only with a single `video` attachment
 - inside `attachments`, `supports_streaming` must be set on the video item itself
+- buttons accept an optional `style` field with `primary`, `success`, or `danger`
+- `exit_on_fail` defaults to `true`; set it to `false` to keep the workflow running and inspect `status=failure` instead
 - `message_file` and local `attachment` paths must stay inside `GITHUB_WORKSPACE` / the current workspace
 - `message_url` must resolve to a public host; localhost, private/link-local IPs, and redirects are rejected
 - MarkdownV2 parse failures fall back to plain text for that chunk instead of failing the whole run

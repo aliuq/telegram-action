@@ -9,10 +9,12 @@
 - 发送普通文本和 MarkdownV2 消息
 - 超长文本自动拆成回复链
 - 按钮支持 flat 和 nested 两种 JSON 结构
+- 按钮支持 `primary`、`success`、`danger` 三种样式
 - 正文支持内联文本、仓库文件、远程 URL
 - 支持本地文件、公开 URL、Telegram file_id 附件
 - 支持通过 `attachments` 一次发送多个媒体条目
 - 支持发到话题里，或者回复一条已有消息
+- 用 `exit_on_fail: "false"` 把通知改成非阻塞辅助步骤
 
 ## 使用方法
 
@@ -91,6 +93,7 @@
 - nested 数组，表示多行
 
 每个按钮都必须带 `text`，同时只能带一个 Telegram 行为字段，例如 `url` 或 `callback_data`
+按钮还支持可选 `style` 字段，可用值是 `primary`、`success`、`danger`
 
 单行示例：
 
@@ -104,8 +107,8 @@
     message: See more details
     buttons: |
       [
-        { "text": "View commit", "url": "https://github.com/${{ github.repository }}/commit/${{ github.sha }}" },
-        { "text": "Open repository", "url": "https://github.com/${{ github.repository }}" }
+        { "text": "View commit", "url": "https://github.com/${{ github.repository }}/commit/${{ github.sha }}", "style": "primary" },
+        { "text": "Open repository", "url": "https://github.com/${{ github.repository }}", "style": "success" }
       ]
 ```
 
@@ -122,6 +125,23 @@ buttons: |
     ]
   ]
 ```
+
+### 非阻塞通知
+
+如果 Telegram 只是辅助通知，不应该影响主流程，可以设置 `exit_on_fail: "false"`
+
+```yaml
+- name: Send best-effort Telegram notification
+  uses: aliuq/telegram-action@master
+  env:
+    TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
+    TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
+  with:
+    message: Build finished
+    exit_on_fail: "false"
+```
+
+启用后，发送失败只会记 warning，同时把 `status` 输出设成 `failure`，不会让 workflow 失败。Action 也兼容 `exitOnFail` 这个 camelCase 别名。
 
 ### 单个附件
 
@@ -265,13 +285,14 @@ buttons: |
 | `attachment_type` | `photo`、`video`、`audio`、`animation`、`document` 之一 | 否 | `""` |
 | `attachment_filename` | 单附件本地上传时的可选文件名覆盖 | 否 | `""` |
 | `supports_streaming` | 单个 `video` 附件的 Telegram 流媒体模式，只接受 `"true"` 或 `"false"` | 否 | `"false"` |
+| `exit_on_fail` | 通知失败时是否让 workflow step 失败，只接受 `"true"` 或 `"false"` | 否 | `"true"` |
 
 ## 输出参数
 
 | 输出 | 说明 |
 |------|------|
 | `message_id` | 本次运行里最后一条 Telegram 消息的 ID |
-| `status` | 当前执行状态，固定为 `"success"` |
+| `status` | 当前执行状态：`"success"` 或 `"failure"` |
 
 ## 重要规则
 
@@ -282,6 +303,8 @@ buttons: |
 - `attachments` 不能再搭配 `attachment_type` 或 `attachment_filename`
 - 顶层 `supports_streaming` 只对单个 `video` 附件有效
 - `attachments` 里的 `supports_streaming` 要写在视频条目本身上
+- 按钮支持可选 `style` 字段，可用值为 `primary`、`success`、`danger`
+- `exit_on_fail` 默认是 `true`；设为 `false` 时，失败只会记录出来，并通过 `status=failure` 暴露结果
 - `message_file` 和本地 `attachment` 路径必须留在 `GITHUB_WORKSPACE` / 当前 workspace 内
 - `message_url` 必须解析到公网主机；`localhost`、私网 / link-local IP，以及重定向都会被拒绝
 - MarkdownV2 某个分片解析失败时，会退回纯文本，而不是让整次发送直接失败

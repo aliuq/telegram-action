@@ -16,13 +16,16 @@
 | `message` | 内联消息正文 | `""` |
 | `message_file` | 仓库内 UTF-8 文本文件 | `""` |
 | `message_url` | 远程 HTTP(S) URL | `""` |
-| `buttons` | flat 或 nested 按钮 JSON | `""` |
+| `buttons` | flat 或 nested 按钮 JSON，可选 `style: primary|success|danger` | `""` |
 | `disable_link_preview` | 链接预览开关，只接受 `"true"` 或 `"false"` | `"true"` |
 | `attachment` | 单附件来源 | `""` |
 | `attachments` | 附件条目 JSON 数组 | `""` |
 | `attachment_type` | 单附件类型 | `""` |
 | `attachment_filename` | 单附件本地文件名覆盖 | `""` |
 | `supports_streaming` | 单个视频附件的流媒体模式 | `"false"` |
+| `exit_on_fail` | 通知失败时是否让 workflow step 失败 | `"true"` |
+
+Action 也兼容 `exitOnFail` 这个 camelCase 别名。
 
 ## attachments 条目结构
 
@@ -41,7 +44,7 @@
 | 输出 | 说明 |
 |------|------|
 | `message_id` | 本次运行里最后一条 Telegram 消息的 ID |
-| `status` | 当前执行状态，固定为 `"success"` |
+| `status` | 当前执行状态：`"success"` 或 `"failure"` |
 
 ## 输入矩阵
 

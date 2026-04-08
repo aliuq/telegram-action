@@ -1,8 +1,8 @@
 import * as core from '@actions/core';
 import type { InlineKeyboardButton } from 'grammy/types';
 import { resolveAttachmentSource } from './attachments.js';
-import { ATTACHMENT_TYPES, BUTTON_ACTION_FIELDS } from './constants.js';
-import { getOptionalEnv, getRequiredEnv } from './env.js';
+import { ATTACHMENT_TYPES, BUTTON_ACTION_FIELDS, BUTTON_STYLES } from './constants.js';
+import { getOptionalEnv } from './env.js';
 import { formatTelegramMessage, resolveMessageText, TELEGRAM_CAPTION_LIMIT } from './messages.js';
 import type {
   AttachmentType,
@@ -13,6 +13,10 @@ import type {
   RawAttachmentItemInput,
 } from './types.js';
 
+interface ParseActionInputOptions {
+  resolveRemoteMessageUrl?: boolean;
+}
+
 /**
  * Read the raw GitHub Actions inputs without applying validation yet.
  *
@@ -20,10 +24,13 @@ import type {
  * which helps the validation flow and the published action stay aligned.
  */
 export function readRawActionInputs(): RawActionInputs {
+  const exitOnFailInput = core.getInput('exit_on_fail', { required: false });
+  const exitOnFailAlias = core.getInput('exitOnFail', { required: false });
+
   return {
     scenarioId: process.env.ACT_SCENARIO_ID,
-    botToken: getRequiredEnv('TELEGRAM_BOT_TOKEN'),
-    chatId: getRequiredEnv('TELEGRAM_CHAT_ID'),
+    botToken: getOptionalEnv('TELEGRAM_BOT_TOKEN'),
+    chatId: getOptionalEnv('TELEGRAM_CHAT_ID'),
     message: core.getInput('message', { required: false }),
     messageFile: core.getInput('message_file', { required: false }),
     messageUrl: core.getInput('message_url', { required: false }),
@@ -38,6 +45,7 @@ export function readRawActionInputs(): RawActionInputs {
       required: false,
     }),
     supportsStreaming: core.getInput('supports_streaming', { required: false }) || 'false',
+    exitOnFail: exitOnFailInput || exitOnFailAlias || 'true',
   };
 }
 
@@ -66,6 +74,18 @@ function assertInlineKeyboardButton(input: unknown): asserts input is InlineKeyb
       `button "${button.text}" must define exactly one action field, got: ${actionFields.join(', ')}`,
     );
   }
+
+  if ('style' in button) {
+    if (typeof button.style !== 'string' || !isButtonStyle(button.style)) {
+      throw new Error(
+        `button "${button.text}" has invalid "style"; expected one of: ${BUTTON_STYLES.join(', ')}`,
+      );
+    }
+  }
+}
+
+function isButtonStyle(value: string): value is (typeof BUTTON_STYLES)[number] {
+  return BUTTON_STYLES.includes(value as (typeof BUTTON_STYLES)[number]);
 }
 
 function parseButton(input: unknown): InlineKeyboardButton {
@@ -122,6 +142,18 @@ function parseBooleanInput(name: string, value: string): boolean {
   }
 
   throw new Error(`${name} must be either "true" or "false", received "${value}"`);
+}
+
+function parseRequiredEnvInput(name: string, value: string): string {
+  if (!value) {
+    throw new Error(`${name} environment variable is required`);
+  }
+
+  return value;
+}
+
+export function parseExitOnFailInput(value: string): boolean {
+  return parseBooleanInput('exit_on_fail', value);
 }
 
 /**
@@ -293,7 +325,10 @@ function assertInputConsistency(rawInputs: RawActionInputs, attachmentType?: Att
 /**
  * Parse and validate raw action inputs into a normalized request object.
  */
-export async function parseActionInputs(rawInputs: RawActionInputs): Promise<ParsedActionInputs> {
+export async function parseActionInputs(
+  rawInputs: RawActionInputs,
+  options: ParseActionInputOptions = {},
+): Promise<ParsedActionInputs> {
   const attachmentType = parseOptionalAttachmentType(rawInputs.attachmentType);
   assertInputConsistency(rawInputs, attachmentType);
 
@@ -311,16 +346,21 @@ export async function parseActionInputs(rawInputs: RawActionInputs): Promise<Par
   const replyMarkup = rawInputs.buttons
     ? { inline_keyboard: parseButtons(rawInputs.buttons) }
     : undefined;
-  const message = await resolveMessageText({
-    message: rawInputs.message,
-    messageFile: rawInputs.messageFile,
-    messageUrl: rawInputs.messageUrl,
-  });
+  const message = await resolveMessageText(
+    {
+      message: rawInputs.message,
+      messageFile: rawInputs.messageFile,
+      messageUrl: rawInputs.messageUrl,
+    },
+    {
+      resolveRemoteUrl: options.resolveRemoteMessageUrl ?? true,
+    },
+  );
 
   return {
     scenarioId: rawInputs.scenarioId,
-    botToken: rawInputs.botToken,
-    chatId: rawInputs.chatId,
+    botToken: parseRequiredEnvInput('TELEGRAM_BOT_TOKEN', rawInputs.botToken),
+    chatId: parseRequiredEnvInput('TELEGRAM_CHAT_ID', rawInputs.chatId),
     message,
     disableLinkPreview: parseBooleanInput('disable_link_preview', rawInputs.disableLinkPreview),
     topicId: parseOptionalIntegerInput('topic_id', rawInputs.topicId),
@@ -330,5 +370,6 @@ export async function parseActionInputs(rawInputs: RawActionInputs): Promise<Par
     attachmentSource,
     attachmentItems,
     supportsStreaming: parseBooleanInput('supports_streaming', rawInputs.supportsStreaming),
+    exitOnFail: parseExitOnFailInput(rawInputs.exitOnFail),
   };
 }

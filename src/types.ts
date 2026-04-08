@@ -76,6 +76,8 @@ export interface RawActionInputs {
   attachmentFilename: string;
   /** Raw toggle for Telegram video streaming mode. */
   supportsStreaming: string;
+  /** Raw failure behavior toggle for the action step. */
+  exitOnFail: string;
 }
 
 /**
@@ -116,6 +118,8 @@ export interface ParsedActionInputs {
   attachmentItems?: ParsedAttachmentItem[];
   /** Whether single-video sends should request Telegram streaming mode. */
   supportsStreaming: boolean;
+  /** Whether action failures should fail the workflow step. */
+  exitOnFail: boolean;
 }
 
 /**
@@ -180,6 +184,8 @@ export interface ScenarioInputs {
   attachment_filename: string;
   /** Scenario-local single-video streaming toggle. */
   supports_streaming: string;
+  /** Scenario-local failure behavior toggle. */
+  exit_on_fail: string;
 }
 
 /**

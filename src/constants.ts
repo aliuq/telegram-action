@@ -17,6 +17,9 @@ export const BUTTON_ACTION_FIELDS = [
   'pay',
 ] as const;
 
+/** Supported Telegram button styles for inline keyboards. */
+export const BUTTON_STYLES = ['primary', 'success', 'danger'] as const;
+
 /**
  * Attachment kinds supported by this action.
  */

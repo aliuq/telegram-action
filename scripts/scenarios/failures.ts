@@ -16,6 +16,16 @@ export function createFailureScenarios(): ScenarioDefinition[] {
       },
     }),
     createScenario({
+      id: 'invalid-button-style',
+      description: 'Unsupported button style should fail validation',
+      expect_failure: true,
+      inputs: {
+        message: '⚠️ This run should fail because the button style is invalid.',
+        buttons:
+          '[{"text":"Open repository","url":"https://github.com/aliuq/telegram-action","style":"rainbow"}]',
+      },
+    }),
+    createScenario({
       id: 'message-source-conflict',
       description: 'Multiple message sources should fail validation',
       expect_failure: true,

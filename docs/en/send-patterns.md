@@ -37,6 +37,12 @@ The `buttons` field accepts either:
 
 Each button must include `text` and exactly one Telegram action field such as `url`, `callback_data`, or `web_app`.
 
+Buttons may also include `style` with one of these values:
+
+- `primary`
+- `success`
+- `danger`
+
 Buttons are not an independent send mode. They always ride on a text message or a caption-capable single attachment.
 
 ## Single attachment

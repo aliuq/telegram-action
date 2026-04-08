@@ -56,6 +56,7 @@ export function buildRawActionInputs(
     attachmentType: scenario.inputs.attachment_type,
     attachmentFilename: scenario.inputs.attachment_filename,
     supportsStreaming: scenario.inputs.supports_streaming,
+    exitOnFail: scenario.inputs.exit_on_fail,
   };
 }
 
@@ -89,7 +90,10 @@ export async function validateScenarioCatalog(scenarios: ScenarioDefinition[]): 
     }
     seen.add(scenario.id);
 
-    const runValidation = () => parseActionInputs(buildRawActionInputs(scenario, false));
+    const runValidation = () =>
+      parseActionInputs(buildRawActionInputs(scenario, false), {
+        resolveRemoteMessageUrl: false,
+      });
 
     if (scenario.expect_failure) {
       try {

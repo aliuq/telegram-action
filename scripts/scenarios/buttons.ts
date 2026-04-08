@@ -16,6 +16,15 @@ export function createButtonScenarios(): ScenarioDefinition[] {
       },
     }),
     createScenario({
+      id: 'buttons-styled',
+      description: 'Inline buttons using Telegram button styles',
+      inputs: {
+        message: '🔘 Button test (styled)',
+        buttons:
+          '[[{"text":"Open workflow","url":"https://github.com/aliuq/telegram-action/actions","style":"primary"},{"text":"Healthy","callback_data":"healthy","style":"success"}],[{"text":"Rollback","callback_data":"rollback","style":"danger"}]]',
+      },
+    }),
+    createScenario({
       id: 'buttons-nested',
       description: 'Inline buttons using nested multi-row JSON',
       inputs: {

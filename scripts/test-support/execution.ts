@@ -220,7 +220,10 @@ export async function runValidationSelection(
   const logLines: string[] = [];
 
   for (const scenario of scenarios) {
-    const runValidation = () => parseActionInputs(buildRawActionInputs(scenario, false));
+    const runValidation = () =>
+      parseActionInputs(buildRawActionInputs(scenario, false), {
+        resolveRemoteMessageUrl: false,
+      });
 
     if (scenario.expect_failure) {
       try {

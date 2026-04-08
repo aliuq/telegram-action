@@ -37,6 +37,12 @@ flowchart TD
 
 每个按钮都要带 `text`，同时只能带一个 Telegram 行为字段，例如 `url`、`callback_data`、`web_app`
 
+按钮还可以带 `style`，可用值有：
+
+- `primary`
+- `success`
+- `danger`
+
 按钮不是独立发送模式，它总是附着在文本消息或者支持 caption 的单附件上
 
 ## 单附件路径

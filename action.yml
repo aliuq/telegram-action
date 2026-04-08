@@ -19,6 +19,7 @@ inputs:
       Inline keyboard buttons in JSON. Supports two formats:
       flat array (single row): [{"text":"…","url":"…"}]
       nested array (multi-row): [[{"text":"…","url":"…"}],[{"text":"…","url":"…"}]]
+      Optional button style values: "primary", "success", or "danger".
     required: false
     default: ""
   disable_link_preview:
@@ -47,12 +48,20 @@ inputs:
     description: 'Enable Telegram streaming mode for single video sends. Only "true" and "false" are accepted.'
     required: false
     default: "false"
+  exit_on_fail:
+    description: 'Fail the workflow step when the notification send fails. Set to "false" to keep the workflow running and expose status=failure instead.'
+    required: false
+    default: ""
+  exitOnFail:
+    description: "Deprecated camelCase alias of exit_on_fail."
+    required: false
+    default: ""
 
 outputs:
   message_id:
     description: "ID of the last sent message"
   status:
-    description: "Status of the action ('success')"
+    description: "Status of the action ('success' or 'failure')"
 
 runs:
   using: "node24"

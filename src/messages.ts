@@ -12,6 +12,10 @@ export interface MessageSourceOptions {
   messageUrl: string;
 }
 
+export interface ResolveMessageTextBehavior {
+  resolveRemoteUrl?: boolean;
+}
+
 export interface TelegramMessageChunk {
   raw: string;
   formatted: string;
@@ -75,6 +79,7 @@ function replaceSelfReferentialLinks(message: string): string {
  */
 export async function resolveMessageText(
   options: MessageSourceOptions,
+  behavior: ResolveMessageTextBehavior = {},
 ): Promise<string | undefined> {
   if (options.message) {
     return options.message;
@@ -95,6 +100,11 @@ export async function resolveMessageText(
     }
 
     const messageUrl = await assertPublicHttpUrl(options.messageUrl);
+
+    if (behavior.resolveRemoteUrl === false) {
+      return '[message_url content omitted during validation]';
+    }
+
     const response = await fetch(messageUrl, {
       redirect: 'error',
       signal: AbortSignal.timeout(30_000),

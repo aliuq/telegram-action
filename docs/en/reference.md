@@ -16,13 +16,16 @@
 | `message` | Inline message text | `""` |
 | `message_file` | Repository-local UTF-8 text file | `""` |
 | `message_url` | Remote HTTP(S) URL | `""` |
-| `buttons` | Flat or nested inline keyboard JSON | `""` |
+| `buttons` | Flat or nested inline keyboard JSON, with optional `style: primary|success|danger` | `""` |
 | `disable_link_preview` | Link preview toggle, accepts only `"true"` or `"false"` | `"true"` |
 | `attachment` | Single attachment source | `""` |
 | `attachments` | JSON array of attachment items | `""` |
 | `attachment_type` | Single attachment type | `""` |
 | `attachment_filename` | Local filename override for one attachment | `""` |
 | `supports_streaming` | Streaming mode for a single video attachment | `"false"` |
+| `exit_on_fail` | Whether notification errors should fail the workflow step | `"true"` |
+
+The action also accepts `exitOnFail` as a camelCase compatibility alias.
 
 ## Attachment item shape
 
@@ -41,7 +44,7 @@ Each `attachments` item accepts:
 | Output | Description |
 |------|------|
 | `message_id` | ID of the last Telegram message sent in the run |
-| `status` | Current execution status, fixed to `"success"` |
+| `status` | Current execution status: `"success"` or `"failure"` |
 
 ## Input matrix
 
