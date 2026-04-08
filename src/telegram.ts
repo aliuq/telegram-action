@@ -199,6 +199,25 @@ type TextTransportApi = Pick<
 type TextTransportBot = { api: TextTransportApi };
 type TextTransportChat = Awaited<ReturnType<TextTransportApi['getChat']>>;
 
+type TelegramBotClientOptions = NonNullable<ConstructorParameters<typeof Bot>[1]>['client'];
+
+export function createTelegramBot(
+  token: string,
+  clientOptions: TelegramBotClientOptions = {},
+): Bot {
+  const { baseFetchConfig, ...restClientOptions } = clientOptions;
+
+  return new Bot(token, {
+    client: {
+      ...restClientOptions,
+      baseFetchConfig: {
+        duplex: 'half',
+        ...baseFetchConfig,
+      },
+    },
+  });
+}
+
 /**
  * Build Telegram reply parameters only when a reply target id was provided.
  */
@@ -566,7 +585,7 @@ export async function sendTextMessage(
 export async function sendTelegramMessage(
   request: ParsedActionInputs,
 ): Promise<{ message_id: number }> {
-  const bot = new Bot(request.botToken);
+  const bot = createTelegramBot(request.botToken);
   try {
     if (request.attachmentItems && request.attachmentItems.length > 0) {
       logActRequestSummary({

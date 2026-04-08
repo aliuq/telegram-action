@@ -1,5 +1,6 @@
+import { InputFile } from 'grammy/web';
 import { describe, expect, test, vi } from 'vitest';
-import { sendTextMessage } from '../telegram.js';
+import { createTelegramBot, sendTextMessage } from '../telegram.js';
 import type { ParsedActionInputs } from '../types.js';
 
 function createRequest(overrides: Partial<ParsedActionInputs> = {}): ParsedActionInputs {
@@ -59,5 +60,18 @@ describe('sendTextMessage', () => {
       message_thread_id: 42,
     });
     expect(api.sendMessage).toHaveBeenCalledOnce();
+  });
+
+  test('creates multipart requests with duplex enabled for Node fetch', async () => {
+    const fetch = vi.fn().mockResolvedValue({
+      json: async () => ({ ok: true, result: { message_id: 123 } }),
+    });
+
+    const bot = createTelegramBot('token', { fetch });
+
+    await bot.api.sendDocument('123456', new InputFile(new Uint8Array([1, 2, 3]), 'test.txt'));
+
+    expect(fetch).toHaveBeenCalledOnce();
+    expect(fetch.mock.calls[0]?.[1]).toEqual(expect.objectContaining({ duplex: 'half' }));
   });
 });
