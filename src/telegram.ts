@@ -25,7 +25,42 @@ interface RetryInstruction {
   reason: string;
 }
 
+function isRetryableTelegramNetworkError(error: unknown): boolean {
+  if (!(error instanceof Error)) {
+    return false;
+  }
+
+  if (error.message.startsWith('Network request for ')) {
+    return true;
+  }
+
+  if (error.message === 'fetch failed') {
+    return true;
+  }
+
+  const cause = 'cause' in error ? error.cause : undefined;
+  if (!(cause instanceof Error)) {
+    return false;
+  }
+
+  return (
+    cause.message === 'fetch failed' ||
+    cause.name.endsWith('TimeoutError') ||
+    cause.message.includes('timed out') ||
+    cause.message.includes('ECONNRESET') ||
+    cause.message.includes('ENETUNREACH') ||
+    cause.message.includes('ETIMEDOUT')
+  );
+}
+
 function getRetryInstruction(error: unknown, retries: number): RetryInstruction | undefined {
+  if (isRetryableTelegramNetworkError(error)) {
+    return {
+      delaySeconds: Math.min(2 ** (retries - 1), 5),
+      reason: 'hit a transient Telegram network error',
+    };
+  }
+
   if (
     !(error instanceof Error) ||
     !('error_code' in error) ||

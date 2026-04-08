@@ -111,4 +111,31 @@ describe('sendTextMessage', () => {
     await expect(sendPromise).resolves.toEqual({ message_id: 123 });
     expect(api.sendMessage).toHaveBeenCalledTimes(2);
   });
+
+  test('retries transient Telegram network errors for text messages', async () => {
+    vi.useFakeTimers();
+
+    const api = {
+      editMessageReplyMarkup: vi.fn(),
+      getChat: vi.fn(),
+      sendChatAction: vi.fn().mockResolvedValue(undefined),
+      sendMessage: vi
+        .fn()
+        .mockRejectedValueOnce(
+          Object.assign(new Error("Network request for 'sendMessage' failed!"), {
+            cause: Object.assign(new Error('fetch failed'), {
+              name: 'ConnectTimeoutError',
+            }),
+          }),
+        )
+        .mockResolvedValue({ message_id: 123 }),
+    };
+
+    const sendPromise = sendTextMessage({ api }, createRequest({ chatId: '123456' }));
+
+    await vi.runAllTimersAsync();
+
+    await expect(sendPromise).resolves.toEqual({ message_id: 123 });
+    expect(api.sendMessage).toHaveBeenCalledTimes(2);
+  });
 });

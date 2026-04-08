@@ -7,6 +7,14 @@ import { createPhotoScenarios } from './photos.ts';
 import { createReplyScenarios } from './replies.ts';
 import { createVideoScenarios } from './videos.ts';
 
+export function shouldIncludeScenarioInActRunAll(scenario: ScenarioDefinition): boolean {
+  return scenario.includeInActRunAll !== false;
+}
+
+export function filterScenariosForActRunAll(scenarios: ScenarioDefinition[]): ScenarioDefinition[] {
+  return scenarios.filter((scenario) => shouldIncludeScenarioInActRunAll(scenario));
+}
+
 /**
  * Assemble the full scenario catalog in the order used by local and CI tooling.
  */
@@ -83,14 +91,21 @@ export function parseScenarioIds(input?: string | null): {
 export function resolveScenarioSelection(
   scenarios: ScenarioDefinition[],
   input?: string | null,
+  options: {
+    runAllFilter?: (scenario: ScenarioDefinition) => boolean;
+  } = {},
 ): ScenarioSelection {
   const parsedSelection = parseScenarioIds(input);
 
   if (parsedSelection.runAll) {
+    const selectedScenarios = options.runAllFilter
+      ? scenarios.filter((scenario) => options.runAllFilter?.(scenario))
+      : scenarios;
+
     return {
       runAll: true,
-      scenarioIds: scenarios.map((scenario) => scenario.id),
-      selectedScenarios: scenarios,
+      scenarioIds: selectedScenarios.map((scenario) => scenario.id),
+      selectedScenarios,
     };
   }
 

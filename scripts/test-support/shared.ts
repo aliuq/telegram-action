@@ -3,6 +3,7 @@ import { getOptionalEnv, getRequiredEnv } from '../../src/env.ts';
 import { parseActionInputs } from '../../src/inputs.ts';
 import { describeTextSendMethod } from '../../src/telegram.ts';
 import type { ParsedActionInputs, RawActionInputs, ScenarioDefinition } from '../../src/types.ts';
+import { filterScenariosForActRunAll } from '../scenarios/index.ts';
 
 export const ROOT = new URL('../..', import.meta.url).pathname;
 export const SECRET_FILE_PATH = new URL('../../.env', import.meta.url).pathname;
@@ -77,9 +78,12 @@ export function describeRequestMethod(request: ParsedActionInputs): string {
  * Validate the scenario catalog against the shared action parser.
  */
 export async function validateScenarioCatalog(scenarios: ScenarioDefinition[]): Promise<void> {
+  const scenariosToValidate =
+    process.env.ACT === 'true' ? filterScenariosForActRunAll(scenarios) : scenarios;
+
   const seen = new Set<string>();
 
-  for (const scenario of scenarios) {
+  for (const scenario of scenariosToValidate) {
     if (seen.has(scenario.id)) {
       throw new Error(`Duplicate scenario id: ${scenario.id}`);
     }

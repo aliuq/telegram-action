@@ -106,7 +106,26 @@ function assertScenarioOutcome(scenarioId: string, expectFailure: boolean, outco
 
 async function runSelectedScenarios(): Promise<void> {
   const scenarios = await loadScenarios();
-  const selection = resolveScenarioSelection(scenarios, process.env.SCENARIO_IDS);
+  const isActWorkflowRun = process.env.ACT === 'true';
+  const selection = resolveScenarioSelection(scenarios, process.env.SCENARIO_IDS, {
+    runAllFilter: isActWorkflowRun
+      ? (scenario) => scenario.includeInActRunAll !== false
+      : undefined,
+  });
+
+  if (
+    isActWorkflowRun &&
+    selection.runAll &&
+    selection.selectedScenarios.length !== scenarios.length
+  ) {
+    const skippedScenarioIds = scenarios
+      .filter((scenario) => !selection.selectedScenarios.some((entry) => entry.id === scenario.id))
+      .map((scenario) => scenario.id);
+
+    logger.info(
+      `Skipping act run-all scenarios that depend on external third-party availability: ${skippedScenarioIds.join(', ')}`,
+    );
+  }
 
   logger.info(`Resolved ${selection.selectedScenarios.length} scenario(s).`);
 

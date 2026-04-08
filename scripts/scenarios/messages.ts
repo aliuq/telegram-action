@@ -38,6 +38,7 @@ export function createMessageScenarios(): ScenarioDefinition[] {
     createScenario({
       id: 'message-from-url-real',
       description: 'Message body loaded from a third-party remote URL',
+      includeInActRunAll: false,
       inputs: {
         message_url: 'https://www.shadcn-vue.com/raw/docs/introduction.md',
       },

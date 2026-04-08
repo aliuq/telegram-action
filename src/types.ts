@@ -192,6 +192,8 @@ export interface ScenarioDefinition {
   description: string;
   /** Whether the scenario is expected to fail during validation or sending. */
   expect_failure: boolean;
+  /** Whether this scenario should be included when act runs the full "all" workflow selection. */
+  includeInActRunAll?: boolean;
   /** Raw action-like inputs for the scenario. */
   inputs: ScenarioInputs;
 }

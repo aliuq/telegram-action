@@ -7,7 +7,7 @@ import type {
   TestMode,
   TestSelection,
 } from '../../src/types.ts';
-import { findScenarioById } from '../scenarios/index.ts';
+import { filterScenariosForActRunAll, findScenarioById } from '../scenarios/index.ts';
 
 /**
  * Parse CLI flags and normalize the runner options.
@@ -163,6 +163,9 @@ export async function resolveSelection(
   cli: CliOptions,
   history: TestHistoryState,
 ): Promise<TestSelection> {
+  const runAllScenarios =
+    process.env.ACT === 'true' ? filterScenariosForActRunAll(allScenarios) : allScenarios;
+
   if (cli.rerunLast) {
     if (!history.lastRun) {
       throw new Error('No previous command found in .test-history/test-history.json');
@@ -180,7 +183,7 @@ export async function resolveSelection(
       return {
         mode: cli.mode,
         runAll: true,
-        scenarioIds: allScenarios.map((scenario) => scenario.id),
+        scenarioIds: runAllScenarios.map((scenario) => scenario.id),
       };
     }
 
@@ -203,7 +206,7 @@ export async function resolveSelection(
         ? {
             mode: 'source',
             runAll: true,
-            scenarioIds: allScenarios.map((scenario) => scenario.id),
+            scenarioIds: runAllScenarios.map((scenario) => scenario.id),
           }
         : {
             mode: 'source',
@@ -217,7 +220,7 @@ export async function resolveSelection(
       ? {
           mode: promptedMode,
           runAll: true,
-          scenarioIds: allScenarios.map((scenario) => scenario.id),
+          scenarioIds: runAllScenarios.map((scenario) => scenario.id),
         }
       : {
           mode: promptedMode,
